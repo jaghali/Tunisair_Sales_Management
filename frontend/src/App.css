@@ -1,0 +1,157 @@
+
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #ffffff; 
+  padding: 0;
+}
+
+.sign-in-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.5); 
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 450px;
+  padding: 32px;
+  gap: 16px;
+  margin: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background-color: transparent; /* Make the card transparent */
+}
+
+.card h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #D0001A;
+  text-align: center;
+}
+
+.form-control {
+  margin-bottom: 16px;
+}
+
+.form-control label {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.link {
+  align-self: center;
+  cursor: pointer;
+  text-decoration: none;
+  color: #1976d2; /* Blue for link */
+}
+
+.button-fullwidth {
+  width: 100%;
+  background-color: #D0001A; /* Set button background to red */
+  color: white;
+  font-weight: bold;
+  &:hover {
+    background-color: #B00015; /* Darker red when hovered */
+  }
+}
+
+.button-outlined {
+  width: 100%;
+  border: 1px solid #D0001A;
+  color: #D0001A;
+  font-weight: bold;
+  &:hover {
+    background-color: #D0001A;
+    color: white;
+  }
+}
+
+.divider {
+  margin: 16px 0;
+  color: #333;
+}
+
+.footer-text {
+  text-align: center;
+  font-size: 1rem;
+  color: #333;
+}
+
+.footer-text a {
+  text-decoration: none;
+  color: #1976d2;
+}
+
+.footer-text a:hover {
+  text-decoration: underline;
+}
+
+button.MuiButton-root {
+  text-transform: none;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+  .sign-in-container {
+    padding: 16px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+}
+
+
+
+/*Contact Page*/
+/* Add these styles in your 'Contact.css' */
+.form-group {
+  margin-bottom: 1.2em;
+  width: 30%;
+  position: relative;
+  left: 30%;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5em;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 0.8em;
+  margin-top: 0.5em;
+  border: 1px solid #c80505;
+  border-radius: 4px;
+  
+}
+
+button {
+  padding: 1em;
+  background-color: #c80505;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background-color: #cccccc;
+}
+
+textarea {
+  resize: vertical;
+}
+
+h1 {
+  font-size: 1.8em;
+  margin-bottom: 1em;
+  margin-top: 2em;
+margin-left: 21em;
+}

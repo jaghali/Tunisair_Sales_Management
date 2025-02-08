@@ -1,0 +1,36 @@
+{
+  "name": "tunisair_sales_management",
+  "version": "1.0.0",
+  "description": "Final Year Project on 'Gestion et contrôle des ventes à bord de Tunisair' using .NET for the backend and React for the frontend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/salah-soltani/Tunisair_Sales_Management.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/salah-soltani/Tunisair_Sales_Management/issues"
+  },
+  "homepage": "https://github.com/salah-soltani/Tunisair_Sales_Management#readme",
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@fullcalendar/core": "^6.1.15",
+    "@fullcalendar/daygrid": "^6.1.15",
+    "@fullcalendar/react": "^6.1.15",
+    "@lottiefiles/dotlottie-react": "^0.12.3",
+    "@mui/icons-material": "^6.4.3",
+    "@mui/material": "^6.4.3",
+    "formatDate": "^1.0.0",
+    "fullcalendar": "^6.1.15",
+    "react-calendar": "^5.1.0",
+    "react-router-dom": "^7.1.5",
+    "react-scripts": "^5.0.1",
+    "recharts": "^2.15.1"
+  }
+}
