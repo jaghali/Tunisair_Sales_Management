@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
@@ -5,20 +6,25 @@ using TunisairSalesManagement.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configuration de la base de données
+// Configuration de la base de donnÃ©es
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Ajout de CORS pour autoriser les requêtes du frontend React
+// Ajout des services Identity pour UserManager
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders(); // This ensures that the UserManager can be injected
+
+// Ajout de CORS pour autoriser les requÃªtes du frontend React
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
-        policy => policy.WithOrigins("http://localhost:3000") 
+        policy => policy.WithOrigins("http://localhost:3000") // URL de votre frontend React
                         .AllowAnyMethod()
                         .AllowAnyHeader());
 });
 
-// Ajout des contrôleurs et NewtonsoftJson
+// Ajout des contrÃ´leurs et NewtonsoftJson
 builder.Services.AddControllers().AddNewtonsoftJson();
 
 // Configuration de Swagger
@@ -40,20 +46,20 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Activer Swagger uniquement en développement
+// Activer Swagger uniquement en dÃ©veloppement
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "TunisairSalesManagement API v1");
-        c.RoutePrefix = string.Empty; // Accès direct à Swagger sur http://localhost:PORT/
+        c.RoutePrefix = string.Empty; // AccÃ¨s direct Ã  Swagger sur http://localhost:PORT/
     });
 }
 
 app.UseHttpsRedirection();
 
-// ?? Activation du middleware CORS (ajouté ici AVANT `UseAuthorization()`)
+// Activation du middleware CORS
 app.UseCors("AllowFrontend");
 
 app.UseAuthorization();

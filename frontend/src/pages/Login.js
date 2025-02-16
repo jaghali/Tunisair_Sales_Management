@@ -1,41 +1,31 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";  // Import useNavigate
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
     const [matricule, setMatricule] = useState("");
     const [password, setPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
-    const [successMessage, setSuccessMessage] = useState("");
-    const navigate = useNavigate(); // Initialize navigate hook
+    const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        setErrorMessage("");  // Reset error message
-        setSuccessMessage(""); // Reset success message
+        setErrorMessage("");
 
-        // If the entered matricule and password are "0000" and "admin", redirect to admin-users
-        if (matricule === "0000" && password === "admin") {
-            navigate("/admin-users");  // Redirect to admin-users route
-        } else {
-            try {
-                const response = await axios.post("http://localhost:5000/api/auth/login", {
-                    matricule: matricule,
-                    password: password,
-                });
+        try {
+            const response = await axios.post("http://localhost:5000/api/auth/login", {
+                Matricule: matricule,
+                Password: password,
+            });
 
-                console.log("Login successful:", response.data);
-                localStorage.setItem("token", response.data.token);  // Store the token in localStorage
+            if (response.data.token) {
+                localStorage.setItem("token", response.data.token);
 
-                // Show success message for successful login
-                setSuccessMessage("Login successful. Redirecting to your dashboard...");
-                setTimeout(() => {
-                    navigate("/admin-users");  // Redirect after success message
-                }, 2000);  // 2-second delay for the success message to be visible
-            } catch (error) {
-                console.error("Login error:", error.response?.data || error.message);
-                setErrorMessage(error.response?.data?.message || "Invalid credentials.");
+                // Redirection vers l'interface spécifique selon le rôle
+                navigate(response.data.redirect);
             }
+        } catch (error) {
+            setErrorMessage("Invalid credentials.");
         }
     };
 
@@ -62,13 +52,11 @@ const LoginPage = () => {
                 <button type="submit" style={styles.button}>Login</button>
 
                 {errorMessage && <p style={styles.error}>{errorMessage}</p>}
-                {successMessage && <p style={styles.success}>{successMessage}</p>}
             </form>
         </div>
     );
 };
 
-// Styles (for basic styling)
 const styles = {
     container: {
         maxWidth: "400px",
@@ -101,10 +89,6 @@ const styles = {
     },
     error: {
         color: "red",
-        marginTop: "10px",
-    },
-    success: {
-        color: "green",
         marginTop: "10px",
     },
 };

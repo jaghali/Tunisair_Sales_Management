@@ -18,7 +18,7 @@ namespace TunisairSalesManagement.Models
         public string SECTEUR { get; set; }
 
         [Required]
-        public string Password { get; set; } = "DefaultPassword";
+        public string Password { get; set; } 
 
 
     }
