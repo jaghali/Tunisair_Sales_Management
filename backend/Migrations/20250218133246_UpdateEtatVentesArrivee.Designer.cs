@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TunisairSalesManagement.Data;
 
@@ -11,9 +12,11 @@ using TunisairSalesManagement.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250218133246_UpdateEtatVentesArrivee")]
+    partial class UpdateEtatVentesArrivee
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -249,7 +252,8 @@ namespace backend.Migrations
             modelBuilder.Entity("TunisairSalesManagement.Models.EtatOffresDepart", b =>
                 {
                     b.Property<string>("Code")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -267,39 +271,44 @@ namespace backend.Migrations
                     b.Property<int>("TotEm")
                         .HasColumnType("int");
 
-                    b.HasKey("Code");
-
                     b.ToTable("EtatOffresDepart");
                 });
 
             modelBuilder.Entity("TunisairSalesManagement.Models.EtatVentesArrivee", b =>
                 {
                     b.Property<string>("Code")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Code");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Description");
 
                     b.Property<decimal>("PrixUnitaireHT")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("Prix Unitaire HT");
 
                     b.Property<int>("QuantiteDotation")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("Quantité Dotation");
 
                     b.Property<int>("QuantiteVendue")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("Quantité vendue");
 
-                    b.Property<int>("Restant")
-                        .HasColumnType("int");
+                    b.Property<decimal>("Restant")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("Restant");
 
                     b.Property<decimal>("TotEm")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("Tot# Em");
 
                     b.Property<decimal>("Valeur")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Code");
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("Valeur");
 
                     b.ToTable("EtatVentesArrivee");
                 });
@@ -307,7 +316,7 @@ namespace backend.Migrations
             modelBuilder.Entity("TunisairSalesManagement.Models.EtatVentesDepart", b =>
                 {
                     b.Property<string>("Code")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -316,10 +325,10 @@ namespace backend.Migrations
                     b.Property<decimal>("PrixUnitaireHT")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("QtCompJ")
+                    b.Property<int>("Qt4Dotation")
                         .HasColumnType("int");
 
-                    b.Property<int>("QtDotation")
+                    b.Property<int>("Qt6CompJ")
                         .HasColumnType("int");
 
                     b.Property<int>("QuantiteCasse")
@@ -339,8 +348,6 @@ namespace backend.Migrations
 
                     b.Property<decimal>("Valeur")
                         .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Code");
 
                     b.ToTable("EtatVentesDepart");
                 });

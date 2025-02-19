@@ -1,0 +1,148 @@
+.dashboard {
+  max-width: 1000px;
+  margin: auto;
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+h1 {
+  color: #333;
+}
+
+select {
+  margin: 10px;
+  padding: 8px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.3s ease-in-out;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+/* Bouton Ajouter */
+button:first-of-type {
+  background-color: #28a745;
+  color: white;
+}
+
+button:first-of-type:hover {
+  background-color: #218838;
+}
+
+/* Tableau */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: center;
+  font-size: 14px;
+}
+
+th {
+  background-color: #343a40;
+  color: white;
+  font-weight: bold;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+tbody tr:hover {
+  background-color: #e9ecef;
+  transition: background 0.3s ease-in-out;
+}
+
+/* Largeur de la colonne Action */
+th.action-column, td.action-column {
+  width: 180px; /* Ajuste la largeur selon le besoin */
+}
+
+/* Conteneur pour aligner les boutons horizontalement */
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px; /* Espacement entre les boutons */
+}
+
+/* Styles des boutons Modifier et Supprimer */
+.action-buttons button {
+  flex: 1; /* Permet aux boutons de prendre toute la largeur disponible */
+  min-width: 80px; /* Assure une taille minimale */
+  padding: 10px 15px; /* Augmente le padding pour une meilleure visibilité */
+  font-size: 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+/* Bouton Modifier */
+.action-buttons button:nth-child(1) {
+  background-color: #007bff;
+  color: white;
+}
+
+.action-buttons button:nth-child(1):hover {
+  background-color: #0056b3;
+}
+
+/* Bouton Supprimer */
+.action-buttons button:nth-child(2) {
+  background-color: #dc3545;
+  color: white;
+}
+
+.action-buttons button:nth-child(2):hover {
+  background-color: #c82333;
+}
+
+/* Formulaire */
+.form-container {
+  margin-top: 15px;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #f8f9fa;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-container input {
+  display: block;
+  width: calc(100% - 20px);
+  margin: 8px 0;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.form-container button {
+  margin-right: 5px;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
