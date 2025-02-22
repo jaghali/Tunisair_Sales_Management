@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Button } from '@mui/material'; // Material UI Button component
-import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'; // Importing the Up Arrow Icon
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'; // Importing the Down Arrow Icon
+import { IconButton } from '@mui/material'; // Import IconButton
+import { Pencil, Trash } from "lucide-react"; // Importing the Edit and Trash icons
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'; // Importing the ArrowDropUpIcon
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'; // Importing the ArrowDropDownIcon
 
 const UserTable = ({ users, onEdit, onDelete }) => {
   // State to manage sorting
@@ -38,63 +39,63 @@ const UserTable = ({ users, onEdit, onDelete }) => {
         <tr>
           <th>
             Matricule
-            <Button onClick={() => handleSort('matricule')} size="small">
+            <IconButton onClick={() => handleSort('matricule')} size="small">
               {sortConfig.key === 'matricule' 
                 ? sortConfig.direction === 'asc' 
                   ? <ArrowDropUpIcon /> 
                   : <ArrowDropDownIcon />
                 : <ArrowDropUpIcon color="disabled" />} {/* Default arrow */}
-            </Button>
+            </IconButton>
           </th>
           <th>
             Nom
-            <Button onClick={() => handleSort('nom')} size="small">
+            <IconButton onClick={() => handleSort('nom')} size="small">
               {sortConfig.key === 'nom' 
                 ? sortConfig.direction === 'asc' 
                   ? <ArrowDropUpIcon /> 
                   : <ArrowDropDownIcon />
                 : <ArrowDropUpIcon color="disabled" />} {/* Default arrow */}
-            </Button>
+            </IconButton>
           </th>
           <th>
             Prénom
-            <Button onClick={() => handleSort('prenom')} size="small">
+            <IconButton onClick={() => handleSort('prenom')} size="small">
               {sortConfig.key === 'prenom' 
                 ? sortConfig.direction === 'asc' 
                   ? <ArrowDropUpIcon /> 
                   : <ArrowDropDownIcon />
                 : <ArrowDropUpIcon color="disabled" />} {/* Default arrow */}
-            </Button>
+            </IconButton>
           </th>
           <th>
             Base
-            <Button onClick={() => handleSort('base')} size="small">
+            <IconButton onClick={() => handleSort('base')} size="small">
               {sortConfig.key === 'base' 
                 ? sortConfig.direction === 'asc' 
                   ? <ArrowDropUpIcon /> 
                   : <ArrowDropDownIcon />
                 : <ArrowDropUpIcon color="disabled" />} {/* Default arrow */}
-            </Button>
+            </IconButton>
           </th>
           <th>
             Collège
-            <Button onClick={() => handleSort('college')} size="small">
+            <IconButton onClick={() => handleSort('college')} size="small">
               {sortConfig.key === 'college' 
                 ? sortConfig.direction === 'asc' 
                   ? <ArrowDropUpIcon /> 
                   : <ArrowDropDownIcon />
                 : <ArrowDropUpIcon color="disabled" />} {/* Default arrow */}
-            </Button>
+            </IconButton>
           </th>
           <th>
             Secteur
-            <Button onClick={() => handleSort('secteur')} size="small">
+            <IconButton onClick={() => handleSort('secteur')} size="small">
               {sortConfig.key === 'secteur' 
                 ? sortConfig.direction === 'asc' 
                   ? <ArrowDropUpIcon /> 
                   : <ArrowDropDownIcon />
-                : <ArrowDropUpIcon color="disabled" />} {/* Default arrow */}
-            </Button>
+                : <ArrowDropUpIcon color="disabled" />} 
+            </IconButton>
           </th>
           <th>Actions</th>
         </tr>
@@ -109,8 +110,11 @@ const UserTable = ({ users, onEdit, onDelete }) => {
             <td>{user.college}</td>
             <td>{user.secteur}</td>
             <td>
-              <Button onClick={() => onEdit(user)} variant="outlined" color="primary" size="small">Modifier</Button>
-              <Button onClick={() => onDelete(user.matricule)} variant="outlined" color="secondary" size="small">Supprimer</Button>
+              <IconButton onClick={() => onEdit(user)} size="small" color="success">
+              <Pencil color="#00a3f5" />              </IconButton>
+              <IconButton onClick={() => onDelete(user.matricule)} size="small" color="error">
+              <Trash color="#f50000" />
+              </IconButton>
             </td>
           </tr>
         ))}

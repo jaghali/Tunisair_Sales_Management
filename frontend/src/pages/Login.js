@@ -20,8 +20,6 @@ const LoginPage = () => {
 
             if (response.data.token) {
                 localStorage.setItem("token", response.data.token);
-
-                // Redirection vers l'interface spécifique selon le rôle
                 navigate(response.data.redirect);
             }
         } catch (error) {
@@ -29,68 +27,80 @@ const LoginPage = () => {
         }
     };
 
+    const styles = {
+        container: {
+            fontFamily: "Roboto",
+            textAlign: "center",
+            display: "flex",
+            justifyContent: "center",
+            height: "100%",
+            width: "100%",
+            color: "white",
+            position: "relative",
+            marginTop:"10%",
+        },
+        formWrapper: {
+            width: "100%",
+            maxWidth: "400px",
+            padding: "25px",
+            backgroundColor: "#3D3D3D",
+            borderRadius: "8px",
+            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+            textAlign: "center",
+        },
+        input: {
+            width: "94%",
+            marginBottom: "12px",
+            padding: "12px",
+            color: "#1a202c",
+            borderRadius: "8px",
+            border: "1px solid #4a5568",
+            outline: "none",
+        },
+        button: {
+            width: "100%",
+            padding: "12px",
+            backgroundColor: '#c80505',
+            color: "#fff",
+            borderRadius: "8px",
+            fontWeight: "bold",
+            cursor: "pointer",
+        },
+        error: {
+            marginTop: "12px",
+            color: "red",
+            textAlign: "center",
+        },
+    };
+
     return (
         <div style={styles.container}>
-            <h2>Login</h2>
-            <form onSubmit={handleLogin} style={styles.form}>
-                <input
-                    type="text"
-                    placeholder="MATRICULE"
-                    value={matricule}
-                    onChange={(e) => setMatricule(e.target.value)}
-                    required
-                    style={styles.input}
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    style={styles.input}
-                />
-                <button type="submit" style={styles.button}>Login</button>
-
-                {errorMessage && <p style={styles.error}>{errorMessage}</p>}
-            </form>
+            <div style={styles.formWrapper}>
+                <h2 style={{ fontSize: "20px", fontWeight: "600", marginBottom: "16px" }}>Login</h2>
+                <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column" }}>
+                    <input
+                        type="text"
+                        placeholder="MATRICULE"
+                        value={matricule}
+                        onChange={(e) => setMatricule(e.target.value)}
+                        required
+                        style={styles.input}
+                    />
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        style={styles.input}
+                    />
+                    <button type="submit" style={styles.button}>
+                        Login
+                    </button>
+                    {errorMessage && <p style={styles.error}>{errorMessage}</p>}
+                </form>
+            </div>
         </div>
     );
 };
-
-const styles = {
-    container: {
-        maxWidth: "400px",
-        margin: "100px auto",
-        padding: "20px",
-        border: "1px solid #ccc",
-        borderRadius: "10px",
-        textAlign: "center",
-        boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)",
-    },
-    form: {
-        display: "flex",
-        flexDirection: "column",
-    },
-    input: {
-        marginBottom: "10px",
-        padding: "10px",
-        fontSize: "16px",
-        border: "1px solid #ddd",
-        borderRadius: "5px",
-    },
-    button: {
-        padding: "10px",
-        fontSize: "16px",
-        backgroundColor: "#007bff",
-        color: "#fff",
-        border: "none",
-        borderRadius: "5px",
-        cursor: "pointer",
-    },
-    error: {
-        color: "red",
-        marginTop: "10px",
-    },
-};
-
 export default LoginPage;

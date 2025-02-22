@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import { motion } from 'framer-motion'; // Make sure to import motion from framer-motion
 import "../App.css";
 
 function Contact() {
@@ -43,19 +43,93 @@ function Contact() {
     }
   };
 
+  // Define styles as constants for consistency with previous styles
+  const containerStyle = {
+    padding: '5%',
+    marginBottom: '2%',
+    color: '#ffffff',
+  };
+
+  const formTitleStyle = {
+    fontSize: '24px',
+    fontWeight: '600',
+    color: '#c80505',
+    marginBottom: '20px',
+  };
+
+  const formGroupStyle = {
+    marginBottom: '16px',
+  };
+
+  const labelStyle = {
+    display: 'block',
+    fontSize: '14px',
+    color: 'black',
+    marginBottom: '8px',
+  };
+
+  const inputStyle = {
+    color: 'white',
+    paddingLeft: '16px',
+    paddingRight: '16px',
+    paddingTop: '8px',
+    paddingBottom: '8px',
+    borderRadius: '8px',
+    fontSize: '14px',
+    outline: 'none',
+    width: '100%',
+  };
+
+  const textareaStyle = {
+    color: 'white',
+    paddingLeft: '16px',
+    paddingRight: '16px',
+    paddingTop: '8px',
+    paddingBottom: '8px',
+    borderRadius: '8px',
+    fontSize: '14px',
+    outline: 'none',
+    width: '100%',
+    resize: 'vertical',
+  };
+
+  const buttonStyle = {
+    backgroundColor: '#c80505',
+    color: 'white',
+    padding: '10px 20px',
+    borderRadius: '8px',
+    fontSize: '16px',
+    border: 'none',
+    cursor: 'pointer',
+    width: '100%',
+    marginTop: '20px',
+  };
+
+  const formSubmittedMessageStyle = {
+    textAlign: 'center',
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#c80505',
+  };
+
   return (
-    <div className="contact-container">
-      <h1>Contact Admin</h1>
+    <motion.div
+      style={containerStyle}
+      initial={{ opacity: 0, y: 20 }}  // Initial animation state
+      animate={{ opacity: 1, y: 0 }}  // End animation state
+      transition={{ duration: 1 }}    // Set animation duration
+    >
+      <h1 style={formTitleStyle}>Contact Admin</h1>
 
       {formSubmitted ? (
-        <div className="form-submitted-message">
+        <div style={formSubmittedMessageStyle}>
           <h2>Thank you for contacting us!</h2>
           <p>Your message has been successfully sent. We will get back to you soon.</p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="contact-form">
-          <div className="form-group">
-            <label htmlFor="name">Name:</label>
+          <div style={formGroupStyle}>
+            <label htmlFor="name" style={labelStyle}>Name:</label>
             <input
               type="text"
               id="name"
@@ -63,11 +137,13 @@ function Contact() {
               value={formData.name}
               onChange={handleChange}
               required
+              placeholder="Enter your name"
+              style={inputStyle}
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="email">Email:</label>
+          <div style={formGroupStyle}>
+            <label htmlFor="email" style={labelStyle}>Email:</label>
             <input
               type="email"
               id="email"
@@ -75,11 +151,13 @@ function Contact() {
               value={formData.email}
               onChange={handleChange}
               required
+              placeholder="Enter your email"
+              style={inputStyle}
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="subject">Subject:</label>
+          <div style={formGroupStyle}>
+            <label htmlFor="subject" style={labelStyle}>Subject:</label>
             <input
               type="text"
               id="subject"
@@ -87,11 +165,13 @@ function Contact() {
               value={formData.subject}
               onChange={handleChange}
               required
+              placeholder="Enter the subject"
+              style={inputStyle}
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="message">Message:</label>
+          <div style={formGroupStyle}>
+            <label htmlFor="message" style={labelStyle}>Message:</label>
             <textarea
               id="message"
               name="message"
@@ -99,19 +179,19 @@ function Contact() {
               onChange={handleChange}
               rows="4"
               required
+              placeholder="Write your message"
+              style={textareaStyle}
             ></textarea>
           </div>
 
-          <div className="form-group">
-            <button type="submit" disabled={isSubmitting}>
+          <div style={formGroupStyle}>
+            <button type="submit" disabled={isSubmitting} style={buttonStyle}>
               {isSubmitting ? 'Sending...' : 'Send Message'}
             </button>
           </div>
         </form>
       )}
-
-     
-    </div>
+    </motion.div>
   );
 }
 
