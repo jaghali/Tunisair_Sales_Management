@@ -20,6 +20,9 @@ namespace TunisairSalesManagement.Data
         public DbSet<PN> PN { get; set; }
         public DbSet<Utilisateur> Utilisateurs { get; set; }  
 
+        public DbSet<EnteteOffre> EnteteOffre { get; set; }
+        public DbSet<EnteteVente> EnteteVente { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

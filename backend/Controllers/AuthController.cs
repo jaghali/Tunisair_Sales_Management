@@ -57,7 +57,7 @@ public class AuthController : ControllerBase
     {
         return role switch
         {
-            "Admin" => "/overviewPage",
+            "Admin" => "/admin-users",
             "DirectionFinanciere" => "/direction-financiere-dashboard",
             "AgentSaisie" => "/agent-saisie-dashboard",
             "PNC" => "/avances-consultation",

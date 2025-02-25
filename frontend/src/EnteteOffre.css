@@ -1,0 +1,96 @@
+/* Style pour le conteneur du tableau */
+.p-6 {
+    padding: 1.5rem; /* Ajoute de l'espace autour du tableau */
+  }
+  
+  .bg-white {
+    background-color: white; /* Fond blanc pour le conteneur */
+  }
+  
+  .rounded-lg {
+    border-radius: 0.5rem; /* Coins arrondis pour le conteneur */
+  }
+  
+  .shadow-lg {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Ombre douce autour du conteneur */
+  }
+  
+  /* Style pour le titre */
+  .text-2xl {
+    font-size: 1.5rem; /* Taille du texte */
+  }
+  
+  .font-semibold {
+    font-weight: 600; /* Poids du texte */
+  }
+  
+  .mb-4 {
+    margin-bottom: 1rem; /* Espacement en bas */
+  }
+  
+  .text-red-600 {
+    color: #c53030; /* Couleur rouge pour le titre */
+  }
+  
+  /* Style pour les messages d'état (chargement et erreur) */
+  .text-red-500 {
+    color: #f56565; /* Couleur rouge clair pour l'erreur */
+  }
+  
+  .min-w-full {
+    min-width: 100%; /* Largeur minimale de la table */
+  }
+  
+  .bg-white {
+    background-color: white; /* Fond blanc pour la table */
+  }
+  
+  .border {
+    border: 1px solid #e2e8f0; /* Bordure grise claire pour la table */
+  }
+  
+  .border-gray-300 {
+    border-color: #e2e8f0; /* Bordure grise pour les cellules */
+  }
+  
+  /* Style pour l'en-tête de la table */
+  .bg-red-600 {
+    background-color: #e53e3e; /* Fond rouge pour l'en-tête */
+  }
+  
+  .text-white {
+    color: white; /* Texte blanc pour l'en-tête */
+  }
+  
+  .px-4 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .py-2 {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .text-center {
+    text-align: center; /* Centre le texte dans les cellules */
+  }
+  
+  /* Style pour les lignes du tableau */
+  .hover\:bg-gray-100:hover {
+    background-color: #f7fafc; /* Effet de survol avec une couleur de fond grise claire */
+  }
+  
+  .border-b {
+    border-bottom: 1px solid #e2e8f0; /* Bordure en bas de chaque ligne */
+  }
+  
+  .p-4 {
+    padding: 1rem; /* Padding pour la cellule de message "Aucune donnée trouvée" */
+  }
+  
+  /* Style pour les cellules de tableau vides */
+  .col-span-4 {
+    grid-column: span 4; /* Fait en sorte que la cellule couvre toute la largeur */
+  }
+  

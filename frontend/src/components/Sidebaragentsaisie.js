@@ -4,8 +4,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
 const SIDEBAR_ITEMS = [
-    { name: "Detail Tunisair", icon: Plane, color: "#6366f1", href: "/OverviewPage" },
-    { name: "Detail Fournisseur", icon: Container  , color: "#8B5CF6", href: "/admin-users" },
+    { name: "Ventes", icon: Plane, color: "#6366f1", href: "/enteteVente" },
+    { name: "Offres", icon: Container  , color: "#8B5CF6", href: "/enteteOffre" },
     { name: "Settings", icon: Settings, color: "#6EE7B7", href: "/settings" },
     { name: "Logout", icon: LogOut, color: "#6EE7B7", href: "/" },
 ];

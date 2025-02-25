@@ -8,8 +8,9 @@ import OverviewPage from './pages/OverviewPage';
 import DirectionFinanciereDashboard from './pages/DirectionFinanciereDashboard'; 
 import AgentSaisieDashboard from './pages/AgentSaisieDashboard'; 
 import AvancesConsultation from './pages/AvancesConsultation'; 
+import EnteteVente from './pages/EnteteVente';  
+import EnteteOffres from './pages/EnteteOffre';
 import Devise from './pages/Devise';
-// Import Sidebars
 import Sidebar from './components/Sidebar';
 import SidebarAgentSaisie from './components/Sidebaragentsaisie'; 
 
@@ -74,6 +75,8 @@ function MainLayout() {
           <Route path="/avances-consultation" element={<AvancesConsultation />} />
           <Route path="/devise" element={<Devise />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/enteteVente" element={<EnteteVente />} />
+          <Route path="/enteteOffre" element={<EnteteOffres />} />
         </Routes>
       </div>
     </div>
