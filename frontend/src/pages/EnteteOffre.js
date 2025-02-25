@@ -30,15 +30,15 @@ const EnteteOffres = () => {
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-semibold mb-4 text-red-600">Entete des Offres</h2>
+      <h2 className="text-3xl font-bold mb-6 text-red-600 text-center">Entete des Offres</h2>
 
       {loading && <p>Chargement en cours...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
       {/* Bouton "Détail" à l'extérieur du tableau */}
-      <div className="mb-4">
+      <div className="button-container">
         <button 
-          className="bg-red-500 hover:bg-red-700"
+          className="bg-blue-600 hover:bg-blue-800 text-white font-semibold px-6 py-2 rounded-lg transition duration-300 shadow-md"
           onClick={handleDetailClick}
         >
           Détail
@@ -48,7 +48,7 @@ const EnteteOffres = () => {
       {!loading && !error && (
         <table className="min-w-full bg-white border border-gray-300">
           <thead>
-            <tr className="bg-red-600 text-white">
+            <tr className="bg-black text-white uppercase text-sm leading-normal">
               <th className="border px-4 py-2">PNC</th>
               <th className="border px-4 py-2">MATRICULE</th>
               <th className="border px-4 py-2">DONNEES</th>
