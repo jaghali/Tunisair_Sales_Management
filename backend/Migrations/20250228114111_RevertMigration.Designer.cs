@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TunisairSalesManagement.Data;
 
@@ -11,9 +12,11 @@ using TunisairSalesManagement.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250228114111_RevertMigration")]
+    partial class RevertMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -220,27 +223,10 @@ namespace backend.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("TunisairSalesManagement.Models.Articles", b =>
-                {
-                    b.Property<string>("Code")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Code");
-
-                    b.ToTable("Articles");
-                });
-
             modelBuilder.Entity("TunisairSalesManagement.Models.EnteteVente", b =>
                 {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+                    b.Property<string>("ID")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("AGENT_SAISIE")
                         .HasColumnType("nvarchar(max)");
@@ -440,10 +426,10 @@ namespace backend.Migrations
                     b.Property<string>("MATRICULE")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("DESTINATION")
+                    b.Property<string>("DONNEES")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("DONNEES")
+                    b.Property<string>("GENERALES")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PNC")

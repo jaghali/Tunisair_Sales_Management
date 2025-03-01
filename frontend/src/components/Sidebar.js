@@ -1,4 +1,4 @@
-import { BarChart2, DollarSign, Menu, Settings, TableOfContents , ChartSpline , Users, LogOut } from "lucide-react";
+import { BarChart2, DollarSign, Menu, Settings, TableOfContents, PackageSearch  , ChartSpline , Users, LogOut } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -6,6 +6,8 @@ import { Link } from "react-router-dom";
 const SIDEBAR_ITEMS = [
     { name: "OverviewPage", icon: BarChart2, color: "#6366f1", href: "/OverviewPage" },
     { name: "Table", icon: TableOfContents , color: "#8B5CF6", href: "/admin-users" },
+    { name: "Articles", icon: PackageSearch  , color: "#8B5CF6", href: "/ArticlesPage" },
+
     { name: "Contact", icon: Users, color: "#EC4899", href: "/admin-contact" },
     { name: "Charts", icon: ChartSpline, color: "#10B981", href: "/sales" },
     { name: "Devise", icon:  DollarSign, color: "#F59E0B", href: "/orders" },

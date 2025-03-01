@@ -9,19 +9,19 @@ namespace TunisairSalesManagement.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EnteteOffreController : ControllerBase
+    public class ListeEquipageVController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public EnteteOffreController(ApplicationDbContext context)
+        public ListeEquipageVController(ApplicationDbContext context)
         {
             _context = context;
         }
 
         [HttpGet]
-public async Task<ActionResult<IEnumerable<EnteteOffre>>> GetEnteteOffres()
+public async Task<ActionResult<IEnumerable<ListeEquipageV>>> GetEnteteVente()
 {
-    var entetes = await _context.EnteteOffre.ToListAsync();
+    var entetes = await _context.ListeEquipageV.ToListAsync();
 
     return entetes;
 }

@@ -16,7 +16,7 @@ const AgentSaisieDashboard = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   // Fetch data from the selected table
-  const fetchUsers = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     try {
       const response = await axios.get(`http://localhost:5000/api/AgentSaisie/${selectedTable}`);
       if (response.data.length > 0) {
@@ -29,8 +29,8 @@ const AgentSaisieDashboard = () => {
   }, [selectedTable]);
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    fetchData();
+  }, [fetchData]);
 
   const handleDelete = async (code) => {
     if (!code) {
@@ -39,7 +39,7 @@ const AgentSaisieDashboard = () => {
     }
     try {
       await axios.delete(`http://localhost:5000/api/AgentSaisie/${selectedTable}/${code}`);
-      fetchUsers();
+      fetchData();
     } catch (error) {
       console.error("Erreur lors de la suppression :", error);
     }
@@ -63,14 +63,14 @@ const AgentSaisieDashboard = () => {
           formData, 
           { headers: { "Content-Type": "application/json" } }
         );
-        fetchUsers(); 
+        fetchData(); 
       } else {
         await axios.post(
           `http://localhost:5000/api/AgentSaisie/${selectedTable}`,
           formData,
           { headers: { "Content-Type": "application/json" } }
         );
-        fetchUsers(); 
+        fetchData(); 
       }
 
       setFormData({});
@@ -93,8 +93,6 @@ const AgentSaisieDashboard = () => {
     setFormData({});
     setShowForm(true);
   };
-
-  
 
   // Pagination handlers
   const handleChangePage = (event, newPage) => {
@@ -165,7 +163,6 @@ const AgentSaisieDashboard = () => {
     borderBottom: "1px solid #ddd",
   };
 
-
   return (
     <div style={containerStyle}>
       <h1 style={titleStyle}>Tableau de bord - Agent de saisie</h1>
@@ -184,8 +181,6 @@ const AgentSaisieDashboard = () => {
       <button style={buttonStyle} onClick={handleAddNew}>
         Ajouter un nouvel élément
       </button>
-
-      
 
       {showForm && (
         <form onSubmit={handleSubmit} style={{ padding: "20px", backgroundColor: "none" }}>

@@ -8,3 +8,93 @@ body {
   margin-bottom: 0;
   font-family: "Roboto", sans-serif; /* Ensure the font-family is correctly specified */
 }
+.container {
+  padding: 5%;
+  background-color: #fff;
+  text-align: center;
+}
+
+.heading {
+  font-size: 24px;
+  font-weight: bold;
+  color: #c80505;
+  margin-bottom: 15px;
+}
+
+.button-container {
+  margin-bottom: 20px;
+}
+
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.header-row {
+  background-color: #3d3d3d;
+  color: #fff;
+}
+
+.header-cell {
+  padding: 12px;
+  border-bottom: 2px solid #ddd;
+  text-align: left;
+}
+
+.row {
+  transition: background 0.3s;
+}
+
+.cell {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.no-data {
+  text-align: center;
+  padding: 15px;
+  color: #666;
+}
+
+/* SVG animation */
+.track {
+  stroke: black;
+  opacity: 0.1;
+}
+
+.car {
+  stroke: black;
+  stroke-dasharray: 15, 85;
+  stroke-dashoffset: 0;
+  stroke-linecap: round;
+  animation: travel 0.9s linear infinite;
+}
+
+@keyframes travel {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}

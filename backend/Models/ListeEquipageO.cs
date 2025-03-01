@@ -3,15 +3,15 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TunisairSalesManagement.Models
 {
-    [Table("EnteteOffre")]
-    public class EnteteOffre
+    [Table("ListeEquipageO")]
+    public class ListeEquipageO
     {
 
-        public string PNC { get; set; }
 
         [Key]
         public string MATRICULE { get; set; }
         
+        public string PNC { get; set; }
         public string? DONNEES { get; set; }
         public string? DESTINATION { get; set; }
     }

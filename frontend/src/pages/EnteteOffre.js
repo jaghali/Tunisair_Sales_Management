@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "../EnteteOffre.css";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@mui/material";
+import "../App.css"; 
 
-const EnteteOffres = () => {
+const EnteteOffre = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -12,7 +13,7 @@ const EnteteOffres = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/EnteteOffre");  
+        const response = await axios.get("http://localhost:5000/api/EnteteOffre");
         setData(response.data);
       } catch (err) {
         setError("Erreur lors du chargement des données.");
@@ -20,61 +21,68 @@ const EnteteOffres = () => {
         setLoading(false);
       }
     };
-    
+
     fetchData();
   }, []);
 
   const handleDetailClick = () => {
-    navigate("/agent-saisie-dashboard");
+    navigate(`/OffrePage`);
   };
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-3xl font-bold mb-6 text-red-600 text-center">Entete des Offres</h2>
+    <div className="container">
+      <h2 className="heading">Entête des Offres</h2>
 
-      {loading && <p>Chargement en cours...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-
-      {/* Bouton "Détail" à l'extérieur du tableau */}
       <div className="button-container">
-        <button 
-          className="bg-blue-600 hover:bg-blue-800 text-white font-semibold px-6 py-2 rounded-lg transition duration-300 shadow-md"
-          onClick={handleDetailClick}
-        >
-          Détail
-        </button>
+        <Button variant="contained" color="primary" onClick={handleDetailClick}>
+          Voir Détails
+        </Button>
       </div>
 
+      {loading && (
+        <div className="loader-container">
+          <svg viewBox="0 0 37 37" height="50" width="50">
+            <path className="track" fill="none" strokeWidth="5" pathLength="100" d="M36.63 31.746 c0 -13.394 -7.326 -25.16 -18.13 -31.376 C7.696 6.66 0.37 18.352 0.37 31.746 c5.328 3.108 11.544 4.884 18.13 4.884 S31.302 34.854 36.63 31.746z" />
+            <path className="car" fill="none" strokeWidth="5" pathLength="100" d="M36.63 31.746 c0 -13.394 -7.326 -25.16 -18.13 -31.376 C7.696 6.66 0.37 18.352 0.37 31.746 c5.328 3.108 11.544 4.884 18.13 4.884 S31.302 34.854 36.63 31.746z" />
+          </svg>
+        </div>
+      )}
+
+      {error && <p className="error">{error}</p>}
+
       {!loading && !error && (
-        <table className="min-w-full bg-white border border-gray-300">
-          <thead>
-            <tr className="bg-black text-white uppercase text-sm leading-normal">
-              <th className="border px-4 py-2">PNC</th>
-              <th className="border px-4 py-2">MATRICULE</th>
-              <th className="border px-4 py-2">DONNEES</th>
-              <th className="border px-4 py-2">DESTINATION</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.length > 0 ? (
-              data.map((row, index) => (
-                <tr key={index} className="text-center border-b hover:bg-gray-100">
-                  <td className="border px-4 py-2">{row.pnc}</td>
-                  <td className="border px-4 py-2">{row.matricule}</td>
-                  <td className="border px-4 py-2">{row.donnees}</td>
-                  <td className="border px-4 py-2">{row.destination}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="4" className="text-center p-4">Aucune donnée trouvée.</td>
+        <div className="table-container">
+          <table className="table">
+            <thead>
+              <tr className="header-row">
+                <th className="header-cell">PNC</th>
+                <th className="header-cell">MATRICULE</th>
+                <th className="header-cell">Données</th>
+                <th className="header-cell">Générales</th>
+                
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data.length > 0 ? (
+                data.map((row) => (
+                  <tr key={row.id} className="row">
+                    <td className="cell">{row.pnc}</td>
+                    <td className="cell">{row.matricule}</td>
+                    <td className="cell">{row.donnees}</td>
+                    <td className="cell">{row.destination}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="2" className="no-data">Aucune donnée trouvée.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
 };
 
-export default EnteteOffres;
+export default EnteteOffre;

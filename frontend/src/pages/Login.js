@@ -11,7 +11,6 @@ const LoginPage = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         setErrorMessage("");
-
         try {
             const response = await axios.post("http://localhost:5000/api/auth/login", {
                 Matricule: matricule,
@@ -38,15 +37,23 @@ const LoginPage = () => {
             color: "white",
             position: "relative",
             marginTop:"10%",
+            maxheight: "200",
+            marginLeft : "-10%",
+
         },
         formWrapper: {
+            justifyContent: "center",
+
             width: "100%",
             maxWidth: "400px",
             padding: "25px",
+            height:"35%",
+            maxheight: "200",
             backgroundColor: "#3D3D3D",
             borderRadius: "8px",
             boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
             textAlign: "center",
+
         },
         input: {
             width: "94%",
