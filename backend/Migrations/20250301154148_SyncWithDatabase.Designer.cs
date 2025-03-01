@@ -12,8 +12,8 @@ using TunisairSalesManagement.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250211103224_AddIdentityTables")]
-    partial class AddIdentityTables
+    [Migration("20250301154148_SyncWithDatabase")]
+    partial class SyncWithDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -221,6 +221,253 @@ namespace backend.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("TunisairSalesManagement.Models.Articles", b =>
+                {
+                    b.Property<string>("Code")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Code");
+
+                    b.ToTable("Articles");
+                });
+
+            modelBuilder.Entity("TunisairSalesManagement.Models.EnteteVente", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("AGENT_SAISIE")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AIROPORT")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AVION")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CC1")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CC2")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DATE_EDITION")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FL01")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FL02")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FL03")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NOM1")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NOM2")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NUMERO_ETAT")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PNC1")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PNC2")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("EnteteVente");
+                });
+
+            modelBuilder.Entity("TunisairSalesManagement.Models.EtatOffresArrivee", b =>
+                {
+                    b.Property<string>("Code")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("QuantiteDotation")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuantiteOfferte")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Restant")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotEm")
+                        .HasColumnType("int");
+
+                    b.HasKey("Code");
+
+                    b.ToTable("EtatOffresArrivee");
+                });
+
+            modelBuilder.Entity("TunisairSalesManagement.Models.EtatOffresDepart", b =>
+                {
+                    b.Property<string>("Code")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("QuantiteDotation")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuantiteOfferte")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Restant")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotEm")
+                        .HasColumnType("int");
+
+                    b.HasKey("Code");
+
+                    b.ToTable("EtatOffresDepart");
+                });
+
+            modelBuilder.Entity("TunisairSalesManagement.Models.EtatVentesArrivee", b =>
+                {
+                    b.Property<string>("Code")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("PrixUnitaireHT")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("QuantiteDotation")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuantiteVendue")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Restant")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotEm")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Valeur")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Code");
+
+                    b.ToTable("EtatVentesArrivee");
+                });
+
+            modelBuilder.Entity("TunisairSalesManagement.Models.EtatVentesDepart", b =>
+                {
+                    b.Property<string>("Code")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("PrixUnitaireHT")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("QtCompJ")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QtDotation")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuantiteCasse")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuantiteOffre")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuantiteVente")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Restant")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotEm")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Valeur")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Code");
+
+                    b.ToTable("EtatVentesDepart");
+                });
+
+            modelBuilder.Entity("TunisairSalesManagement.Models.ListeEquipageO", b =>
+                {
+                    b.Property<string>("MATRICULE")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("DESTINATION")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DONNEES")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PNC")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("MATRICULE");
+
+                    b.ToTable("ListeEquipageO");
+                });
+
+            modelBuilder.Entity("TunisairSalesManagement.Models.ListeEquipageV", b =>
+                {
+                    b.Property<string>("MATRICULE")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("DESTINATION")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DONNEES")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PNC")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("MATRICULE");
+
+                    b.ToTable("ListeEquipageV");
                 });
 
             modelBuilder.Entity("TunisairSalesManagement.Models.PN", b =>
