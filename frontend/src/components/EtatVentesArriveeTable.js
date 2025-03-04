@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { Edit, Trash, Save, X } from "lucide-react";
-import { TablePagination } from "@mui/material";
+import { Edit, Trash, Save, X, Plus } from "lucide-react";
+import { TablePagination, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
 
 const EtatVentesArriveeTable = () => {
   const [data, setData] = useState([]);
@@ -9,12 +9,14 @@ const EtatVentesArriveeTable = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [editedItem, setEditedItem] = useState(null);
+  const [newItem, setNewItem] = useState({});
+  const [openDialog, setOpenDialog] = useState(false); // State to manage the dialog open/close
 
   const fetchData = useCallback(async () => {
     try {
       const response = await axios.get("http://localhost:5000/api/AgentSaisie/EtatVentesArrivee");
       if (response.data.length > 0) {
-        setColumns(Object.keys(response.data[0]));
+        setColumns(Object.keys(response.data[0]));  // Setting column headers dynamically
       }
       setData(response.data);
     } catch (error) {
@@ -63,6 +65,22 @@ const EtatVentesArriveeTable = () => {
     setEditedItem({ ...editedItem, [key]: e.target.value });
   };
 
+  const handleChangeNewItem = (e, key) => {
+    setNewItem({ ...newItem, [key]: e.target.value });
+  };
+
+  const handleAddNew = async () => {
+    if (!newItem || Object.keys(newItem).length === 0) return;
+    try {
+      await axios.post("http://localhost:5000/api/AgentSaisie/EtatVentesArrivee", newItem);
+      fetchData();
+      setOpenDialog(false); // Close the dialog after submitting
+      setNewItem({});
+    } catch (error) {
+      console.error("Erreur lors de l'ajout :", error);
+    }
+  };
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -77,6 +95,41 @@ const EtatVentesArriveeTable = () => {
   return (
     <div>
       <h2 style={styles.heading}>Etat des Ventes Arrivées</h2>
+      <Button
+        variant="contained"
+        color="primary"
+        startIcon={<Plus />}
+        onClick={() => setOpenDialog(true)} // Open the dialog when the "Ajouter" button is clicked
+        style={styles.addButton}
+      >
+        Ajouter
+      </Button>
+
+      {/* Dialog for adding a new item */}
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>Ajouter un nouvel élément</DialogTitle>
+        <DialogContent>
+          {columns.map((col) => (
+            <TextField
+              key={col}
+              label={col}
+              fullWidth
+              margin="normal"
+              value={newItem[col] || ""}
+              onChange={(e) => handleChangeNewItem(e, col)}
+            />
+          ))}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)} color="secondary">
+            Annuler
+          </Button>
+          <Button onClick={handleAddNew} color="primary">
+            Ajouter
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <table style={styles.table}>
         <thead>
           <tr style={styles.headerRow}>
@@ -96,11 +149,10 @@ const EtatVentesArriveeTable = () => {
                 {columns.map((col) => (
                   <td key={col} style={styles.cell}>
                     {isEditing ? (
-                      <input
+                      <TextField
                         type="text"
                         value={editedItem[col]}
                         onChange={(e) => handleChange(e, col)}
-                        style={styles.input}
                       />
                     ) : (
                       item[col]
@@ -148,41 +200,35 @@ const styles = {
     color: "#c80505",
     marginBottom: "15px",
   },
+  addButton: {
+    marginBottom: "20px",
+  },
   table: {
     width: "100%",
     borderCollapse: "collapse",
     marginTop: "20px",
     boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-    borderRadius: "8px",
-    overflow: "hidden",
   },
   headerRow: {
-    backgroundColor: "#c80505",
-    color: "#fff",
+    backgroundColor: "#f8f9fa",
   },
   headerCell: {
-    padding: "12px",
-    borderBottom: "2px solid #ddd",
+    padding: "10px",
     textAlign: "left",
+    fontWeight: "bold",
+    borderBottom: "2px solid #ddd",
   },
   row: {
-    transition: "background 0.3s",
+    borderBottom: "1px solid #ddd",
   },
   cell: {
     padding: "10px",
-    borderBottom: "1px solid #ddd",
     textAlign: "left",
+    borderBottom: "1px solid #ddd",
   },
   icon: {
     cursor: "pointer",
-    marginLeft: "10px",
-    transition: "transform 0.2s",
-  },
-  input: {
-    width: "100%",
-    padding: "5px",
-    border: "1px solid #ddd",
-    borderRadius: "4px",
+    margin: "0 5px",
   },
 };
 

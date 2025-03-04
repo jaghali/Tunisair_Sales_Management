@@ -5,7 +5,7 @@ import EtatOffreArriveeTable from "../components/EtatOffreArriveeTable";
 import { useNavigate } from "react-router-dom";
 
 const OffrePage = () => {
-  //const [offreDetails, setOffreDetails] = useState([]);
+  const [offreDetails, setOffreDetails] = useState([]);
   const [offreEtatArrivee, setOffreEtatArrivee] = useState([]);
   const [offreEtatDepart, setOffreEtatDepart] = useState([]);
   const [error, setError] = useState(null);
@@ -15,11 +15,11 @@ const OffrePage = () => {
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        //const response = await axios.get("http://localhost:5000/api/ListeEquipageO/");
+        const response = await axios.get("http://localhost:5000/api/ListeEquipageV");
         const etatArriveeResponse = await axios.get("http://localhost:5000/api/AgentSaisie/EtatOffresArrivee");
         const etatDepartResponse = await axios.get("http://localhost:5000/api/AgentSaisie/EtatOffresDepart");
 
-        //setOffreDetails(response.data);
+        setOffreDetails(response.data);
         setOffreEtatArrivee(etatArriveeResponse.data);
         setOffreEtatDepart(etatDepartResponse.data);
       } catch (err) {
@@ -38,29 +38,25 @@ const OffrePage = () => {
   if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
-    <div style={containerStyle}>
-      <h2 className="text-3xl font-bold mb-6 text-red-600 text-center">Détails des Offres</h2>
+    <div style={styles.container}>
+      <h2 style={styles.heading}>Liste d'Equipages</h2>
 
-      {/* Table for OffreDetails */}
-      <table className="min-w-full mb-6 border border-gray-300 shadow-md">
+      {/* Table for Liste Equipage */}
+      <table style={styles.table}>
         <thead>
-          <tr className="bg-gray-200">
-            <th className="border px-4 py-2">PNC</th>
-            <th className="border px-4 py-2">Matricule</th>
-            <th className="border px-4 py-2">Données</th>
-            <th className="border px-4 py-2">Générales</th>
+          <tr style={styles.headerRow}>
+            <th style={styles.headerCell}>PNC</th>
+            <th style={styles.headerCell}>Matricule</th>
           </tr>
         </thead>
-        {/* <tbody>
-          {offreDetails.map((offre, index) => (
-            <tr key={index} className="border text-center hover:bg-gray-100">
-              <td className="border px-4 py-2">{offre.pnc}</td>
-              <td className="border px-4 py-2">{offre.matricule}</td>
-              <td className="border px-4 py-2">{offre.donnees}</td>
-              <td className="border px-4 py-2">{offre.generales}</td>
+        <tbody>
+          {offreDetails.map((vente, index) => (
+            <tr key={index} style={styles.row}>
+              <td style={styles.cell}>{vente.pnc}</td>
+              <td style={styles.cell}>{vente.matricule}</td>
             </tr>
           ))}
-        </tbody> */}
+        </tbody>
       </table>
 
       {/* Render both tables without toggling */}
@@ -70,8 +66,60 @@ const OffrePage = () => {
   );
 };
 
-const containerStyle = {
-  padding: "5%",
+const styles = {
+  container: {
+    padding: "2%", 
+    maxWidth: "1000px", 
+    margin: "0 auto",
+ 
+  },
+  heading: {
+    textAlign: "center",
+    fontSize: "1.5rem", 
+    fontWeight: "700",
+    color: "#b71c1c",
+    marginBottom: "1rem", 
+    letterSpacing: "0.5px", 
+  },
+  table: {
+    width: "70%", 
+    borderCollapse: "separate",
+    borderSpacing: "0",
+    marginTop: "1rem", 
+    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", 
+    borderRadius: "8px", 
+    overflow: "hidden",
+    marginLeft: "auto", 
+    marginRight: "auto",
+  },
+  headerRow: {
+    backgroundColor: "#b71c1c",
+    color: "#ffffff",
+  },
+  headerCell: {
+    padding: "0.8rem", 
+    fontSize: "0.9rem", 
+    fontWeight: "600",
+    borderBottom: "2px solid #880e0e", 
+    textAlign: "left",
+  },
+  row: {
+    transition: "background 0.3s ease-in-out",
+    "&:hover": {
+      backgroundColor: "#f5f5f5",
+    },
+  },
+  cell: {
+    padding: "0.7rem", 
+    fontSize: "0.85rem", 
+    borderBottom: "1px solid #ddd",
+    textAlign: "left",
+    color: "#333",
+  },
+  actionButtons: {
+    display: "flex",
+    gap: "0.4rem", 
+  },
 };
 
 export default OffrePage;

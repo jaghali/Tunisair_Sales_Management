@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 import { Edit, Trash, Save, X } from "lucide-react";
+import EnteteVenteForm from "../components/EnteteVenteForm";
 
 import "../App.css"; 
 
@@ -12,6 +13,7 @@ const EnteteVente = () => {
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(null);
   const [editedItem, setEditedItem] = useState(null);
+  const [openForm, setOpenForm] = useState(false); 
 
   const navigate = useNavigate();
 
@@ -36,12 +38,13 @@ const EnteteVente = () => {
   const handleEdit = (item) => {
     setIsEditing(item.id);
     setEditedItem({ ...item });
+    
   };
 
-  const handleSaveEdit = async () => {
+  const handleSaveEdit = async (newData) => {
     try {
-      await axios.put(`http://localhost:5000/api/EnteteVente/${editedItem.id}`, editedItem);
-      setData(data.map((row) => (row.id === editedItem.id ? editedItem : row)));
+      await axios.put(`http://localhost:5000/api/EnteteVente/${newData.id}`, newData);
+      setData(data.map((row) => (row.id === newData.id ? newData : row)));
       setIsEditing(null);
       setEditedItem(null);
     } catch (err) {
@@ -49,9 +52,22 @@ const EnteteVente = () => {
     }
   };
 
+  const handleAddNew = (newData) => {
+    try {
+      axios.post("http://localhost:5000/api/EnteteVente", newData)
+        .then(response => {
+          setData([...data, response.data]);
+          setOpenForm(false); // Close form after adding
+        });
+    } catch (err) {
+      alert("Erreur lors de l'ajout !");
+    }
+  };
+
   const handleCancelEdit = () => {
     setIsEditing(null);
     setEditedItem(null);
+    setOpenForm(false);
   };
 
   const handleDelete = async (id) => {
@@ -70,8 +86,8 @@ const EnteteVente = () => {
       <h2 className="heading">Entête des Ventes</h2>
 
       <div className="button-container">
-        <Button variant="contained" color="primary" >
-         Ajouter Etat De Vente
+        <Button variant="contained" color="primary" onClick={() => setOpenForm(true)}>
+          Ajouter Etat De Vente
         </Button>
       </div>
 
@@ -96,7 +112,6 @@ const EnteteVente = () => {
                 <th className="header-cell">DATE_EDITION</th>
                 <th className="header-cell">Actions</th>
                 <th className="header-cell">Details</th>
-
               </tr>
             </thead>
             <tbody>
@@ -130,7 +145,7 @@ const EnteteVente = () => {
                     <td className="cell">
                       {isEditing === row.id ? (
                         <>
-                          <Save onClick={handleSaveEdit} style={{ ...styles.icon, color: "green" }} />
+                          <Save onClick={() => handleSaveEdit(editedItem)} style={{ ...styles.icon, color: "green" }} />
                           <X onClick={handleCancelEdit} style={{ ...styles.icon, color: "red" }} />
                         </>
                       ) : (
@@ -141,7 +156,6 @@ const EnteteVente = () => {
                       )}
                     </td>
                     <td className="cell"><Button onClick={handleDetailClick}>View More ...</Button></td>
-
                   </tr>
                 ))
               ) : (
@@ -153,6 +167,22 @@ const EnteteVente = () => {
           </table>
         </div>
       )}
+
+      {/* Dialog for Add Form Only */}
+      <Dialog open={openForm} onClose={handleCancelEdit}>
+        <DialogTitle>Ajouter Etat De Vente</DialogTitle>
+        <DialogContent>
+          <EnteteVenteForm
+            onClose={handleCancelEdit}
+            onSave={handleAddNew} 
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelEdit} color="secondary">
+            Annuler
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

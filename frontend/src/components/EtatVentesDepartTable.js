@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { Edit, Trash, Save, X } from "lucide-react";
-import { TablePagination } from "@mui/material";
+import { Edit, Trash, Save, X,Plus } from "lucide-react";
+import { TablePagination, Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField } from "@mui/material";
 
 const EtatVentesDepartTable = () => {
   const [data, setData] = useState([]);
@@ -9,6 +9,8 @@ const EtatVentesDepartTable = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [editedItem, setEditedItem] = useState(null);
+  const [showDialog, setShowDialog] = useState(false);
+  const [newItem, setNewItem] = useState({});
 
   const fetchData = useCallback(async () => {
     try {
@@ -27,10 +29,6 @@ const EtatVentesDepartTable = () => {
   }, [fetchData]);
 
   const handleDelete = async (code) => {
-    if (!code) {
-      console.error("Code invalide pour la suppression");
-      return;
-    }
     try {
       await axios.delete(`http://localhost:5000/api/AgentSaisie/EtatVentesDepart/${code}`);
       fetchData();
@@ -48,8 +46,6 @@ const EtatVentesDepartTable = () => {
   };
 
   const handleSaveEdit = async () => {
-    if (!editedItem) return;
-
     try {
       await axios.put(`http://localhost:5000/api/AgentSaisie/EtatVentesDepart/${editedItem.code}`, editedItem);
       fetchData();
@@ -72,18 +68,55 @@ const EtatVentesDepartTable = () => {
     setPage(0);
   };
 
+  const handleAddChange = (e, key) => {
+    setNewItem({ ...newItem, [key]: e.target.value });
+  };
+
+  const handleAddItem = async () => {
+    try {
+      await axios.post("http://localhost:5000/api/AgentSaisie/EtatVentesDepart", newItem);
+      fetchData();
+      setShowDialog(false);
+      setNewItem({});
+    } catch (error) {
+      console.error("Erreur lors de l'ajout :", error);
+    }
+  };
+
   const paginatedData = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
     <div>
-      <h2 style={styles.heading}>Etat des Ventes Départ</h2>
-      <table style={styles.table}>
+      <h2>Etat des Ventes Départ</h2>
+      <Button variant="contained" color="primary" startIcon={<Plus />} onClick={() => setShowDialog(true)}>
+        Ajouter
+      </Button>
+
+      <Dialog open={showDialog} onClose={() => setShowDialog(false)}>
+        <DialogTitle>Ajouter un nouvel élément</DialogTitle>
+        <DialogContent>
+          {columns.map((col) => (
+            <TextField
+              key={col}
+              label={col}
+              value={newItem[col] || ""}
+              onChange={(e) => handleAddChange(e, col)}
+              fullWidth
+              margin="dense"
+            />
+          ))}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleAddItem} color="primary">Enregistrer</Button>
+          <Button onClick={() => setShowDialog(false)} color="secondary">Annuler</Button>
+        </DialogActions>
+      </Dialog>
+
+      <table  style={styles.table}>
         <thead>
           <tr style={styles.headerRow}>
             {columns.map((col) => (
-              <th key={col} style={styles.headerCell}>
-                {col}
-              </th>
+              <th key={col} >{col}</th>
             ))}
             <th style={styles.headerCell}>Actions</th>
           </tr>
@@ -96,12 +129,7 @@ const EtatVentesDepartTable = () => {
                 {columns.map((col) => (
                   <td key={col} style={styles.cell}>
                     {isEditing ? (
-                      <input
-                        type="text"
-                        value={editedItem[col]}
-                        onChange={(e) => handleChange(e, col)}
-                        style={styles.input}
-                      />
+                      <TextField value={editedItem[col]} onChange={(e) => handleChange(e, col)} />
                     ) : (
                       item[col]
                     )}
@@ -138,7 +166,6 @@ const EtatVentesDepartTable = () => {
     </div>
   );
 };
-
 // CSS Styles
 const styles = {
   heading: {
@@ -148,43 +175,36 @@ const styles = {
     color: "#c80505",
     marginBottom: "15px",
   },
+  addButton: {
+    marginBottom: "20px",
+  },
   table: {
     width: "100%",
     borderCollapse: "collapse",
     marginTop: "20px",
     boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-    borderRadius: "8px",
-    overflow: "hidden",
   },
   headerRow: {
-    backgroundColor: "#c80505",
-    color: "#fff",
+    backgroundColor: "#f8f9fa",
   },
   headerCell: {
-    padding: "12px",
-    borderBottom: "2px solid #ddd",
+    padding: "10px",
     textAlign: "left",
+    fontWeight: "bold",
+    borderBottom: "2px solid #ddd",
   },
   row: {
-    transition: "background 0.3s",
+    borderBottom: "1px solid #ddd",
   },
   cell: {
     padding: "10px",
-    borderBottom: "1px solid #ddd",
     textAlign: "left",
+    borderBottom: "1px solid #ddd",
   },
   icon: {
     cursor: "pointer",
-    marginLeft: "10px",
-    transition: "transform 0.2s",
-  },
-  input: {
-    width: "100%",
-    padding: "5px",
-    border: "1px solid #ddd",
-    borderRadius: "4px",
+    margin: "0 5px",
   },
 };
 
 export default EtatVentesDepartTable;
-

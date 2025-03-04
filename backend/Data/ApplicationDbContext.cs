@@ -24,6 +24,7 @@ namespace TunisairSalesManagement.Data
         public DbSet<ListeEquipageV> ListeEquipageV { get; set; }
 
         public DbSet<EnteteVente> EnteteVente { get; set; }
+        public DbSet<EnteteOffre> EnteteOffre { get; set; }
         public DbSet<Articles> Articles { get; set; }
 
 
@@ -46,6 +47,7 @@ namespace TunisairSalesManagement.Data
                 .HasKey(e => e.Code);
             modelBuilder.Entity<ListeEquipageO>().HasKey(e => e.MATRICULE);
             modelBuilder.Entity<EnteteVente>().HasKey(e => e.ID);
+            modelBuilder.Entity<EnteteOffre>().HasKey(e => e.ID);
 
             modelBuilder.Entity<ListeEquipageV>().HasKey(e => e.MATRICULE);
             modelBuilder.Entity<Articles>().HasKey(e => e.Code);

@@ -41,16 +41,14 @@ const VentePage = () => {
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.heading}>Détails des Ventes</h2>
+      <h2 style={styles.heading}>Liste d'Equipages</h2>
 
-      {/* Table for VenteDetails */}
+      {/* Table for Liste Equipage */}
       <table style={styles.table}>
         <thead>
           <tr style={styles.headerRow}>
             <th style={styles.headerCell}>PNC</th>
             <th style={styles.headerCell}>Matricule</th>
-            <th style={styles.headerCell}>Données</th>
-            <th style={styles.headerCell}>Générales</th>
           </tr>
         </thead>
         <tbody>
@@ -58,8 +56,6 @@ const VentePage = () => {
             <tr key={index} style={styles.row}>
               <td style={styles.cell}>{vente.pnc}</td>
               <td style={styles.cell}>{vente.matricule}</td>
-              <td style={styles.cell}>{vente.donnees}</td>
-              <td style={styles.cell}>{vente.generales}</td>
             </tr>
           ))}
         </tbody>
@@ -74,40 +70,59 @@ const VentePage = () => {
 
 const styles = {
   container: {
-    padding: "5%",
+    padding: "2%", 
+    maxWidth: "1000px", 
+    margin: "0 auto",
+ 
   },
   heading: {
     textAlign: "center",
-    fontSize: "24px",
-    fontWeight: "bold",
-    color: "#c80505",
-    marginBottom: "15px",
+    fontSize: "1.5rem", 
+    fontWeight: "700",
+    color: "#b71c1c",
+    marginBottom: "1rem", 
+    letterSpacing: "0.5px", 
   },
   table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    marginTop: "20px",
-    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-    borderRadius: "8px",
+    width: "70%", 
+    borderCollapse: "separate",
+    borderSpacing: "0",
+    marginTop: "1rem", 
+    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", 
+    borderRadius: "8px", 
     overflow: "hidden",
+    marginLeft: "auto", 
+    marginRight: "auto",
   },
   headerRow: {
-    backgroundColor: "#c80505",
-    color: "#fff",
+    backgroundColor: "#b71c1c",
+    color: "#ffffff",
   },
   headerCell: {
-    padding: "12px",
-    borderBottom: "2px solid #ddd",
+    padding: "0.8rem", 
+    fontSize: "0.9rem", 
+    fontWeight: "600",
+    borderBottom: "2px solid #880e0e", 
     textAlign: "left",
   },
   row: {
-    transition: "background 0.3s",
+    transition: "background 0.3s ease-in-out",
+    "&:hover": {
+      backgroundColor: "#f5f5f5",
+    },
   },
   cell: {
-    padding: "10px",
+    padding: "0.7rem", 
+    fontSize: "0.85rem", 
     borderBottom: "1px solid #ddd",
     textAlign: "left",
+    color: "#333",
+  },
+  actionButtons: {
+    display: "flex",
+    gap: "0.4rem", 
   },
 };
+
 
 export default VentePage;
