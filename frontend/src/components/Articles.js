@@ -44,7 +44,7 @@ const Articles = () => {
   };
 
   const handleEdit = (item) => {
-    setEditedItem(item); // Set the item being edited
+    setEditedItem({ ...item }); // Make a copy of the item being edited
   };
 
   const handleCancelEdit = () => {
@@ -90,7 +90,7 @@ const Articles = () => {
 
   const handleAddArticle = async () => {
     // Validate that all fields are filled out
-    if (!newArticle.code || !newArticle.description ) {
+    if (!newArticle.code || !newArticle.description) {
       alert("Veuillez remplir tous les champs !");
       return;
     }
@@ -209,7 +209,6 @@ const Articles = () => {
             fullWidth
             margin="normal"
           />
-         
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} color="primary">Annuler</Button>

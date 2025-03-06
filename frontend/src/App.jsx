@@ -16,6 +16,7 @@ import SidebarAgentSaisie from "./components/Sidebaragentsaisie";
 import VentePage from "./pages/VentePage";
 import OffrePage from "./pages/OffrePage";
 import ArticlesPage from "./pages/ArticlesPage";
+import ForgotPasswordPage from "./pages/ForgotPassword";
 
 
 function App() {
@@ -47,7 +48,7 @@ function MainLayout() {
   ];
 
   let sidebarComponent = null;
-  if (location.pathname !== "/") {
+  if (location.pathname !== "/" && location.pathname !== "/ForgotPasswordPage") {
     sidebarComponent = agentSaisiePages.includes(location.pathname) ? (
       <SidebarAgentSaisie />
     ) : (
@@ -96,6 +97,8 @@ function MainLayout() {
               <Route path="/ventePage" element={<VentePage />} />
               <Route path="/OffrePage" element={<OffrePage />} />
               <Route path="/ArticlesPage" element={<ArticlesPage />} />
+              <Route path="/ForgotPasswordPage" element={<ForgotPasswordPage />} />
+
 
             </Routes>
           </div>

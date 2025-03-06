@@ -16,8 +16,8 @@ const OffrePage = () => {
     const fetchDetails = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/ListeEquipageV");
-        const etatArriveeResponse = await axios.get("http://localhost:5000/api/AgentSaisie/EtatOffresArrivee");
-        const etatDepartResponse = await axios.get("http://localhost:5000/api/AgentSaisie/EtatOffresDepart");
+        const etatArriveeResponse = await axios.get("http://localhost:5000/api/EtatOffresArrivee");
+        const etatDepartResponse = await axios.get("http://localhost:5000/api/EtatOffresDepart");
 
         setOffreDetails(response.data);
         setOffreEtatArrivee(etatArriveeResponse.data);

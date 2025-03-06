@@ -1,24 +1,26 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Edit, Trash, Save, X, Plus } from "lucide-react";
-import { TablePagination, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
+import { TablePagination, Button, TextField } from "@mui/material";
 
 const EtatVentesArriveeTable = () => {
   const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [columns, setColumns] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [editedItem, setEditedItem] = useState(null);
   const [newItem, setNewItem] = useState({});
-  const [openDialog, setOpenDialog] = useState(false); // State to manage the dialog open/close
+  const [searchQuery, setSearchQuery] = useState("");  // Search query state
 
   const fetchData = useCallback(async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/AgentSaisie/EtatVentesArrivee");
-      if (response.data.length > 0) {
-        setColumns(Object.keys(response.data[0]));  // Setting column headers dynamically
+      const response = await axios.get("http://localhost:5000/api/EtatVentesArrivee");
+      if (response.data && response.data.length > 0) {
+        setColumns(Object.keys(response.data[0]));
+        setData(response.data);
+        setFilteredData(response.data);  // Initially, all data is visible
       }
-      setData(response.data);
     } catch (error) {
       console.error("Erreur lors de la récupération des données :", error);
     }
@@ -28,32 +30,38 @@ const EtatVentesArriveeTable = () => {
     fetchData();
   }, [fetchData]);
 
-  const handleDelete = async (code) => {
-    if (!code) {
-      console.error("Code invalide pour la suppression");
-      return;
+  useEffect(() => {
+    if (searchQuery === "") {
+      setFilteredData(data);  // If no search query, show all data
+    } else {
+      const filtered = data.filter((item) =>
+        Object.keys(item).some((key) => {
+          if (key === "code" || key === "description") {
+            return item[key].toString().toLowerCase().includes(searchQuery.toLowerCase());
+          }
+          return false;
+        })
+      );
+      setFilteredData(filtered);
     }
+  }, [searchQuery, data]);
+
+  const handleDelete = async (code) => {
     try {
-      await axios.delete(`http://localhost:5000/api/AgentSaisie/EtatVentesArrivee/${code}`);
+      await axios.delete(`http://localhost:5000/api/EtatVentesArrivee/${code}`);
       fetchData();
     } catch (error) {
       console.error("Erreur lors de la suppression :", error);
     }
   };
 
-  const handleEdit = (item) => {
-    setEditedItem(item);
-  };
-
-  const handleCancelEdit = () => {
-    setEditedItem(null);
-  };
+  const handleEdit = (item) => setEditedItem(item);
+  const handleCancelEdit = () => setEditedItem(null);
 
   const handleSaveEdit = async () => {
-    if (!editedItem) return;
-
+    if (!editedItem?.code) return;
     try {
-      await axios.put(`http://localhost:5000/api/AgentSaisie/EtatVentesArrivee/${editedItem.code}`, editedItem);
+      await axios.put(`http://localhost:5000/api/EtatVentesArrivee/${editedItem.code}`, editedItem);
       fetchData();
       setEditedItem(null);
     } catch (error) {
@@ -61,74 +69,47 @@ const EtatVentesArriveeTable = () => {
     }
   };
 
-  const handleChange = (e, key) => {
-    setEditedItem({ ...editedItem, [key]: e.target.value });
-  };
-
-  const handleChangeNewItem = (e, key) => {
-    setNewItem({ ...newItem, [key]: e.target.value });
-  };
+  const handleChange = (e, key) => setEditedItem({ ...editedItem, [key]: e.target.value });
+  const handleChangeNewItem = (e, key) => setNewItem({ ...newItem, [key]: e.target.value });
 
   const handleAddNew = async () => {
-    if (!newItem || Object.keys(newItem).length === 0) return;
+    if (Object.keys(newItem).length !== columns.length || Object.values(newItem).some((val) => val === "")) {
+      console.error("Tous les champs sont requis");
+      return;
+    }
     try {
-      await axios.post("http://localhost:5000/api/AgentSaisie/EtatVentesArrivee", newItem);
+      await axios.post("http://localhost:5000/api/EtatVentesArrivee", newItem);
       fetchData();
-      setOpenDialog(false); // Close the dialog after submitting
       setNewItem({});
     } catch (error) {
       console.error("Erreur lors de l'ajout :", error);
     }
   };
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
+  const handleChangePage = (event, newPage) => setPage(newPage);
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
-  const paginatedData = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
     <div>
       <h2 style={styles.heading}>Etat des Ventes Arrivées</h2>
-      <Button
-        variant="contained"
-        color="primary"
-        startIcon={<Plus />}
-        onClick={() => setOpenDialog(true)} // Open the dialog when the "Ajouter" button is clicked
-        style={styles.addButton}
-      >
+
+      {/* Search Input */}
+      <TextField
+        label="Rechercher par Code ou Description"
+        variant="outlined"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        style={styles.searchInput}
+      />
+
+      <Button variant="contained" startIcon={<Plus />} onClick={() => setNewItem(columns.reduce((acc, col) => ({ ...acc, [col]: "" }), {}))} style={styles.addButton}>
         Ajouter
       </Button>
-
-      {/* Dialog for adding a new item */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Ajouter un nouvel élément</DialogTitle>
-        <DialogContent>
-          {columns.map((col) => (
-            <TextField
-              key={col}
-              label={col}
-              fullWidth
-              margin="normal"
-              value={newItem[col] || ""}
-              onChange={(e) => handleChangeNewItem(e, col)}
-            />
-          ))}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} color="secondary">
-            Annuler
-          </Button>
-          <Button onClick={handleAddNew} color="primary">
-            Ajouter
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       <table style={styles.table}>
         <thead>
@@ -142,18 +123,14 @@ const EtatVentesArriveeTable = () => {
           </tr>
         </thead>
         <tbody>
-          {paginatedData.map((item, index) => {
+          {paginatedData.map((item) => {
             const isEditing = editedItem && editedItem.code === item.code;
             return (
-              <tr key={index} style={styles.row}>
+              <tr key={item.code} style={styles.row}>
                 {columns.map((col) => (
                   <td key={col} style={styles.cell}>
                     {isEditing ? (
-                      <TextField
-                        type="text"
-                        value={editedItem[col]}
-                        onChange={(e) => handleChange(e, col)}
-                      />
+                      <TextField type="text" value={editedItem[col]} onChange={(e) => handleChange(e, col)} style={styles.input} />
                     ) : (
                       item[col]
                     )}
@@ -175,12 +152,33 @@ const EtatVentesArriveeTable = () => {
               </tr>
             );
           })}
+
+          {/* New row for adding a new item */}
+          {newItem && Object.keys(newItem).length > 0 && (
+            <tr style={styles.row}>
+              {columns.map((col) => (
+                <td key={col} style={styles.cell}>
+                  <TextField
+                    type="text"
+                    value={newItem[col] || ""}
+                    onChange={(e) => handleChangeNewItem(e, col)}
+                    style={styles.input}
+                    placeholder={`Enter ${col}`}
+                  />
+                </td>
+              ))}
+              <td style={styles.cell}>
+                <Save onClick={handleAddNew} style={{ ...styles.icon, color: "green" }} />
+                <X onClick={() => setNewItem({})} style={{ ...styles.icon, color: "red" }} />
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
 
       <TablePagination
         component="div"
-        count={data.length}
+        count={filteredData.length}
         page={page}
         onPageChange={handleChangePage}
         rowsPerPage={rowsPerPage}
@@ -191,7 +189,7 @@ const EtatVentesArriveeTable = () => {
   );
 };
 
-// CSS Styles
+// Styles using JavaScript object
 const styles = {
   heading: {
     textAlign: "center",
@@ -200,35 +198,56 @@ const styles = {
     color: "#c80505",
     marginBottom: "15px",
   },
-  addButton: {
+  searchInput: {
+    width: "300px",
     marginBottom: "20px",
+  },
+  addButton: {
+    display: "flex",
+    alignItems: "center",
+    backgroundColor: "#28a745",
+    color: "#fff",
+    border: "none",
+    padding: "10px 15px",
+    borderRadius: "5px",
+    cursor: "pointer",
+    fontSize: "16px",
+    marginBottom: "15px",
   },
   table: {
     width: "100%",
     borderCollapse: "collapse",
     marginTop: "20px",
     boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+    borderRadius: "8px",
+    overflow: "hidden",
   },
   headerRow: {
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#c80505",
+    color: "#fff",
   },
   headerCell: {
-    padding: "10px",
-    textAlign: "left",
-    fontWeight: "bold",
+    padding: "12px",
     borderBottom: "2px solid #ddd",
+    textAlign: "left",
   },
   row: {
-    borderBottom: "1px solid #ddd",
+    transition: "background 0.3s",
   },
   cell: {
     padding: "10px",
-    textAlign: "left",
     borderBottom: "1px solid #ddd",
+    textAlign: "left",
   },
   icon: {
     cursor: "pointer",
-    margin: "0 5px",
+    marginLeft: "10px",
+    transition: "transform 0.2s",
+  },
+  input: {
+    width: "100%",
+    padding: "5px",
+    borderRadius: "4px",
   },
 };
 

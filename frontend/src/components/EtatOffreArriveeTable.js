@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { Edit, Trash, Save, X } from "lucide-react";
-import { TablePagination } from "@mui/material";
+import { Edit, Trash, Save, X, PlusCircle } from "lucide-react";
+import { TablePagination, TextField } from "@mui/material";
 
 const EtatOffreArriveeTable = () => {
   const [data, setData] = useState([]);
@@ -9,10 +9,13 @@ const EtatOffreArriveeTable = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [editedItem, setEditedItem] = useState(null);
+  const [newItem, setNewItem] = useState(null);
+  const [isAdding, setIsAdding] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
 
   const fetchData = useCallback(async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/AgentSaisie/EtatOffresArrivee");
+      const response = await axios.get("http://localhost:5000/api/EtatOffresArrivee");
       if (response.data.length > 0) {
         setColumns(Object.keys(response.data[0]));
       }
@@ -26,13 +29,20 @@ const EtatOffreArriveeTable = () => {
     fetchData();
   }, [fetchData]);
 
+  // Filter data based on search query (code or description)
+  const filteredData = data.filter((item) => {
+    const codeMatch = item.code && item.code.toLowerCase().includes(searchQuery.toLowerCase());
+    const descriptionMatch = item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return codeMatch || descriptionMatch;
+  });
+
   const handleDelete = async (code) => {
     if (!code) {
       console.error("Code invalide pour la suppression");
       return;
     }
     try {
-      await axios.delete(`http://localhost:5000/api/AgentSaisie/EtatOffresArrivee/${code}`);
+      await axios.delete(`http://localhost:5000/api/EtatOffresArrivee/${code}`);
       fetchData();
     } catch (error) {
       console.error("Erreur lors de la suppression :", error);
@@ -40,20 +50,20 @@ const EtatOffreArriveeTable = () => {
   };
 
   const handleEdit = (item) => {
-    setEditedItem(item); // Set the item being edited
+    setEditedItem(item);
   };
 
   const handleCancelEdit = () => {
-    setEditedItem(null); // Cancel editing
+    setEditedItem(null);
   };
 
   const handleSaveEdit = async () => {
     if (!editedItem) return;
 
     try {
-      await axios.put(`http://localhost:5000/api/AgentSaisie/EtatOffresArrivee/${editedItem.code}`, editedItem);
+      await axios.put(`http://localhost:5000/api/EtatOffresArrivee/${editedItem.code}`, editedItem);
       fetchData();
-      setEditedItem(null); // Close form after saving
+      setEditedItem(null);
     } catch (error) {
       console.error("Erreur lors de la mise à jour :", error);
     }
@@ -61,6 +71,31 @@ const EtatOffreArriveeTable = () => {
 
   const handleChange = (e, key) => {
     setEditedItem({ ...editedItem, [key]: e.target.value });
+  };
+
+  const handleAdd = () => {
+    setNewItem({});
+    setIsAdding(true);
+  };
+
+  const handleChangeNew = (e, key) => {
+    setNewItem({ ...newItem, [key]: e.target.value });
+  };
+
+  const handleSaveNew = async () => {
+    try {
+      await axios.post("http://localhost:5000/api/EtatOffresArrivee", newItem);
+      fetchData();
+      setNewItem(null);
+      setIsAdding(false);
+    } catch (error) {
+      console.error("Erreur lors de l'ajout :", error);
+    }
+  };
+
+  const handleCancelAdd = () => {
+    setNewItem(null);
+    setIsAdding(false);
   };
 
   const handleChangePage = (event, newPage) => {
@@ -72,11 +107,26 @@ const EtatOffreArriveeTable = () => {
     setPage(0);
   };
 
-  const paginatedData = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
     <div>
       <h2 style={styles.heading}>Etat des Offres Arrivée</h2>
+      
+      {/* Search Input */}
+      <TextField
+             label="Rechercher par code ou description"
+             variant="outlined"
+             fullWidth
+             value={searchQuery}
+             onChange={(e) => setSearchQuery(e.target.value)}
+             style={styles.searchBar}
+           />
+
+      <button onClick={handleAdd} style={styles.addButton}>
+        <PlusCircle size={20} style={{ marginRight: "5px" }} />
+        Ajouter
+      </button>
       <table style={styles.table}>
         <thead>
           <tr style={styles.headerRow}>
@@ -89,6 +139,24 @@ const EtatOffreArriveeTable = () => {
           </tr>
         </thead>
         <tbody>
+          {isAdding && (
+            <tr style={styles.row}>
+              {columns.map((col) => (
+                <td key={col} style={styles.cell}>
+                  <input
+                    type="text"
+                    value={newItem[col] || ""}
+                    onChange={(e) => handleChangeNew(e, col)}
+                    style={styles.input}
+                  />
+                </td>
+              ))}
+              <td style={styles.cell}>
+                <Save onClick={handleSaveNew} style={{ ...styles.icon, color: "green" }} />
+                <X onClick={handleCancelAdd} style={{ ...styles.icon, color: "red" }} />
+              </td>
+            </tr>
+          )}
           {paginatedData.map((item, index) => {
             const isEditing = editedItem && editedItem.code === item.code;
             return (
@@ -128,7 +196,7 @@ const EtatOffreArriveeTable = () => {
 
       <TablePagination
         component="div"
-        count={data.length}
+        count={filteredData.length}
         page={page}
         onPageChange={handleChangePage}
         rowsPerPage={rowsPerPage}
@@ -147,6 +215,23 @@ const styles = {
     fontWeight: "bold",
     color: "#c80505",
     marginBottom: "15px",
+  },
+  addButton: {
+    display: "flex",
+    alignItems: "center",
+    backgroundColor: "#28a745",
+    color: "#fff",
+    border: "none",
+    padding: "10px 15px",
+    borderRadius: "5px",
+    cursor: "pointer",
+    fontSize: "16px",
+    marginBottom: "10px",
+  },
+  searchBar: {
+    width: "300px",
+    marginBottom: "20px",
+  
   },
   table: {
     width: "100%",

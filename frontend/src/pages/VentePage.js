@@ -17,8 +17,8 @@ const VentePage = () => {
       try {
         const [response, etatArriveeResponse, etatDepartResponse] = await Promise.all([
           axios.get("http://localhost:5000/api/ListeEquipageV"),
-          axios.get("http://localhost:5000/api/AgentSaisie/EtatVentesArrivee"),
-          axios.get("http://localhost:5000/api/AgentSaisie/EtatVentesDepart"),
+          axios.get("http://localhost:5000/api/EtatVentesArrivee"),
+          axios.get("http://localhost:5000/api/EtatVentesDepart"),
         ]);
 
         setVenteDetails(response.data);

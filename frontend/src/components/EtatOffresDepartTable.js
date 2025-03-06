@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { Edit, Trash, Save, X } from "lucide-react";
-import { TablePagination } from "@mui/material";
+import { Edit, Trash, Save, X, PlusCircle } from "lucide-react";
+import { TablePagination, TextField } from "@mui/material";
 
 const EtatOffreDepartTable = () => {
   const [data, setData] = useState([]);
@@ -9,10 +9,12 @@ const EtatOffreDepartTable = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [editedItem, setEditedItem] = useState(null);
+  const [newItem, setNewItem] = useState(null);
+  const [searchQuery, setSearchQuery] = useState(""); // State to hold the search query
 
   const fetchData = useCallback(async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/AgentSaisie/EtatOffresDepart");
+      const response = await axios.get("http://localhost:5000/api/EtatOffresDepart");
       if (response.data.length > 0) {
         setColumns(Object.keys(response.data[0]));
       }
@@ -32,7 +34,7 @@ const EtatOffreDepartTable = () => {
       return;
     }
     try {
-      await axios.delete(`http://localhost:5000/api/AgentSaisie/EtatOffresDepart/${code}`);
+      await axios.delete(`http://localhost:5000/api/EtatOffresDepart/${code}`);
       fetchData();
     } catch (error) {
       console.error("Erreur lors de la suppression :", error);
@@ -49,9 +51,8 @@ const EtatOffreDepartTable = () => {
 
   const handleSaveEdit = async () => {
     if (!editedItem) return;
-
     try {
-      await axios.put(`http://localhost:5000/api/AgentSaisie/EtatOffresDepart/${editedItem.code}`, editedItem);
+      await axios.put(`http://localhost:5000/api/EtatOffresDepart/${editedItem.code}`, editedItem);
       fetchData();
       setEditedItem(null);
     } catch (error) {
@@ -63,6 +64,25 @@ const EtatOffreDepartTable = () => {
     setEditedItem({ ...editedItem, [key]: e.target.value });
   };
 
+  const handleAdd = () => {
+    setNewItem(columns.reduce((acc, col) => ({ ...acc, [col]: "" }), {}));
+  };
+
+  const handleSaveNew = async () => {
+    if (!newItem) return;
+    try {
+      await axios.post("http://localhost:5000/api/EtatOffresDepart", newItem);
+      fetchData();
+      setNewItem(null);
+    } catch (error) {
+      console.error("Erreur lors de l'ajout :", error);
+    }
+  };
+
+  const handleCancelNew = () => {
+    setNewItem(null);
+  };
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -72,23 +92,57 @@ const EtatOffreDepartTable = () => {
     setPage(0);
   };
 
-  const paginatedData = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  // Filter data based on the search query
+  const filteredData = data.filter((item) => {
+    return (
+      item.code.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.description.toString().toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
+  
+
+  const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
     <div>
       <h2 style={styles.heading}>Etat des Offres Départ</h2>
+
+      {/* Search Bar */}
+      <TextField
+        label="Rechercher"
+        variant="outlined"
+        fullWidth
+        style={styles.searchBar}
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)} // Update search query on input change
+      />
+
+      <button onClick={handleAdd} style={styles.addButton}>
+        <PlusCircle size={18} style={{ marginRight: "5px" }} /> Ajouter
+      </button>
       <table style={styles.table}>
         <thead>
           <tr style={styles.headerRow}>
             {columns.map((col) => (
-              <th key={col} style={styles.headerCell}>
-                {col}
-              </th>
+              <th key={col} style={styles.headerCell}>{col}</th>
             ))}
             <th style={styles.headerCell}>Actions</th>
           </tr>
         </thead>
         <tbody>
+          {newItem && (
+            <tr style={styles.row}>
+              {columns.map((col) => (
+                <td key={col} style={styles.cell}>
+                  <input type="text" value={newItem[col]} onChange={(e) => setNewItem({ ...newItem, [col]: e.target.value })} style={styles.input} />
+                </td>
+              ))}
+              <td style={styles.cell}>
+                <Save onClick={handleSaveNew} style={{ ...styles.icon, color: "green" }} />
+                <X onClick={handleCancelNew} style={{ ...styles.icon, color: "red" }} />
+              </td>
+            </tr>
+          )}
           {paginatedData.map((item, index) => {
             const isEditing = editedItem && editedItem.code === item.code;
             return (
@@ -96,12 +150,7 @@ const EtatOffreDepartTable = () => {
                 {columns.map((col) => (
                   <td key={col} style={styles.cell}>
                     {isEditing ? (
-                      <input
-                        type="text"
-                        value={editedItem[col]}
-                        onChange={(e) => handleChange(e, col)}
-                        style={styles.input}
-                      />
+                      <input type="text" value={editedItem[col]} onChange={(e) => handleChange(e, col)} style={styles.input} />
                     ) : (
                       item[col]
                     )}
@@ -125,10 +174,9 @@ const EtatOffreDepartTable = () => {
           })}
         </tbody>
       </table>
-
       <TablePagination
         component="div"
-        count={data.length}
+        count={filteredData.length}
         page={page}
         onPageChange={handleChangePage}
         rowsPerPage={rowsPerPage}
@@ -139,51 +187,18 @@ const EtatOffreDepartTable = () => {
   );
 };
 
-// CSS Styles
 const styles = {
-  heading: {
-    textAlign: "center",
-    fontSize: "24px",
-    fontWeight: "bold",
-    color: "#c80505",
-    marginBottom: "15px",
-  },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    marginTop: "20px",
-    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-    borderRadius: "8px",
-    overflow: "hidden",
-  },
-  headerRow: {
-    backgroundColor: "#c80505",
-    color: "#fff",
-  },
-  headerCell: {
-    padding: "12px",
-    borderBottom: "2px solid #ddd",
-    textAlign: "left",
-  },
-  row: {
-    transition: "background 0.3s",
-  },
-  cell: {
-    padding: "10px",
-    borderBottom: "1px solid #ddd",
-    textAlign: "left",
-  },
-  icon: {
-    cursor: "pointer",
-    marginLeft: "10px",
-    transition: "transform 0.2s",
-  },
-  input: {
-    width: "100%",
-    padding: "5px",
-    border: "1px solid #ddd",
-    borderRadius: "4px",
-  },
+  heading: { textAlign: "center", fontSize: "24px", fontWeight: "bold", color: "#c80505", marginBottom: "15px" },
+  addButton: { backgroundColor: "#28a745", color: "white", border: "none", padding: "10px", cursor: "pointer", marginBottom: "10px", display: "flex", alignItems: "center", borderRadius: "5px" },
+  searchBar: {  width: "300px",
+    marginBottom: "20px", },
+  table: { width: "100%", borderCollapse: "collapse", marginTop: "20px", boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", borderRadius: "8px", overflow: "hidden" },
+  headerRow: { backgroundColor: "#c80505", color: "#fff" },
+  headerCell: { padding: "12px", textAlign: "left" },
+  row: { transition: "background 0.3s" },
+  cell: { padding: "10px", borderBottom: "1px solid #ddd", textAlign: "left" },
+  icon: { cursor: "pointer", marginLeft: "10px" },
+  input: { width: "100%", padding: "5px", border: "1px solid #ddd", borderRadius: "4px" },
 };
 
 export default EtatOffreDepartTable;
