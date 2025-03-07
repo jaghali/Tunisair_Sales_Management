@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { Edit, Trash, Save, X, PlusCircle } from "lucide-react";
-import { TablePagination, TextField } from "@mui/material";
+import { Edit, Trash, Save, X, Plus, Search } from "lucide-react";
+import { TablePagination, TextField, MenuItem, Select } from "@mui/material";
 
 const EtatOffreArriveeTable = () => {
   const [data, setData] = useState([]);
   const [columns, setColumns] = useState([]);
   const [page, setPage] = useState(0);
+  const [articles, setArticles] = useState([]);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [editedItem, setEditedItem] = useState(null);
   const [newItem, setNewItem] = useState(null);
@@ -25,9 +26,20 @@ const EtatOffreArriveeTable = () => {
     }
   }, []);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  const fetchArticles = useCallback(async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/Articles");
+      setArticles(response.data);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des articles :", error);
+    }
+  }, []);
+
+   useEffect(() => {
+     fetchData();
+     fetchArticles();
+   }, [fetchData, fetchArticles]);
+
 
   // Filter data based on search query (code or description)
   const filteredData = data.filter((item) => {
@@ -114,8 +126,9 @@ const EtatOffreArriveeTable = () => {
       <h2 style={styles.heading}>Etat des Offres Arrivée</h2>
       
       {/* Search Input */}
-      <TextField
-             label="Rechercher par code ou description"
+      <TextField 
+             startIcon={<Search/>}
+             label="Rechercher"
              variant="outlined"
              fullWidth
              value={searchQuery}
@@ -124,7 +137,7 @@ const EtatOffreArriveeTable = () => {
            />
 
       <button onClick={handleAdd} style={styles.addButton}>
-        <PlusCircle size={20} style={{ marginRight: "5px" }} />
+        <Plus size={20} style={{ marginRight: "5px" }} />
         Ajouter
       </button>
       <table style={styles.table}>
@@ -143,12 +156,25 @@ const EtatOffreArriveeTable = () => {
             <tr style={styles.row}>
               {columns.map((col) => (
                 <td key={col} style={styles.cell}>
-                  <input
+                  {col === "description" ? (
+                      <Select
+                         value={newItem[col] || ""}
+                         onChange={(e) => setNewItem({ ...newItem, [col]: e.target.value })}
+                      >
+                      {articles.map((article) => (
+                        <MenuItem key={article.code} value={article.description}>
+                        {article.description}
+                        </MenuItem>
+                      ))}
+                      </Select>
+                   ) : (
+                  <TextField
                     type="text"
                     value={newItem[col] || ""}
                     onChange={(e) => handleChangeNew(e, col)}
                     style={styles.input}
                   />
+                 )}
                 </td>
               ))}
               <td style={styles.cell}>
@@ -164,7 +190,7 @@ const EtatOffreArriveeTable = () => {
                 {columns.map((col) => (
                   <td key={col} style={styles.cell}>
                     {isEditing ? (
-                      <input
+                      <TextField
                         type="text"
                         value={editedItem[col]}
                         onChange={(e) => handleChange(e, col)}
@@ -266,7 +292,6 @@ const styles = {
   input: {
     width: "100%",
     padding: "5px",
-    border: "1px solid #ddd",
     borderRadius: "4px",
   },
 };

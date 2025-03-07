@@ -110,6 +110,8 @@ const EnteteOffre = () => {
                 <th className="header-cell">AVION</th>
                 <th className="header-cell">AIROPORT</th>
                 <th className="header-cell">DATE_EDITION</th>
+                <th className="header-cell">NUMERO_ETAT</th>
+                <th className="header-cell">PNC_1</th>
                 <th className="header-cell">Actions</th>
                 <th className="header-cell">Details</th>
               </tr>
@@ -141,6 +143,28 @@ const EnteteOffre = () => {
                       )}
                     </td>
                     <td className="cell">{row.datE_EDITION}</td>
+                    <td className="cell">
+                      {isEditing === row.id ? (
+                        <input
+                          type="text"
+                          value={editedItem.numerO_ETAT}
+                          onChange={(e) => setEditedItem({ ...editedItem, numerO_ETAT: e.target.value })}
+                        />
+                      ) : (
+                        row.numerO_ETAT
+                      )}
+                    </td>
+                    <td className="cell">
+                      {isEditing === row.id ? (
+                        <input
+                          type="text"
+                          value={editedItem.pnC1}
+                          onChange={(e) => setEditedItem({ ...editedItem, pnC1: e.target.value })}
+                        />
+                      ) : (
+                        row.pnC1
+                      )}
+                    </td>
 
                     <td className="cell">
                       {isEditing === row.id ? (

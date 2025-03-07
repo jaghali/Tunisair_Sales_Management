@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Edit, Trash, Save, X, Plus } from "lucide-react";
-import { TablePagination, Button, TextField } from "@mui/material";
+import { TablePagination, Button, TextField,MenuItem, Select } from "@mui/material";
 import "../App.css";
 
 const EtatVentesDepartTable = () => {
   const [data, setData] = useState([]);
   const [columns, setColumns] = useState([]);
+  const [articles, setArticles] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [editedItem, setEditedItem] = useState(null);
@@ -26,9 +27,19 @@ const EtatVentesDepartTable = () => {
     }
   }, []);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  const fetchArticles = useCallback(async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/Articles");
+      setArticles(response.data);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des articles :", error);
+    }
+  }, []);
+
+   useEffect(() => {
+     fetchData();
+     fetchArticles();
+   }, [fetchData, fetchArticles]);
 
   const handleDelete = async (code) => {
     try {
@@ -101,7 +112,7 @@ const EtatVentesDepartTable = () => {
 
       {/* Search Bar */}
       <TextField
-        label="Rechercher par code ou description"
+        label="Rechercher "
         variant="outlined"
         fullWidth
         value={searchQuery}
@@ -135,6 +146,18 @@ const EtatVentesDepartTable = () => {
             <tr style={style.row}>
               {columns.map((col) => (
                 <td key={col} style={style.cell}>
+                  {col === "description" ? (
+                      <Select
+                        value={newItem[col] || ""}
+                        onChange={(e) => setNewItem({ ...newItem, [col]: e.target.value })}
+                      >
+                        {articles.map((article) => (
+                          <MenuItem key={article.code} value={article.description}>
+                            {article.description}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    ) : (
                   <TextField
                     label={col}
                     value={newItem[col] || ""}
@@ -142,7 +165,7 @@ const EtatVentesDepartTable = () => {
                     fullWidth
                     margin="dense"
                     style={style.input}
-                  />
+                  />)}
                 </td>
               ))}
               <td style={style.cell}>

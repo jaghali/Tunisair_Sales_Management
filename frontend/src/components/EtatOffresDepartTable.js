@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { Edit, Trash, Save, X, PlusCircle } from "lucide-react";
-import { TablePagination, TextField } from "@mui/material";
+import { Edit, Trash, Save, X, Plus } from "lucide-react";
+import { TablePagination,Button, TextField, MenuItem, Select } from "@mui/material";
 
 const EtatOffreDepartTable = () => {
   const [data, setData] = useState([]);
   const [columns, setColumns] = useState([]);
+  const [articles, setArticles] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [editedItem, setEditedItem] = useState(null);
@@ -24,9 +25,19 @@ const EtatOffreDepartTable = () => {
     }
   }, []);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  const fetchArticles = useCallback(async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/Articles");
+      setArticles(response.data);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des articles :", error);
+    }
+  }, []);
+
+   useEffect(() => {
+     fetchData();
+     fetchArticles();
+   }, [fetchData, fetchArticles]);
 
   const handleDelete = async (code) => {
     if (!code) {
@@ -117,8 +128,12 @@ const EtatOffreDepartTable = () => {
         onChange={(e) => setSearchQuery(e.target.value)} // Update search query on input change
       />
 
-      <button onClick={handleAdd} style={styles.addButton}>
-        <PlusCircle size={18} style={{ marginRight: "5px" }} /> Ajouter
+      <button style={styles.addButton}
+        variant="contained"
+        onClick={() => handleAdd(true)} // Toggle the add form visibility
+      >
+        <Plus size={20} style={{ marginRight: "5px" }} />
+        Ajouter
       </button>
       <table style={styles.table}>
         <thead>
@@ -134,7 +149,20 @@ const EtatOffreDepartTable = () => {
             <tr style={styles.row}>
               {columns.map((col) => (
                 <td key={col} style={styles.cell}>
-                  <input type="text" value={newItem[col]} onChange={(e) => setNewItem({ ...newItem, [col]: e.target.value })} style={styles.input} />
+                  {col === "description" ? (
+                    <Select
+                      value={newItem[col] || ""}
+                      onChange={(e) => setNewItem({ ...newItem, [col]: e.target.value })}
+                    >
+                    {articles.map((article) => (
+                    <MenuItem key={article.code} value={article.description}>
+                    {article.description}
+                    </MenuItem>
+                    ))}
+                    </Select>
+                  ) : (
+                   <TextField value={newItem[col]} onChange={(e) => setNewItem({ ...newItem, [col]: e.target.value })} style={styles.input} />
+                  )}
                 </td>
               ))}
               <td style={styles.cell}>
@@ -150,7 +178,7 @@ const EtatOffreDepartTable = () => {
                 {columns.map((col) => (
                   <td key={col} style={styles.cell}>
                     {isEditing ? (
-                      <input type="text" value={editedItem[col]} onChange={(e) => handleChange(e, col)} style={styles.input} />
+                      <TextField type="text" value={editedItem[col]} onChange={(e) => handleChange(e, col)} style={styles.input} />
                     ) : (
                       item[col]
                     )}
@@ -189,16 +217,26 @@ const EtatOffreDepartTable = () => {
 
 const styles = {
   heading: { textAlign: "center", fontSize: "24px", fontWeight: "bold", color: "#c80505", marginBottom: "15px" },
-  addButton: { backgroundColor: "#28a745", color: "white", border: "none", padding: "10px", cursor: "pointer", marginBottom: "10px", display: "flex", alignItems: "center", borderRadius: "5px" },
-  searchBar: {  width: "300px",
-    marginBottom: "20px", },
+  addButton: {
+    display: "flex",
+    alignItems: "center",
+    backgroundColor: "#28a745",
+    color: "#fff",
+    border: "none",
+    padding: "10px 15px",
+    borderRadius: "5px",
+    cursor: "pointer",
+    fontSize: "16px",
+    marginBottom: "10px",
+  },  
+  searchBar: { width: "300px", marginBottom: "20px", },
   table: { width: "100%", borderCollapse: "collapse", marginTop: "20px", boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", borderRadius: "8px", overflow: "hidden" },
   headerRow: { backgroundColor: "#c80505", color: "#fff" },
   headerCell: { padding: "12px", textAlign: "left" },
   row: { transition: "background 0.3s" },
   cell: { padding: "10px", borderBottom: "1px solid #ddd", textAlign: "left" },
   icon: { cursor: "pointer", marginLeft: "10px" },
-  input: { width: "100%", padding: "5px", border: "1px solid #ddd", borderRadius: "4px" },
+  input: { width: "100%", padding: "5px", borderRadius: "4px" },
 };
 
 export default EtatOffreDepartTable;
