@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Edit, Trash, Save, X, Plus } from "lucide-react";
-import { TablePagination, Button, TextField, MenuItem, Select } from "@mui/material";
+import { TablePagination, Button, TextField, Autocomplete } from "@mui/material";
 
 const EtatVentesArriveeTable = () => {
   const [data, setData] = useState([]);
@@ -135,19 +135,17 @@ const EtatVentesArriveeTable = () => {
                 {columns.map((col) => (
                   <td key={col}  style={styles.cell}>
                     {col === "description" ? (
-                      <Select
-                        value={newItem[col] || ""}
-                        onChange={(e) => setNewItem({ ...newItem, [col]: e.target.value })}
-                      >
-                        {articles.map((article) => (
-                          <MenuItem key={article.code} value={article.description}>
-                            {article.description}
-                          </MenuItem>
-                        ))}
-                      </Select>
+                      <Autocomplete
+                          options={articles}
+                          getOptionLabel={(option) => option.description}
+                          value={articles.find((article) => article.description === newItem[col]) || null}                                         
+                          onChange={(event, newValue) => {
+                          setNewItem({ ...newItem, [col]: newValue ? newValue.description : "" });
+                           }}
+                          renderInput={(params) => <TextField {...params} label="Search" variant="outlined" />}
+                      />
                     ) : (
                       <TextField
-                        type="text"
                         value={newItem[col] || ""}
                         onChange={(e) => setNewItem({ ...newItem, [col]: e.target.value })}
                       />
