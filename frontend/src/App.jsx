@@ -53,6 +53,7 @@ function MainLayout() {
     "/ventePagearr",
     "/OffrePage",
     "/OffrePagearr",
+    "/settings",
   ];
 
   let sidebarComponent = null;
