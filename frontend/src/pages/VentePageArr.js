@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import EtatVentesDepartTable from "../components/EtatVentesDepartTable";
+import EtatVentesArriveeTable from "../components/EtatVentesArriveeTable";
 import { useNavigate } from "react-router-dom";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 
-const VentePage = () => {
+const VentePageArr = () => {
   const [venteDetails, setVenteDetails] = useState([]);
-  const [venteEtatDepart, setVenteEtatDepart] = useState([]);
+  const [venteEtatArrivee, setVenteEtatArrivee] = useState([]);
   const [error, setError] = useState(null);
   const [tabValue, setTabValue] = useState(0);
   const navigate = useNavigate();
@@ -16,13 +16,13 @@ const VentePage = () => {
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        const [response, etatDepartResponse] = await Promise.all([
+        const [response, etatArriveeResponse] = await Promise.all([
           axios.get("http://localhost:5000/api/ListeEquipageV"),
-          axios.get("http://localhost:5000/api/EtatVentesDepart"),
+          axios.get("http://localhost:5000/api/EtatVentesArrivee"),
         ]);
 
         setVenteDetails(response.data);
-        setVenteEtatDepart(etatDepartResponse.data);
+        setVenteEtatArrivee(etatArriveeResponse.data);
       } catch (err) {
         setError("Erreur lors du chargement des données.");
       }
@@ -46,7 +46,7 @@ const VentePage = () => {
     <div style={{ padding: "2%", maxWidth: "1000px", margin: "0 auto" }}>
         <Tabs value={tabValue} textColor="secondary" indicatorColor="secondary" aria-label="secondary tabs example" onChange={handleTabChange} centered>
         <Tab label="Liste Equipage" />
-        <Tab label="État Ventes Départ" />
+        <Tab label="État Ventes Arrivée" />
       </Tabs>
       {tabValue === 0 && (
         <table style={{ width: "70%", borderCollapse: "collapse", marginTop: "1rem", marginLeft: "auto", marginRight: "auto", boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", borderRadius: "8px", overflow: "hidden" }}>
@@ -66,9 +66,9 @@ const VentePage = () => {
           </tbody>
         </table>
       )}
-      {tabValue === 1 && <EtatVentesDepartTable data={venteEtatDepart} onDetailClick={handleDetailClick} />}
+      {tabValue === 1 && <EtatVentesArriveeTable data={venteEtatArrivee} onDetailClick={handleDetailClick} />}
     </div>
   );
 };
 
-export default VentePage;
+export default VentePageArr;

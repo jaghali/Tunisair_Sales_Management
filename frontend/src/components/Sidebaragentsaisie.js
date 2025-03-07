@@ -1,11 +1,13 @@
-import { Menu, Settings, Container   ,Plane , LogOut } from "lucide-react";
+import { Menu, Settings   ,Plane , LogOut, PlaneLanding, GiftIcon } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
 const SIDEBAR_ITEMS = [
-    { name: "Ventes", icon: Plane, color: "#6366f1", href: "/enteteVente" },
-    { name: "Offres", icon: Container  , color: "#8B5CF6", href: "/enteteOffre" },
+    { name: "Ventes Départ", icon: Plane, color: "#6366f1", href: "/enteteVente" },
+    { name: "Ventes Arrivée", icon: PlaneLanding, color: "#6366f1", href: "/enteteVentearr" },
+    { name: "Offres Départ", icon:GiftIcon , color: "#8B5CF6", href: "/enteteOffre" },
+    { name: "Offres Arrivée", icon:GiftIcon , color: "#8B5CF6", href: "/enteteOffrearr" },
     { name: "Settings", icon: Settings, color: "#6EE7B7", href: "/settings" },
     { name: "Logout", icon: LogOut, color: "#6EE7B7", href: "/" },
 ];

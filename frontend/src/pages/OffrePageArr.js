@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import EtatOffresDepartTable from "../components/EtatOffresDepartTable";
+import EtatOffreArriveeTable from "../components/EtatOffreArriveeTable";
 import { useNavigate } from "react-router-dom";
 
-const OffrePage = () => {
-  const [offreEtatDepart, setOffreEtatDepart] = useState([]);
+const OffrePageArr = () => {
+  const [offreEtatArrivee, setOffreEtatArrivee] = useState([]);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
@@ -12,9 +12,8 @@ const OffrePage = () => {
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        const etatDepartResponse = await axios.get("http://localhost:5000/api/EtatOffresDepart");
-
-        setOffreEtatDepart(etatDepartResponse.data);
+        const etatArriveeResponse = await axios.get("http://localhost:5000/api/EtatOffresArrivee");
+        setOffreEtatArrivee(etatArriveeResponse.data);
       } catch (err) {
         setError("Erreur lors du chargement des données.");
       }
@@ -32,7 +31,7 @@ const OffrePage = () => {
 
   return (
     <div style={styles.container}>
-      <EtatOffresDepartTable data={offreEtatDepart} onDetailClick={handleDetailClick} />
+      <EtatOffreArriveeTable data={offreEtatArrivee} onDetailClick={handleDetailClick} />
     </div>
   );
 };
@@ -93,4 +92,4 @@ const styles = {
   },
 };
 
-export default OffrePage;
+export default OffrePageArr;

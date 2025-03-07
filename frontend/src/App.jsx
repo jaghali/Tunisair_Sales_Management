@@ -9,12 +9,16 @@ import DirectionFinanciereDashboard from "./pages/DirectionFinanciereDashboard";
 import AgentSaisieDashboard from "./pages/AgentSaisieDashboard";
 import AvancesConsultation from "./pages/AvancesConsultation";
 import EnteteVente from "./pages/EnteteVente";
+import EnteteVenteArr from "./pages/EnteteVenteArr";
 import EnteteOffres from "./pages/EnteteOffre";
+import EnteteOffresArr from "./pages/EnteteOffreArr";
 import Devise from "./pages/Devise";
 import Sidebar from "./components/Sidebar";
 import SidebarAgentSaisie from "./components/Sidebaragentsaisie";
 import VentePage from "./pages/VentePage";
+import VentePageArr from "./pages/VentePageArr";
 import OffrePage from "./pages/OffrePage";
+import OffrePageArr from "./pages/OffrePageArr";
 import ArticlesPage from "./pages/ArticlesPage";
 import ForgotPasswordPage from "./pages/ForgotPassword";
 
@@ -42,9 +46,13 @@ function MainLayout() {
   const agentSaisiePages = [
     "/agent-saisie-dashboard",
     "/enteteOffre",
+    "/enteteOffrearr",
     "/enteteVente",
+    "/enteteVentearr",
     "/ventePage",
+    "/ventePagearr",
     "/OffrePage",
+    "/OffrePagearr",
   ];
 
   let sidebarComponent = null;
@@ -93,9 +101,13 @@ function MainLayout() {
               <Route path="/devise" element={<Devise />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/enteteVente" element={<EnteteVente />} />
+              <Route path="/enteteVentearr" element={<EnteteVenteArr />} />
               <Route path="/enteteOffre" element={<EnteteOffres />} />
+              <Route path="/enteteOffrearr" element={<EnteteOffresArr />} />
               <Route path="/ventePage" element={<VentePage />} />
+              <Route path="/ventePagearr" element={<VentePageArr />} />
               <Route path="/OffrePage" element={<OffrePage />} />
+              <Route path="/OffrePagearr" element={<OffrePageArr />} />
               <Route path="/ArticlesPage" element={<ArticlesPage />} />
               <Route path="/ForgotPasswordPage" element={<ForgotPasswordPage />} />
 

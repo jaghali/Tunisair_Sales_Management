@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { Edit, Trash, Save, X, Plus } from "lucide-react";
+import { Edit, Trash, Save, X, Plus,Search } from "lucide-react";
 import { TablePagination, Button, TextField, Autocomplete } from "@mui/material";
 
 const EtatVentesArriveeTable = () => {
@@ -85,7 +85,7 @@ const EtatVentesArriveeTable = () => {
   };
 
   const handleChange = (e, key) => setEditedItem({ ...editedItem, [key]: e.target.value });
-  const handleChangeNewItem = (e, key) => setNewItem({ ...newItem, [key]: e.target.value });
+  //const handleChangeNewItem = (e, key) => setNewItem({ ...newItem, [key]: e.target.value });
 
   const handleAddNew = async () => {
     try {
@@ -103,13 +103,20 @@ const EtatVentesArriveeTable = () => {
     <div>
       <h2 style={styles.heading}>État des Ventes Arrivées</h2>
       {/* Search Input */}
-      <TextField
-        label="Rechercher par Code ou Description"
-        variant="outlined"
+     <div style={styles.searchInput}>
+     <Search size={20} color="#3D3D3D"    
+     />
+
+     <input
+     style={styles.inputsea}
+        placeholder="Rechercher..."
+        
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        style={styles.searchInput}
-      />    
+        
+      />   
+      </div> 
+       
         <Button
             variant="contained"
             color="primary"
@@ -143,6 +150,7 @@ const EtatVentesArriveeTable = () => {
                           setNewItem({ ...newItem, [col]: newValue ? newValue.description : "" });
                            }}
                           renderInput={(params) => <TextField {...params} label="Search" variant="outlined" />}
+                          
                       />
                     ) : (
                       <TextField
@@ -219,7 +227,16 @@ const styles = {
   },
   searchInput: {
     width: "300px",
+    height :"3rem",
     marginBottom: "20px",
+    backgroundColor:"white",
+    borderRadius:"10px",
+    padding : "0 15px",
+    display:"flex",
+    alignItems:"center",
+    boxShadow:"0px 0px 8px #ddd"
+    
+
   },
   addButton: {
     display: "flex",
@@ -268,5 +285,11 @@ const styles = {
     padding: "5px",
     borderRadius: "4px",
   },
+  inputsea:{
+    border:"none",
+    outline : "none",
+    marginLeft : "10px"
+  },
+ 
 };
 export default EtatVentesArriveeTable;
