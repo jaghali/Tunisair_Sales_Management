@@ -153,7 +153,8 @@ const EtatOffreDepartTable = () => {
                     <Autocomplete
                           options={articles}
                          getOptionLabel={(option) => option.description}
-                         value={articles.find((article) => article.description === newItem[col]) || null}                                          onChange={(event, newValue) => {
+                         value={articles.find((article) => article.description === newItem[col]) || null}                   
+                         onChange={(event, newValue) => {
                           setNewItem({ ...newItem, [col]: newValue ? newValue.description : "" });
                         }}
                         renderInput={(params) => <TextField {...params} label="Search" variant="outlined" />}
@@ -232,7 +233,7 @@ const styles = {
   headerRow: { backgroundColor: "#c80505", color: "#fff" },
   headerCell: { padding: "12px", textAlign: "left" },
   row: { transition: "background 0.3s" },
-  cell: { padding: "10px", borderBottom: "1px solid #ddd", textAlign: "left" },
+  cell: { padding: "10px", borderBottom: "1px solid #ddd", textAlign: "left",color: "#000", },
   icon: { cursor: "pointer", marginLeft: "10px" },
   input: { width: "100%", padding: "5px", borderRadius: "4px" },
 };

@@ -281,6 +281,7 @@ const styles = {
     padding: "10px",
     borderBottom: "1px solid #ddd",
     textAlign: "left",
+    color: "#000",
   },
   icon: {
     cursor: "pointer",
