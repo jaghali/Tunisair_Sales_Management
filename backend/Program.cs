@@ -25,7 +25,12 @@ builder.Services.AddCors(options =>
 });
 
 // Ajout des contrôleurs et NewtonsoftJson
-builder.Services.AddControllers().AddNewtonsoftJson();
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+    });
+
 
 // Configuration de Swagger
 builder.Services.AddEndpointsApiExplorer();
