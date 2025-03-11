@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { Edit, Trash, Save, X, PlusCircle } from "lucide-react";
-import { TablePagination, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from "@mui/material";
+import { Edit, Trash, Save, X, Plus } from "lucide-react";
+import { TablePagination, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, MenuItem, Select, InputLabel, FormControl } from "@mui/material";
 import "../App.css";
 
 const Articles = () => {
@@ -10,17 +10,46 @@ const Articles = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [editedItem, setEditedItem] = useState(null);
-  const [searchTerm, setSearchTerm] = useState(""); // New state for search term
-  const [openDialog, setOpenDialog] = useState(false); // State to control the add article dialog
-  const [newArticle, setNewArticle] = useState({ code: "", description: "", price: "" }); // Form data for adding a new article
+  const [searchTerm, setSearchTerm] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);
+  const [newArticle, setNewArticle] = useState({
+    code: "",
+    description: "",
+    supplier: "",
+    departureDate:"",
+    arrivalDate: "",
+    currency: "",
+    prices: [],
+  });
 
+  const [suppliers, setSuppliers] = useState([]); // State for storing suppliers
+  const [selectedSupplier, setSelectedSupplier] = useState("");
+
+  // Fetch articles and suppliers data
   const fetchData = useCallback(async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/Articles");
-      if (response.data.length > 0) {
-        setColumns(Object.keys(response.data[0]));
-      }
-      setData(response.data);
+      const articlesResponse = await axios.get("http://localhost:5000/api/Articles");
+      const suppliersResponse = await axios.get("http://localhost:5000/api/Fournisseurs");
+      const pricesResponse = await axios.get("http://localhost:5000/api/PrixArticles");
+
+      const pricesData = Array.isArray(pricesResponse.data) ? pricesResponse.data : [];
+
+      const pricesMap = new Map();
+      pricesData.forEach((price) => {
+        if (!pricesMap.has(price.articleCode)) {
+          pricesMap.set(price.articleCode, []);
+        }
+        pricesMap.get(price.articleCode).push(price);
+      });
+
+      const articlesWithPrices = articlesResponse.data.map((article) => ({
+        ...article,
+        prices: pricesMap.get(article.code) || [],
+      }));
+
+      setData(articlesWithPrices);
+      setColumns(Object.keys(articlesResponse.data[0] || {}));
+      setSuppliers(suppliersResponse.data);
     } catch (error) {
       console.error("Erreur lors de la récupération des données :", error);
     }
@@ -30,7 +59,8 @@ const Articles = () => {
     fetchData();
   }, [fetchData]);
 
-  const handleDelete = async (code) => {
+
+   const handleDelete = async (code) => {
     if (!code) {
       console.error("Code invalide pour la suppression");
       return;
@@ -67,52 +97,91 @@ const Articles = () => {
     setEditedItem({ ...editedItem, [key]: e.target.value });
   };
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value.toLowerCase()); // Update search term in lowercase
-  };
-
-  const handleOpenDialog = () => {
-    setOpenDialog(true); // Open dialog to add article
-  };
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false); // Close dialog
-  };
-
+  // Handle adding a new article with prices
   const handleAddArticle = async () => {
-    // Validate that all fields are filled out
-    if (!newArticle.code || !newArticle.description) {
+    if (!newArticle.code || !newArticle.description || !newArticle.supplier) {
       alert("Veuillez remplir tous les champs !");
       return;
     }
-
+  
     try {
-      // Send POST request to add new article
-      await axios.post("http://localhost:5000/api/Articles", newArticle);
-      fetchData(); // Refetch data
-      setNewArticle({ code: "", description: "", price: "" }); // Reset form
-      setOpenDialog(false); // Close dialog
+      // Ajout de l'article
+      await axios.post("http://localhost:5000/api/Articles", {
+        code: newArticle.code,
+        description: newArticle.description,
+        fournisseurId: newArticle.supplier,
+      });
+  
+      // Attendre que l'article soit bien créé avant d'ajouter les prix
+      for (const price of newArticle.prices) {
+        await axios.post("http://localhost:5000/api/PrixArticles", {
+          articleCode: newArticle.code, 
+          deviseId: price.currency,
+          dateDepart: price.departureDate,
+          dateArrivee: price.arrivalDate,
+          prix: price.price,
+        });
+      }
+  
+      fetchData();
+      setNewArticle({ code: "", description: "", supplier: "", departureDate: "", arrivalDate: "", currency: "", prices: [] });
+      setOpenDialog(false);
     } catch (error) {
-      console.error("Erreur lors de l'ajout de l'article:", error);
+      if (error.response) {
+        console.error("Erreur réponse API:", error.response.data);
+        if (error.response.data.errors) {
+          console.error("Détails des erreurs:", error.response.data.errors);
+        }
+      } else {
+        console.error("Erreur inconnue:", error);
+      }
     }
+    
+  };
+  
+
+  // Handle adding new price entry
+  const handleAddPrice = () => {
+    setNewArticle({
+      ...newArticle,
+      prices: [
+        ...newArticle.prices,
+        { departureDate:newArticle.departureDate,arrivalDate: newArticle.arrivalDate, price: "", currency: newArticle.currency },
+      ],
+    });
   };
 
-  // Filter data based on search term
+  // Handle change in fields for the new article
+  const handleNewArticleChange = (e, key) => {
+    setNewArticle({ ...newArticle, [key]: e.target.value });
+  };
+
+  const handleNewPriceChange = (index, e, key) => {
+    const updatedPrices = [...newArticle.prices];
+    updatedPrices[index][key] = e.target.value;
+    setNewArticle({ ...newArticle, prices: updatedPrices });
+  };
+
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value.toLowerCase());
+  };
+
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
+
   const filteredData = data.filter((item) => {
-    return columns.some((col) =>
+    const matchesSearchTerm = columns.some((col) =>
       item[col] && item[col].toString().toLowerCase().includes(searchTerm)
     );
+    const matchesSupplier = selectedSupplier ? item.fournisseurId === selectedSupplier : true;
+    return matchesSearchTerm && matchesSupplier;
   });
-
   const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
@@ -125,19 +194,34 @@ const Articles = () => {
         onChange={handleSearch}
         style={styles.searchInput}
       />
+      {/* Dropdown to filter by supplier */}
+      <FormControl fullWidth margin="normal"style={{ display: "flex", justifyContent: "flex-end", width: "150px" }}>
+        <InputLabel>Fournisseur</InputLabel>
+        <Select
+          value={selectedSupplier}
+          onChange={(e) => setSelectedSupplier(e.target.value)}
+          label="Fournisseur"
+          
+        >
+          <MenuItem value="">Tous</MenuItem>
+          {suppliers.map((supplier) => (
+            <MenuItem key={supplier.id} value={supplier.id}>
+              {supplier.nom}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
       <button onClick={handleOpenDialog} style={styles.addButton}>
-        <PlusCircle style={styles.icon} />
+        <Plus style={styles.icon} />
         Ajouter Article
       </button>
 
       <table style={styles.table}>
         <thead>
-          <tr style={styles.headerRow}>
-            {columns.map((col) => (
-              <th key={col} style={styles.headerCell}>
-                {col}
-              </th>
-            ))}
+        <tr style={styles.headerRow}>
+            <th style={styles.headerCell}>Code</th>
+            <th style={styles.headerCell}>Description</th>
+            <th style={styles.headerCell}>Prix</th>
             <th style={styles.headerCell}>Actions</th>
           </tr>
         </thead>
@@ -146,20 +230,35 @@ const Articles = () => {
             const isEditing = editedItem && editedItem.code === item.code;
             return (
               <tr key={index} style={styles.row}>
-                {columns.map((col) => (
-                  <td key={col} style={styles.cell}>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={editedItem[col]}
-                        onChange={(e) => handleChange(e, col)}
-                        style={styles.input}
-                      />
-                    ) : (
-                      item[col]
-                    )}
-                  </td>
-                ))}
+                <td style={styles.cell}>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={editedItem.code}
+                      onChange={(e) => handleChange(e, "code")}
+                      style={styles.input}
+                    />
+                  ) : (
+                    item.code
+                  )}
+                </td>
+                <td style={styles.cell}>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={editedItem.description}
+                      onChange={(e) => handleChange(e, "description")}
+                      style={styles.input}
+                    />
+                  ) : (
+                    item.description
+                  )}
+                </td>
+                <td style={styles.cell}>
+                  {item.prices.map((price, priceIndex) => (
+                  <div key={priceIndex}>{`${price.prix}`}</div>
+                  ))}
+                </td>     
                 <td style={styles.cell}>
                   {isEditing ? (
                     <>
@@ -168,7 +267,7 @@ const Articles = () => {
                     </>
                   ) : (
                     <>
-                      <Edit onClick={() => handleEdit(item)} style={{ ...styles.icon, color: "#00a3f5" }} />
+                      <Edit onClick={() => handleEdit(item)} style={{ ...styles.icon, color: "green" }} />
                       <Trash onClick={() => handleDelete(item.code)} style={{ ...styles.icon, color: "#e74c3c" }} />
                     </>
                   )}
@@ -181,11 +280,11 @@ const Articles = () => {
 
       <TablePagination
         component="div"
-        count={filteredData.length} // Use filtered data length
+        count={filteredData.length}
         page={page}
-        onPageChange={handleChangePage}
+        onPageChange={setPage}
         rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
+        onRowsPerPageChange={setRowsPerPage}
         rowsPerPageOptions={[10, 20, 30]}
       />
 
@@ -193,11 +292,25 @@ const Articles = () => {
       <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="sm">
         <DialogTitle>Ajouter un Article</DialogTitle>
         <DialogContent>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Fournisseur</InputLabel>
+            <Select
+              value={newArticle.supplier}
+              onChange={(e) => handleNewArticleChange(e, "supplier")}
+              label="Fournisseur"
+            >
+              {suppliers.map((supplier) => (
+                <MenuItem key={supplier.id} value={supplier.id}>
+                  {supplier.nom}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <TextField
             label="Code"
             name="code"
             value={newArticle.code}
-            onChange={(e) => setNewArticle({ ...newArticle, code: e.target.value })}
+            onChange={(e) => handleNewArticleChange(e, "code")}
             fullWidth
             margin="normal"
           />
@@ -205,10 +318,62 @@ const Articles = () => {
             label="Description"
             name="description"
             value={newArticle.description}
-            onChange={(e) => setNewArticle({ ...newArticle, description: e.target.value })}
+            onChange={(e) => handleNewArticleChange(e, "description")}
             fullWidth
             margin="normal"
           />
+          <TextField
+                label="Date Départ"
+                type="date"
+                value={newArticle.departureDate}
+                onChange={(e) => handleNewArticleChange(e, "departureDate")}
+                fullWidth
+                margin="normal"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+          <TextField
+            label="Date d'arrivée"
+            type="date"
+            value={newArticle.arrivalDate}
+            onChange={(e) => handleNewArticleChange(e, "arrivalDate")}
+            fullWidth
+            margin="normal"
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Devise</InputLabel>
+            <Select
+              value={newArticle.currency}
+              onChange={(e) => handleNewArticleChange(e, "currency")}
+              label="Devise"
+            >
+              <MenuItem value="1">USD</MenuItem>
+              <MenuItem value="2">EUR</MenuItem>
+              <MenuItem value="3">TND</MenuItem>
+            </Select>
+          </FormControl>
+
+          <Button onClick={handleAddPrice} color="primary" style={{ marginTop: "10px" }}>
+            Ajouter un Prix
+          </Button>
+
+          {newArticle.prices.map((price, index) => (
+            <div key={index}>
+              
+              <TextField
+                label="Prix"
+                type="number"
+                value={price.price}
+                onChange={(e) => handleNewPriceChange(index, e, "price")}
+                fullWidth
+                margin="normal"
+              />
+            </div>
+          ))}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} color="primary">Annuler</Button>
@@ -219,8 +384,8 @@ const Articles = () => {
   );
 };
 
-// CSS Styles
-const styles = {
+// CSS Styles remain unchanged
+const styles = { 
   heading: {
     textAlign: "center",
     fontSize: "24px",
@@ -239,11 +404,12 @@ const styles = {
     border: "1px solid #ddd",
   },
   addButton: {
-    backgroundColor: "#28a745",
+    backgroundColor: "#00a3f5",
     color: "white",
     padding: "10px 20px",
-    borderRadius: "4px",
+    fontSize: "16px",
     border: "none",
+    borderRadius: "5px",
     cursor: "pointer",
     marginBottom: "20px",
   },
@@ -266,6 +432,7 @@ const styles = {
   },
   row: {
     transition: "background 0.3s",
+    color:"black"
   },
   cell: {
     padding: "10px",
@@ -288,6 +455,6 @@ const styles = {
     outline: "none",
     width: "300px",
   },
-};
+ };
 
 export default Articles;
