@@ -22,8 +22,12 @@ const Articles = () => {
     prices: [],
   });
 
-  const [suppliers, setSuppliers] = useState([]); // State for storing suppliers
+  const [suppliers, setSuppliers] = useState([]); 
   const [selectedSupplier, setSelectedSupplier] = useState("");
+  const [selectedDateDebut, setSelectedDateDebut] = useState("");
+  const [selectedDateFin, setSelectedDateFin] = useState("");
+
+
 
   // Fetch articles and suppliers data
   const fetchData = useCallback(async () => {
@@ -195,22 +199,36 @@ const Articles = () => {
         style={styles.searchInput}
       />
       {/* Dropdown to filter by supplier */}
-      <FormControl fullWidth margin="normal"style={{ display: "flex", justifyContent: "flex-end", width: "150px" }}>
-        <InputLabel>Fournisseur</InputLabel>
-        <Select
-          value={selectedSupplier}
-          onChange={(e) => setSelectedSupplier(e.target.value)}
-          label="Fournisseur"
-          
-        >
-          <MenuItem value="">Tous</MenuItem>
-          {suppliers.map((supplier) => (
-            <MenuItem key={supplier.id} value={supplier.id}>
-              {supplier.nom}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginBottom: "20px" }}>
+        <FormControl style={{ width: "150px" }}>
+          <InputLabel>Fournisseur</InputLabel>
+          <Select
+            value={selectedSupplier}
+            onChange={(e) => setSelectedSupplier(e.target.value)}
+            label="Fournisseur"
+          >
+            <MenuItem value="">Tous</MenuItem>
+            {suppliers.map((supplier) => (
+              <MenuItem key={supplier.id} value={supplier.id}>{supplier.nom}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <TextField
+          label="Date Debut"
+          type="date"
+          value={selectedDateDebut}
+          onChange={(e) => setSelectedDateDebut(e.target.value)}
+          InputLabelProps={{ shrink: true }}
+        />
+         <TextField
+          label="Date Fin"
+          type="date"
+          value={selectedDateFin}
+          onChange={(e) => setSelectedDateFin(e.target.value)}
+          InputLabelProps={{ shrink: true }}
+        />
+      </div>
       <button onClick={handleOpenDialog} style={styles.addButton}>
         <Plus style={styles.icon} />
         Ajouter Article

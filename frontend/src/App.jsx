@@ -21,6 +21,7 @@ import OffrePage from "./pages/OffrePage";
 import OffrePageArr from "./pages/OffrePageArr";
 import ArticlesPage from "./pages/ArticlesPage";
 import ForgotPasswordPage from "./pages/ForgotPassword";
+import FournisseurPage from "./pages/FournisseurPage";
 
 
 function App() {
@@ -99,7 +100,6 @@ function MainLayout() {
               <Route path="/direction-financiere-dashboard" element={<DirectionFinanciereDashboard />} />
               <Route path="/agent-saisie-dashboard" element={<AgentSaisieDashboard />} />
               <Route path="/avances-consultation" element={<AvancesConsultation />} />
-              <Route path="/devise" element={<Devise />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/enteteVente" element={<EnteteVente />} />
               <Route path="/enteteVentearr" element={<EnteteVenteArr />} />
@@ -111,6 +111,10 @@ function MainLayout() {
               <Route path="/OffrePagearr" element={<OffrePageArr />} />
               <Route path="/ArticlesPage" element={<ArticlesPage />} />
               <Route path="/ForgotPasswordPage" element={<ForgotPasswordPage />} />
+              <Route path="/Devise" element={<Devise/>} />
+              <Route path="/FournisseurPage" element={<FournisseurPage/>} />
+
+
 
 
             </Routes>

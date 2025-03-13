@@ -86,5 +86,6 @@ namespace TunisairSalesManagement.Controllers
         {
             return _context.EtatVentesArrivee.Any(e => e.Code == code);
         }
+        
     }
 }

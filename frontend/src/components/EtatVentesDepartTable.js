@@ -1,19 +1,17 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Edit, Trash, Save, X, Plus } from "lucide-react";
-import { TablePagination, Button, TextField,Autocomplete } from "@mui/material";
+import { TablePagination, Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField } from "@mui/material";
 import "../App.css";
 
 const EtatVentesDepartTable = () => {
   const [data, setData] = useState([]);
   const [columns, setColumns] = useState([]);
-  const [articles, setArticles] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [editedItem, setEditedItem] = useState(null);
+  const [showDialog, setShowDialog] = useState(false);
   const [newItem, setNewItem] = useState({});
-  const [isAdding, setIsAdding] = useState(false); // Track if adding mode is active
-  const [searchQuery, setSearchQuery] = useState(""); // State for search query
 
   const fetchData = useCallback(async () => {
     try {
@@ -27,19 +25,9 @@ const EtatVentesDepartTable = () => {
     }
   }, []);
 
-  const fetchArticles = useCallback(async () => {
-    try {
-      const response = await axios.get("http://localhost:5000/api/Articles");
-      setArticles(response.data);
-    } catch (error) {
-      console.error("Erreur lors de la récupération des articles :", error);
-    }
-  }, []);
-
-   useEffect(() => {
-     fetchData();
-     fetchArticles();
-   }, [fetchData, fetchArticles]);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleDelete = async (code) => {
     try {
@@ -89,46 +77,52 @@ const EtatVentesDepartTable = () => {
     try {
       await axios.post("http://localhost:5000/api/EtatVentesDepart", newItem);
       fetchData();
-      setIsAdding(false);
+      setShowDialog(false);
       setNewItem({});
     } catch (error) {
       console.error("Erreur lors de l'ajout :", error);
     }
   };
 
-  // Filter data based on the search query (search by code and description)
-  const filteredData = data.filter((item) => {
-    return (
-      item.code.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description?.toString().toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  });
-
-  const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  const paginatedData = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
     <div>
       <h2 style={style.heading}>Etat des Ventes Départ</h2>
-
-      {/* Search Bar */}
-      <TextField
-        label="Rechercher "
-        variant="outlined"
-        fullWidth
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        style={style.searchBar}
-      />
-
       <Button
         variant="contained"
         color="primary"
         startIcon={<Plus />}
-        onClick={() => setIsAdding(true)} // Toggle the add form visibility
+        onClick={() => setShowDialog(true)}
         style={style.addButton}
       >
         Ajouter
       </Button>
+
+      <Dialog open={showDialog} onClose={() => setShowDialog(false)}>
+        <DialogTitle>Ajouter un nouvel élément</DialogTitle>
+        <DialogContent>
+          {columns.map((col) => (
+            <TextField
+              key={col}
+              label={col}
+              value={newItem[col] || ""}
+              onChange={(e) => handleAddChange(e, col)}
+              fullWidth
+              margin="dense"
+              style={style.input}
+            />
+          ))}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleAddItem} color="primary">
+            Enregistrer
+          </Button>
+          <Button onClick={() => setShowDialog(false)} color="secondary">
+            Annuler
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <table style={style.table}>
         <thead>
@@ -142,36 +136,6 @@ const EtatVentesDepartTable = () => {
           </tr>
         </thead>
         <tbody>
-          {isAdding && (
-            <tr style={style.row}>
-              {columns.map((col) => (
-                <td key={col} style={style.cell}>
-                  {col === "description" ? (
-                <Autocomplete
-                          options={articles}
-                         getOptionLabel={(option) => option.description}
-                         value={articles.find((article) => article.description === newItem[col]) || null}                                          onChange={(event, newValue) => {
-                          setNewItem({ ...newItem, [col]: newValue ? newValue.description : "" });
-                        }}
-                        renderInput={(params) => <TextField {...params} label="Search" variant="outlined" />}
-                    />
-                    ) : (
-                  <TextField
-                    value={newItem[col] || ""}
-                    onChange={(e) => handleAddChange(e, col)}
-                    fullWidth
-                    margin="dense"
-                    style={style.input}
-                  />)}
-                </td>
-              ))}
-              <td style={style.cell}>
-                <Save onClick={handleAddItem} style={{ ...style.icon, color: "green" }} />
-                <X onClick={() => setIsAdding(false)} style={{ ...style.icon, color: "red" }} />
-              </td>
-            </tr>
-          )}
-
           {paginatedData.map((item, index) => {
             const isEditing = editedItem && editedItem.code === item.code;
             return (
@@ -210,7 +174,7 @@ const EtatVentesDepartTable = () => {
 
       <TablePagination
         component="div"
-        count={filteredData.length}
+        count={data.length}
         page={page}
         onPageChange={handleChangePage}
         rowsPerPage={rowsPerPage}
@@ -267,7 +231,6 @@ const style = {
     padding: "10px",
     borderBottom: "1px solid #ddd",
     textAlign: "left",
-    color: "#000",
   },
   icon: {
     cursor: "pointer",
@@ -277,11 +240,9 @@ const style = {
   input: {
     width: "100%",
     padding: "5px",
+    border: "1px solid #ddd",
     borderRadius: "4px",
   },
-  searchBar: {
-    width: "300px",
-    marginBottom: "20px",  },
 };
 
 export default EtatVentesDepartTable;

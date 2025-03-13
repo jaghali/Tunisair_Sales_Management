@@ -1,19 +1,29 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { Edit, Trash, Save, X, Plus,Search } from "lucide-react";
+import { Edit, Trash, Save, X, Plus, Search } from "lucide-react";
 import { TablePagination, Button, TextField, Autocomplete } from "@mui/material";
 
 const EtatVentesArriveeTable = () => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [columns, setColumns] = useState([]);
-  const [articles, setArticles] = useState([]);
+  const [enteteVenteArrivee, setEnteteVenteArrivee] = useState([]); // Changed from EtatVentesArrivee to enteteVenteArrivee
   const [page, setPage] = useState(0);
+  const [isEditing, setIsEditing] = useState(null);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [newItem, setNewItem] = useState({});
+  const [newItem, setNewItem] = useState({
+    code: "",
+    description: "",
+    quantiteDotation: "",
+    totEm: "",
+    quantiteVendue: "",
+    prixUnitaireHT: "",
+    valeur: "",
+    restant: "",
+  });
   const [searchQuery, setSearchQuery] = useState("");
   const [editedItem, setEditedItem] = useState(null);
-  const [isAdding, setIsAdding] = useState(false); // Ajouter un état pour afficher le formulaire d'ajout
+  const [isAdding, setIsAdding] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -27,23 +37,23 @@ const EtatVentesArriveeTable = () => {
     }
   }, []);
 
-  const fetchArticles = useCallback(async () => {
+  const fetchEnteteVenteArrivee = useCallback(async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/Articles");
-      setArticles(response.data);
+      const response = await axios.get("http://localhost:5000/api/EtatVentesArrivee"); // Updated endpoint
+      setEnteteVenteArrivee(response.data);
     } catch (error) {
-      console.error("Erreur lors de la récupération des articles :", error);
+      console.error("Erreur lors de la récupération des entetes de ventes :", error);
     }
   }, []);
 
   useEffect(() => {
     fetchData();
-    fetchArticles();
-  }, [fetchData, fetchArticles]);
+    fetchEnteteVenteArrivee();
+  }, [fetchData, fetchEnteteVenteArrivee]);
 
   useEffect(() => {
     if (searchQuery === "") {
-      setFilteredData(data);  // If no search query, show all data
+      setFilteredData(data);
     } else {
       const filtered = data.filter((item) =>
         Object.keys(item).some((key) => {
@@ -59,7 +69,7 @@ const EtatVentesArriveeTable = () => {
 
   const handleDelete = async (code) => {
     try {
-      await axios.delete("http://localhost:5000/api/EtatVentesArrivee/${code}");
+      await axios.delete(`http://localhost:5000/api/EtatVentesArrivee/${code}`);
       fetchData();
     } catch (error) {
       console.error("Erreur lors de la suppression :", error);
@@ -67,144 +77,218 @@ const EtatVentesArriveeTable = () => {
   };
 
   const handleEdit = (item) => {
-    setEditedItem(item);
+    setEditedItem({ ...item });
+    setIsEditing(item.code);
   };
 
   const handleCancelEdit = () => {
     setEditedItem(null);
+    setIsEditing(null);
   };
 
-  const handleSaveEdit = async () => {
-    try {
-      await axios.put(`http://localhost:5000/api/EtatVentesArrivee/${editedItem.code}`, editedItem);
-      fetchData();
-      setEditedItem(null);
-    } catch (error) {
-      console.error("Erreur lors de la mise à jour :", error);
-    }
+  const handleChange = (e, key) => {
+    setEditedItem({ ...editedItem, [key]: e.target.value });
   };
-
-  const handleChange = (e, key) => setEditedItem({ ...editedItem, [key]: e.target.value });
-  //const handleChangeNewItem = (e, key) => setNewItem({ ...newItem, [key]: e.target.value });
 
   const handleAddNew = async () => {
+    if (newItem.restant > newItem.quantiteDotation) {
+      alert("Le restant ne peut pas être supérieur à la Quantité de Dotation");
+      return;
+    }
+
     try {
       await axios.post("http://localhost:5000/api/EtatVentesArrivee", newItem);
       fetchData();
-      setNewItem({});
-      setIsAdding(false); // Fermer le formulaire après ajout
+    
+      setIsAdding(false);
     } catch (error) {
       console.error("Erreur lors de l'ajout :", error);
     }
   };
 
+  const handleSaveEdit = async () => {
+    if (editedItem.restant > editedItem.quantiteDotation) {
+      alert("Le restant ne peut pas être supérieur à la Quantité de Dotation");
+      return;
+    }
+
+    try {
+      await axios.put(`http://localhost:5000/api/EtatVentesArrivee/${editedItem.code}`, editedItem);
+      fetchData();
+      setEditedItem(null);
+      setIsEditing(null);
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour :", error);
+    }
+  };
+
   const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
+  // Handle description change and automatically fill the code and prixUnitaireHT
+  const handleDescriptionChange = (event, newValue) => {
+    if (newValue) {
+      const selectedEnteteVenteArrivee = enteteVenteArrivee.find((article) => article.description === newValue);
+      if (selectedEnteteVenteArrivee) {
+        setNewItem({
+          ...newItem,
+          description: newValue,
+          code: selectedEnteteVenteArrivee.code, // Changed from article to enteteVenteArrivee
+          prixUnitaireHT: selectedEnteteVenteArrivee.prixUnitaireHT, // Changed from article to enteteVenteArrivee
+        });
+      }
+    }
+  };
+
   return (
     <div>
       <h2 style={styles.heading}>État des Ventes Arrivées</h2>
-      {/* Search Input */}
-     <div style={styles.searchInput}>
-     <Search size={20} color="#3D3D3D"    
-     />
 
-     <input
-     style={styles.inputsea}
-        placeholder="Rechercher..."
-        
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        
-      />   
-      </div> 
-       
-        <Button
-            variant="contained"
-            color="primary"
-            startIcon={<Plus />}
-            onClick={() => setIsAdding(true)} // Toggle the add form visibility
-            style={styles.addButton}
-        >
+      {/* Search Input */}
+      <div style={styles.searchInput}>
+        <Search size={20} color="#3D3D3D" />
+        <input
+          style={styles.inputsea}
+          placeholder="Rechercher..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
+
+      <Button
+        variant="contained"
+        color="primary"
+        startIcon={<Plus />}
+        onClick={() => setIsAdding(true)}
+        style={styles.addButton}
+      >
         Ajouter
-        </Button>
-        <div>
-          <table style={styles.table}>
-            <thead>
-              <tr style={styles.headerRow}>
-                {columns.map((col) => (
-                  <th key={col} style={styles.headerCell}>{col}</th>
-                ))}
-                <th style={styles.headerCell}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>  
-            {isAdding && (   
-              <tr style={styles.row}>
-                {columns.map((col) => (
-                  <td key={col}  style={styles.cell}>
-                    {col === "description" ? (
-                      <Autocomplete
-                          options={articles}
-                          getOptionLabel={(option) => option.description}
-                          value={articles.find((article) => article.description === newItem[col]) || null}                                         
-                          onChange={(event, newValue) => {
-                          setNewItem({ ...newItem, [col]: newValue ? newValue.description : "" });
-                           }}
-                          renderInput={(params) => <TextField {...params} label="Search" variant="outlined" />}
-                          
-                      />
-                    ) : (
-                      <TextField
-                        value={newItem[col] || ""}
-                        onChange={(e) => setNewItem({ ...newItem, [col]: e.target.value })}
-                      />
-                    )}
-                  </td>
-                ))}
-                <td style={styles.cell}>
-                    <Save onClick={handleAddNew} style={{ ...styles.icon, color: "green" }} />
-                    <X onClick={() => setIsAdding(false)} style={{ ...styles.icon, color: "red" }} />
-                </td>
-              </tr>
+      </Button>
+      {/* Add Item Form */}
+      {isAdding && (
+        <div style={styles.formContainer}>
+          <Autocomplete
+            options={enteteVenteArrivee} 
+            getOptionLabel={(option) => option.description || ''} 
+            onChange={(event, value) => {
+              if (value) {
+                setNewItem({
+                  ...newItem,
+                  code: value.code,  // Assuming code is present in the selected option
+                  description: value.description,  // Automatically set the description
+                  prixUnitaireHT: value.prixUnitaireHT,  // Automatically set the price from selected enteteVenteArrivee
+                });
+              }
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Description"
+                fullWidth
+                style={styles.inputField}
+              />
             )}
-                  {paginatedData.map((item, index) => {
-                        const isEditing = editedItem && editedItem.code === item.code;
-                        return (
-                          <tr key={index} style={styles.row}>
-                            {columns.map((col) => (
-                              <td key={col} style={styles.cell}>
-                                {isEditing ? (
-                                  <TextField
-                                    value={editedItem[col]}
-                                    onChange={(e) => handleChange(e, col)}
-                                    style={styles.input}
-                                  />
-                                ) : (
-                                  item[col]
-                                )}
-                              </td>
-                            ))}
-                            <td style={styles.cell}>
-                              {isEditing ? (
-                                <>
-                                  <Save onClick={handleSaveEdit} style={{ ...styles.icon, color: "green" }} />
-                                  <X onClick={handleCancelEdit} style={{ ...styles.icon, color: "red" }} />
-                                </>
-                              ) : (
-                                <>
-                                  <Edit onClick={() => handleEdit(item)} style={{ ...styles.icon, color: "#00a3f5" }} />
-                                  <Trash onClick={() => handleDelete(item.code)} style={{ ...styles.icon, color: "#e74c3c" }} />
-                                </>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-            </tbody>
-          </table>
+          />
+          <TextField
+            label="Code"
+            value={newItem.code}
+            onChange={(e) => setNewItem({ ...newItem, code: e.target.value })}
+            fullWidth
+            style={styles.inputField}
+            disabled = "True"
+          />
+          <TextField
+            label="Quantité de Dotation"
+            value={newItem.quantiteDotation}
+            onChange={(e) => setNewItem({ ...newItem, quantiteDotation: e.target.value })}
+            fullWidth
+            style={styles.inputField}
+          />
+          <TextField
+            label="TotEm"
+            value={newItem.totEm}
+            onChange={(e) => setNewItem({ ...newItem, totEm: e.target.value })}
+            fullWidth
+            style={styles.inputField}
+          />
+          <TextField
+            label="Quantité Vendue"
+            value={newItem.quantiteVendue}
+            onChange={(e) => setNewItem({ ...newItem, quantiteVendue: e.target.value })}
+            fullWidth
+            style={styles.inputField}
+          />
+          <TextField
+            label="Prix Unitaire HT"
+            value={newItem.prixUnitaireHT}
+            onChange={(e) => setNewItem({ ...newItem, prixUnitaireHT: e.target.value })}
+            fullWidth
+            style={styles.inputField}
+            disabled = "True"
+          />
+          <TextField
+            label="Valeur"
+            value={newItem.valeur}
+            onChange={(e) => setNewItem({ ...newItem, valeur: e.target.value })}
+            fullWidth
+            style={styles.inputField}
+          />
+          <TextField
+            label="Restant"
+            value={newItem.restant}
+            onChange={(e) => setNewItem({ ...newItem, restant: e.target.value })}
+            fullWidth
+            style={styles.inputField}
+          />
+          <Button onClick={handleAddNew}>Save</Button>
         </div>
-      
-      
-      
+      )}
+
+      {/* Table */}
+      <div>
+        <table className="table">
+          <thead>
+            <tr className="header-row">
+              <th className="header-cell">Code</th>
+              <th className="header-cell">Description</th>
+              <th className="header-cell">Quantité de Dotation</th>
+              <th className="header-cell">TotEm</th>
+              <th className="header-cell">Quantité Vendue</th>
+              <th className="header-cell">Prix Unitaire HT</th>
+              <th className="header-cell">Valeur</th>
+              <th className="header-cell">Restant</th>
+              <th className="header-cell">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+  {paginatedData.length > 0 ? (
+    paginatedData.map((row) => (
+      <tr key={row.code}>
+        <td className="cell">{row.code}</td>
+        <td className="cell">{row.description}</td>
+        <td className="cell">{row.quantiteDotation}</td>
+        <td className="cell">{row.totEm}</td>
+        <td className="cell">{row.quantiteVendue}</td>
+        <td className="cell">{row.prixUnitaireHT}</td>
+        <td className="cell">{row.valeur}</td>
+        <td className="cell">{row.restant}</td>
+        <td className="cell">
+          {/* Edit Button */}
+          <Edit onClick={() => handleEdit(row)} style={{ cursor: 'pointer', marginRight: '10px' }} />
+          {/* Delete Button */}
+          <Trash onClick={() => handleDelete(row.code)} style={{ cursor: 'pointer' }} />
+        </td>
+      </tr>
+    ))
+  ) : (
+    <tr>
+      <td colSpan="9">Aucune donnée trouvée.</td>
+    </tr>
+  )}
+</tbody>
+
+        </table>
+      </div>
+
       <TablePagination
         component="div"
         count={filteredData.length}
@@ -216,7 +300,7 @@ const EtatVentesArriveeTable = () => {
     </div>
   );
 };
-// Styles using JavaScript object
+
 const styles = {
   heading: {
     textAlign: "center",
@@ -227,20 +311,21 @@ const styles = {
   },
   searchInput: {
     width: "300px",
-    height :"3rem",
+    height: "3rem",
     marginBottom: "20px",
-    backgroundColor:"white",
-    borderRadius:"10px",
-    padding : "0 15px",
-    display:"flex",
-    alignItems:"center",
-    boxShadow:"0px 0px 8px #ddd"
-    
-
-  },
-  addButton: {
+    backgroundColor: "white",
+    borderRadius: "10px",
+    padding: "0 15px",
     display: "flex",
     alignItems: "center",
+    boxShadow: "0px 0px 8px #ddd",
+  },
+  inputsea: {
+    border: "none",
+    outline: "none",
+    marginLeft: "10px",
+  },
+  addButton: {
     backgroundColor: "#28a745",
     color: "#fff",
     border: "none",
@@ -250,47 +335,16 @@ const styles = {
     fontSize: "16px",
     marginBottom: "15px",
   },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    marginTop: "20px",
-    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+  formContainer: {
+    padding: "15px",
+    backgroundColor: "#f9f9f9",
+    marginBottom: "15px",
     borderRadius: "8px",
-    overflow: "hidden",
+    boxShadow: "0 0 5px rgba(0, 0, 0, 0.1)",
   },
-  headerRow: {
-    backgroundColor: "#c80505",
-    color: "#fff",
+  inputField: {
+    marginBottom: "10px",
   },
-  headerCell: {
-    padding: "12px",
-    borderBottom: "2px solid #ddd",
-    textAlign: "left",
-  },
-  row: {
-    transition: "background 0.3s",
-  },
-  cell: {
-    padding: "10px",
-    borderBottom: "1px solid #ddd",
-    textAlign: "left",
-    color: "#000",
-  },
-  icon: {
-    cursor: "pointer",
-    marginLeft: "10px",
-    transition: "transform 0.2s",
-  },
-  input: {
-    width: "100%",
-    padding: "5px",
-    borderRadius: "4px",
-  },
-  inputsea:{
-    border:"none",
-    outline : "none",
-    marginLeft : "10px"
-  },
- 
 };
+
 export default EtatVentesArriveeTable;

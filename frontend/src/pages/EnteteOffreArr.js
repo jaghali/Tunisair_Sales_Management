@@ -91,18 +91,10 @@ const EnteteOffreArr = () => {
         </Button>
       </div>
 
-      {loading && (
-        <div className="loader-container">
-          <svg viewBox="0 0 37 37" height="50" width="50">
-            <path className="track" fill="none" strokeWidth="5" pathLength="100" d="M36.63 31.746 c0 -13.394 -7.326 -25.16 -18.13 -31.376 C7.696 6.66 0.37 18.352 0.37 31.746 c5.328 3.108 11.544 4.884 18.13 4.884 S31.302 34.854 36.63 31.746z" />
-            <path className="car" fill="none" strokeWidth="5" pathLength="100" d="M36.63 31.746 c0 -13.394 -7.326 -25.16 -18.13 -31.376 C7.696 6.66 0.37 18.352 0.37 31.746 c5.328 3.108 11.544 4.884 18.13 4.884 S31.302 34.854 36.63 31.746z" />
-          </svg>
-        </div>
-      )}
 
       {error && <p className="error">{error}</p>}
 
-      {!loading && !error && (
+      {!error && (
         <div className="table-container">
           <table className="table">
             <thead>

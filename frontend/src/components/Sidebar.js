@@ -7,10 +7,11 @@ const SIDEBAR_ITEMS = [
     { name: "OverviewPage", icon: BarChart2, color: "#6366f1", href: "/OverviewPage" },
     { name: "Table", icon: TableOfContents , color: "#8B5CF6", href: "/admin-users" },
     { name: "Articles", icon: PackageSearch  , color: "#8B5CF6", href: "/ArticlesPage" },
+    { name: "Fournisseur", icon: PackageSearch  , color: "#8B5CF6", href: "/FournisseurPage" },
 
     { name: "Contact", icon: Users, color: "#EC4899", href: "/admin-contact" },
     { name: "Charts", icon: ChartSpline, color: "#10B981", href: "/sales" },
-    { name: "Devise", icon:  DollarSign, color: "#F59E0B", href: "/orders" },
+    { name: "Devise", icon:  DollarSign, color: "#F59E0B", href: "/Devise" },
     { name: "Settings", icon: Settings, color: "#6EE7B7", href: "/settings" },
     { name: "Logout", icon: LogOut, color: "#6EE7B7", href: "/" },
 ];

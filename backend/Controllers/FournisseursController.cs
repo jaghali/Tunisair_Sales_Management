@@ -20,17 +20,69 @@ namespace TunisairSalesManagement.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Fournisseur>>> GetFournisseurs()
         {
-            // Récupère tous les fournisseurs de la base de données
-            var fournisseurs = await _context.Fournisseurs.ToListAsync();
+           var fournisseurs = await _context.Fournisseurs.ToListAsync();
+            return Ok(fournisseurs); 
+        }
 
-            // Si aucun fournisseur n'est trouvé
-            if (fournisseurs == null || fournisseurs.Count == 0)
+        // POST: api/Fournisseurs
+        [HttpPost]
+        public async Task<ActionResult<Fournisseur>> PostArticles(Fournisseur fournisseurs)
+        {
+            _context.Fournisseurs.Add(fournisseurs);
+            await _context.SaveChangesAsync();
+
+            // Return the newly created article with a 201 Created status
+            return CreatedAtAction(nameof(GetFournisseurs), new { id = fournisseurs.Id }, fournisseurs);
+        }
+
+        // PUT: api/Fournisseur/id
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutFournisseur(int id, Fournisseur fournisseurs)
+        {
+            if (id != fournisseurs.Id)
             {
-                return NotFound("Aucun fournisseur trouvé.");
+                return BadRequest();
             }
 
-            // Retourne la liste des fournisseurs
-            return Ok(fournisseurs);
+            _context.Entry(fournisseurs).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!FournisseurExists(id)) 
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return NoContent(); // Return No Content if successful
+        }
+            // DELETE: api/Fournisseur/5
+        [HttpDelete("{Id}")]
+        public async Task<IActionResult> DeleteFournisseurs(int Id)
+        {
+            var fournisseurs = await _context.Fournisseurs.FindAsync(Id); // Find the article by Code
+            if (fournisseurs == null)
+            {
+                return NotFound();
+            }
+
+            _context.Fournisseurs.Remove(fournisseurs);
+            await _context.SaveChangesAsync();
+
+            return NoContent(); 
+        }
+
+        private bool FournisseurExists(int Id)
+        {
+            return _context.Fournisseurs.Any(e => e.Id == Id);
+        }
         }
     }
-}
+
