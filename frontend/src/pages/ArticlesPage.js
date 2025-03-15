@@ -66,9 +66,7 @@ const styles = {
     borderBottom: "2px solid #ddd",
     textAlign: "left",
   },
-  row: {
-    transition: "background 0.3s",
-  },
+  
   cell: {
     padding: "10px",
     borderBottom: "1px solid #ddd",

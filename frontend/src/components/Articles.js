@@ -3,6 +3,7 @@ import axios from "axios";
 import { Edit, Trash, Save, X, Plus } from "lucide-react";
 import { TablePagination, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, MenuItem, Select, InputLabel, FormControl } from "@mui/material";
 import "../App.css";
+import { Add } from "@mui/icons-material";
 
 const Articles = () => {
   const [data, setData] = useState([]);
@@ -26,6 +27,57 @@ const Articles = () => {
   const [selectedSupplier, setSelectedSupplier] = useState("");
   const [selectedDateDebut, setSelectedDateDebut] = useState("");
   const [selectedDateFin, setSelectedDateFin] = useState("");
+
+  const [openPriceDialog, setOpenPriceDialog] = useState(false); // New state for price dialog
+  const [selectedArticleCode, setSelectedArticleCode] = useState(""); // To store selected article code for price
+  const [newPrice, setNewPrice] = useState({
+    departureDate: "",
+    arrivalDate: "",
+    price: "",
+    currency: "",
+  });
+
+    // Function to open the price dialog for a selected article
+    const handleOpenPriceDialog = (articleCode) => {
+      setSelectedArticleCode(articleCode);
+      setOpenPriceDialog(true);
+    };
+  
+    const handleClosePriceDialog = () => {
+      setOpenPriceDialog(false);
+      setNewPrice({
+        departureDate: "",
+        arrivalDate: "",
+        price: "",
+        currency: "",
+      });
+    };
+  
+    const handlePriceChange = (e, key) => {
+      setNewPrice({ ...newPrice, [key]: e.target.value });
+    };
+  
+    const handleAddNewPrice = async () => {
+      if (!newPrice.departureDate || !newPrice.arrivalDate || !newPrice.price) {
+        alert("Veuillez remplir tous les champs !");
+        return;
+      }
+  
+      try {
+        await axios.post("http://localhost:5000/api/PrixArticles", {
+          articleCode: selectedArticleCode,
+          dateDepart: newPrice.departureDate,
+          dateArrivee: newPrice.arrivalDate,
+          prix: newPrice.price,
+          deviseId: newPrice.currency,
+        });
+  
+        fetchData(); // Refresh the data
+        handleClosePriceDialog(); // Close the price dialog
+      } catch (error) {
+        console.error("Erreur lors de l'ajout du prix :", error);
+      }
+    };
 
 
 
@@ -179,6 +231,24 @@ const Articles = () => {
     setOpenDialog(false);
   };
 
+  const getFilteredPrice = (prices, dateDebut, dateFin) => {
+    // Convertir les dates en objets Date pour comparaison
+    const dateDebutObj = new Date(dateDebut);
+    const dateFinObj = new Date(dateFin);
+  
+    // Filtrer les prix qui sont dans la plage de dates
+    const filteredPrice = prices.find((price) => {
+      const departureDate = new Date(price.dateDepart);
+      const arrivalDate = new Date(price.dateArrivee);
+      return (
+        departureDate >= dateDebutObj &&
+        arrivalDate <= dateFinObj
+      );
+    });
+  
+    return filteredPrice || null;
+  };
+
   const filteredData = data.filter((item) => {
     const matchesSearchTerm = columns.some((col) =>
       item[col] && item[col].toString().toLowerCase().includes(searchTerm)
@@ -246,6 +316,9 @@ const Articles = () => {
         <tbody>
           {paginatedData.map((item, index) => {
             const isEditing = editedItem && editedItem.code === item.code;
+            // Filtered price logic
+            const filteredPrice = getFilteredPrice(item.prices, selectedDateDebut, selectedDateFin);
+            
             return (
               <tr key={index} style={styles.row}>
                 <td style={styles.cell}>
@@ -273,10 +346,14 @@ const Articles = () => {
                   )}
                 </td>
                 <td style={styles.cell}>
-                  {item.prices.map((price, priceIndex) => (
-                  <div key={priceIndex}>{`${price.prix}`}</div>
-                  ))}
-                </td>     
+  {filteredPrice ? (
+    <div>{`${filteredPrice.prix}`}</div>
+  ) : (
+    <div>Aucun prix disponible pour cette période</div>
+  )}
+</td>
+
+     
                 <td style={styles.cell}>
                   {isEditing ? (
                     <>
@@ -287,6 +364,7 @@ const Articles = () => {
                     <>
                       <Edit onClick={() => handleEdit(item)} style={{ ...styles.icon, color: "green" }} />
                       <Trash onClick={() => handleDelete(item.code)} style={{ ...styles.icon, color: "#e74c3c" }} />
+                      <Add onClick={() => handleOpenPriceDialog(item.code)} />
                     </>
                   )}
                 </td>
@@ -398,6 +476,54 @@ const Articles = () => {
           <Button onClick={handleAddArticle} color="primary">Ajouter</Button>
         </DialogActions>
       </Dialog>
+
+      <Dialog open={openPriceDialog} onClose={handleClosePriceDialog} fullWidth maxWidth="sm">
+        <DialogTitle>Ajouter un Prix</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Date Départ"
+            type="date"
+            value={newPrice.departureDate}
+            onChange={(e) => handlePriceChange(e, "departureDate")}
+            fullWidth
+            margin="normal"
+            InputLabelProps={{ shrink: true }}
+          />
+          <TextField
+            label="Date Arrivée"
+            type="date"
+            value={newPrice.arrivalDate}
+            onChange={(e) => handlePriceChange(e, "arrivalDate")}
+            fullWidth
+            margin="normal"
+            InputLabelProps={{ shrink: true }}
+          />
+          <TextField
+            label="Prix"
+            type="number"
+            value={newPrice.price}
+            onChange={(e) => handlePriceChange(e, "price")}
+            fullWidth
+            margin="normal"
+          />
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Devise</InputLabel>
+            <Select
+              value={newPrice.currency}
+              onChange={(e) => handlePriceChange(e, "currency")}
+              label="Devise"
+            >
+              <MenuItem value="1">USD</MenuItem>
+              <MenuItem value="2">EUR</MenuItem>
+              <MenuItem value="3">TND</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClosePriceDialog} color="secondary">Annuler</Button>
+          <Button onClick={handleAddNewPrice} color="primary">Ajouter</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
@@ -449,7 +575,6 @@ const styles = {
     textAlign: "left",
   },
   row: {
-    transition: "background 0.3s",
     color:"black"
   },
   cell: {
