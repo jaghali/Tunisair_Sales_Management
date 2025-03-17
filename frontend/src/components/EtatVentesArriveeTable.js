@@ -27,7 +27,7 @@ const EtatVentesArriveeTable = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [prixArticles, setPrixArticles] = useState([]);
 
-const fetchPrixArticles = useCallback(async () => {
+const fetchPrixArticles = useCallback(async ()  => {
   try {
     const response = await axios.get("http://localhost:5000/api/PrixArticles");
     setPrixArticles(response.data);
@@ -111,20 +111,26 @@ const handleClose = () => {
   };
 
   const handleAddNew = async () => {
-    if (newItem.restant > newItem.quantiteDotation) {
-      alert("Le restant ne peut pas être supérieur à la Quantité de Dotation");
-      return;
-    }
-
+    const formattedItem = {
+      code: newItem.code,  
+      description: newItem.description, 
+      quantiteDotation: parseInt(newItem.quantiteDotation, 10),  
+      totEm: parseFloat(newItem.totEm),  
+      quantiteVendue: parseInt(newItem.quantiteVendue, 10),  
+      prixUnitaireHT: parseFloat(newItem.prixUnitaireHT),  
+      valeur: parseFloat(newItem.valeur), 
+      restant: parseInt(newItem.restant, 10),  
+    };
+  
     try {
-      await axios.post("http://localhost:5000/api/EtatVentesArrivee", newItem);
-      fetchData();
-    
-      setIsAdding(false);
+      await axios.post("http://localhost:5000/api/EtatVentesArrivee", formattedItem);
+      fetchData(); 
+      setIsAdding(false); 
     } catch (error) {
-      console.error("Erreur lors de l'ajout :", error);
+      console.error("Erreur lors de l'ajout :", error.response?.data || error.message);
     }
   };
+  
 
   const handleSaveEdit = async () => {
     if (editedItem.restant > editedItem.quantiteDotation) {
@@ -140,6 +146,26 @@ const handleClose = () => {
     } catch (error) {
       console.error("Erreur lors de la mise à jour :", error);
     }
+  };
+
+  const handleNewItemChange = (e, key) => {
+    const value = e.target.value;
+    setNewItem((prev) => {
+      const updatedItem = { ...prev, [key]: value };
+
+      // calcul automatique de Valeur et Restant
+      if (key === "quantiteVendue" || key === "prixUnitaireHT") {
+        const quantiteVendue = parseFloat(updatedItem.quantiteVendue) || 0;
+        const prixUnitaireHT = parseFloat(updatedItem.prixUnitaireHT) || 0;
+        updatedItem.valeur = (prixUnitaireHT * quantiteVendue).toFixed(2);
+      }
+      if (key === "quantiteVendue" || key === "quantiteDotation") {
+        const quantiteDotation = parseFloat(updatedItem.quantiteDotation) || 0;
+        const quantiteVendue = parseFloat(updatedItem.quantiteVendue) || 0;
+        updatedItem.restant = (quantiteDotation - quantiteVendue).toFixed(2);
+      }
+      return updatedItem;
+    });
   };
 
   const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
@@ -159,7 +185,6 @@ const handleClose = () => {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-
 
       <Button
         variant="contained"
@@ -213,7 +238,7 @@ const handleClose = () => {
           <TextField
             label="Quantité de Dotation"
             value={newItem.quantiteDotation}
-            onChange={(e) => setNewItem({ ...newItem, quantiteDotation: e.target.value })}
+            onChange={(e) => handleNewItemChange(e, "quantiteDotation")}
             fullWidth
             style={styles.inputField}
           />
@@ -227,31 +252,31 @@ const handleClose = () => {
           <TextField
             label="Quantité Vendue"
             value={newItem.quantiteVendue}
-            onChange={(e) => setNewItem({ ...newItem, quantiteVendue: e.target.value })}
+            onChange={(e) => handleNewItemChange(e, "quantiteVendue")}
             fullWidth
             style={styles.inputField}
           />
           <TextField
             label="Prix Unitaire HT"
             value={newItem.prixUnitaireHT}
-            onChange={(e) => setNewItem({ ...newItem, prixUnitaireHT: e.target.value })}
+            onChange={(e) => handleNewItemChange(e, "prixUnitaireHT")}
             fullWidth
             style={styles.inputField}
-            disabled = "True"
           />
           <TextField
             label="Valeur"
             value={newItem.valeur}
-            onChange={(e) => setNewItem({ ...newItem, valeur: e.target.value })}
             fullWidth
             style={styles.inputField}
+            disabled
           />
+
           <TextField
             label="Restant"
             value={newItem.restant}
-            onChange={(e) => setNewItem({ ...newItem, restant: e.target.value })}
             fullWidth
             style={styles.inputField}
+            disabled
           />
            </DialogContent>
           <DialogActions>

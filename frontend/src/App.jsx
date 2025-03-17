@@ -22,6 +22,7 @@ import OffrePageArr from "./pages/OffrePageArr";
 import ArticlesPage from "./pages/ArticlesPage";
 import ForgotPasswordPage from "./pages/ForgotPassword";
 import FournisseurPage from "./pages/FournisseurPage";
+import Confrontation from "./pages/ConfrontationPage";
 
 
 function App() {
@@ -55,6 +56,7 @@ function MainLayout() {
     "/OffrePage",
     "/OffrePagearr",
     "/settings",
+    "/ConfrontationPage",
   ];
 
   let sidebarComponent = null;
@@ -113,6 +115,7 @@ function MainLayout() {
               <Route path="/ForgotPasswordPage" element={<ForgotPasswordPage />} />
               <Route path="/Devise" element={<Devise/>} />
               <Route path="/FournisseurPage" element={<FournisseurPage/>} />
+              <Route path="/ConfrontationPage" element={<Confrontation/>} />
 
 
 
