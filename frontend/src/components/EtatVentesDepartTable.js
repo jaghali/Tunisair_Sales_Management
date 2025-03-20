@@ -3,7 +3,6 @@ import axios from "axios";
 import { Edit, Trash, Save, X, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { TablePagination, Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField,Autocomplete, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
-import "../App.css";
 
 const EtatVentesDepartTable = () => {
   const [data, setData] = useState([]);
@@ -238,7 +237,6 @@ const EtatVentesDepartTable = () => {
               disabled={col === "code" || col === "description" } 
             />
           ))}
-          {/* Les champs "valeur" et "restant" seront remplis automatiquement */}
           <TextField
                       label="Prix Unitaire HT"
                       value={newItem.prixUnitaireHT}
@@ -273,8 +271,8 @@ const EtatVentesDepartTable = () => {
         </DialogActions>
       </Dialog>
 
-      <table style={style.table}>
-        <thead>
+      <table>
+        <thead >
           <tr style={style.headerRow}>
             {columns.map((col) => (
               <th key={col} style={style.headerCell}>

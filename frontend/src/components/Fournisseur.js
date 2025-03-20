@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { Edit, Trash, Save, X, Plus } from "lucide-react";
-import { TablePagination, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from "@mui/material";
+import { Pencil, Trash, Save, X, Plus } from "lucide-react";
+import { TablePagination, Dialog, DialogTitle, DialogContent, DialogActions,  TextField, InputAdornment, IconButton , Button } from "@mui/material";
 import "../App.css";
+import SearchIcon from '@mui/icons-material/Search';
+import { motion } from 'framer-motion';
 
 const Fournisseurs = () => {
   const [data, setData] = useState([]);
@@ -11,6 +13,9 @@ const Fournisseurs = () => {
   const [editedItem, setEditedItem] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+    
+  
   const [newFournisseur, setNewFournisseur] = useState({ nom: "", adresse: "" , telephone:"" });
 
   const fetchData = useCallback(async () => {
@@ -42,7 +47,13 @@ const Fournisseurs = () => {
   const handleCancelEdit = () => {
     setEditedItem(null);
   };
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
+  };
 
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
   const handleSaveEdit = async () => {
     if (!editedItem) return;
     try {
@@ -82,18 +93,49 @@ const Fournisseurs = () => {
   );
 
   return (
-    <div>
-      <h2 style={styles.heading}>Fournisseurs</h2>
-      <input
-        type="text"
-        placeholder="Rechercher..."
-        value={searchTerm}
-        onChange={handleSearch}
-        style={styles.searchInput}
-      />
-      <button onClick={() => setOpenDialog(true)} style={styles.addButton}>
-        <Plus style={styles.icon} /> Ajouter Fournisseur
-      </button>
+    <div style={styles.container}>
+      
+      <div style={styles.header}>
+        <h2 style={styles.heading}>Gestion des Fournisseurs</h2>
+
+        
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", width: "100%" }}>
+
+      <TextField
+    label="Rechercher..."
+    variant="standard"
+    fullWidth
+    style={{ ...styles.searchInput, flexGrow: 1 }} // Apply flexGrow here
+    onChange={(e) => setSearchQuery(e.target.value)}
+    InputLabelProps={{ style: { color: "#3D3D3D" } }}
+    InputProps={{
+      endAdornment: (
+        <InputAdornment position="end">
+          <SearchIcon style={{ color: "gray" }} />
+        </InputAdornment>
+      ),
+      sx: {
+        "&:before": { borderBottom: "2px solid #3D3D3D" },
+        "&:hover:before": { borderBottom: "2px solid red" },
+        "&:after": { borderBottom: "2px solid red" },
+      },
+    }}
+    
+  />
+      <motion.button
+    onClick={handleOpenDialog}
+    style={styles.addButton}
+    whileHover={{ scale: 1.1 }}
+    whileTap={{ scale: 0.9 }}
+    transition={{ type: "spring", stiffness: 300 }}
+  >
+    <Plus style={styles.icon} />
+    Ajouter Fournisseur
+  </motion.button>
+      </div>
+      
+     
 
       <table style={styles.table}>
         <thead>
@@ -138,7 +180,7 @@ const Fournisseurs = () => {
                   </>
                 ) : (
                   <>
-                    <Edit onClick={() => handleEdit(item)} style={{ ...styles.icon, color: "green" }} />
+                    <Pencil onClick={() => handleEdit(item)} style={{ ...styles.icon, color: "#00a3f5" }} />
                     <Trash onClick={() => handleDelete(item.id)} style={{ ...styles.icon, color: "#e74c3c" }} />
                   </>
                 )}
@@ -169,73 +211,75 @@ const Fournisseurs = () => {
 
 export default Fournisseurs;
 const styles = { 
-    heading: {
-      textAlign: "center",
-      fontSize: "24px",
-      fontWeight: "bold",
-      color: "#c80505",
-      marginBottom: "15px",
-    },
-    searchInput: {
-      marginBottom: "20px",
-      padding: "10px",
-      fontSize: "16px",
-      width: "100%",
-      maxWidth: "400px",
-      margin: "0 auto",
-      borderRadius: "4px",
-      border: "1px solid #ddd",
-    },
     addButton: {
-      backgroundColor: "#00a3f5",
-      color: "white",
-      padding: "10px 20px",
-      fontSize: "16px",
-      border: "none",
-      borderRadius: "5px",
-      cursor: "pointer",
-      marginBottom: "20px",
-    },
-    table: {
-      width: "100%",
-      borderCollapse: "collapse",
-      marginTop: "20px",
-      boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-      borderRadius: "8px",
-      overflow: "hidden",
-    },
-    headerRow: {
-      backgroundColor: "#c80505",
-      color: "#fff",
-    },
-    headerCell: {
-      padding: "12px",
-      borderBottom: "2px solid #ddd",
-      textAlign: "left",
-    },
-    row: {
-      transition: "background 0.3s",
-      color:"black"
-    },
-    cell: {
-      padding: "10px",
-      borderBottom: "1px solid #ddd",
-      textAlign: "left",
-    },
-    icon: {
-      cursor: "pointer",
-      marginLeft: "10px",
-      transition: "transform 0.2s",
-    },
-    input: {
-      color: "black",
-      paddingLeft: "40px",
-      paddingRight: "16px",
-      paddingTop: "8px",
-      paddingBottom: "8px",
-      borderRadius: "8px",
-      fontSize: "14px",
-      outline: "none",
-      width: "300px",
-    },
-   };
+        padding: '10px 20px',
+        backgroundColor: '#C80505',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '5px',
+        display: 'flex',
+        alignItems: 'center',
+        cursor: 'pointer',
+        fontSize: '16px',
+    
+      },
+      container: {
+        padding: "10px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        borderRadius: "10px",
+      },
+      header: {
+        display: "flex",
+        justifyContent: "space-between", // Align elements side by side
+        width: "100%",
+        marginBottom: "20px",
+      },
+      heading: {
+        flex: 1,
+        textAlign: "left", // Align the heading to the left
+      },
+      searchInput: {
+        maxWidth: "400px",
+        marginRight: "10px", 
+      },
+      table: {
+        borderCollapse: "collapse",
+        borderRadius: "10px",
+        backgroundColor: "#fff",
+        boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.15)",
+        width: "100%",
+      },
+      headerRow: {
+        backgroundColor: "#f8f9fa",
+        fontWeight: "bold",
+        borderRadius: "30px",
+      },
+      headerCell: {
+        padding: "12px",
+        textAlign: "left",
+        borderBottom: "2px solid #ddd",
+        color: "#333",
+      },
+      row: {
+        transition: "background 0.3s",
+        borderBottom: "1px solid #ddd",
+      },
+      cell: {
+        padding: "10px",
+        color: "#333",
+        borderBottom: "1px solid #ddd",
+      },
+      dialog: {
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        backgroundColor: "#fff",
+        padding: "20px",
+        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+        borderRadius: "10px",
+        zIndex: "999",
+      },
+    };

@@ -45,9 +45,10 @@ function Contact() {
 
   // Define styles as constants for consistency with previous styles
   const containerStyle = {
-    padding: '5%',
-    marginBottom: '2%',
-    color: '#ffffff',
+    padding: "10px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
   };
 
   const formTitleStyle = {

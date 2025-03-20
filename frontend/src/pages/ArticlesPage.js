@@ -40,7 +40,7 @@ const ArticlesPage = () => {
 
 const styles = {
   container: {
-    padding: "5%",
+         padding: "10%", marginLeft:"15%" , marginTop:"-8%"
   },
   heading: {
     textAlign: "center",

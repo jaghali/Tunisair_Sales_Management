@@ -348,7 +348,7 @@ const handleClose = () => {
         page={page}
         onPageChange={(event, newPage) => setPage(newPage)}
         rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={(event) => setRowsPerPage(parseInt(event.target.value, 10))}
+        onRowsPerPageChange={(event) => setRowsPerPage(parseInt(event.target.value, 5))}
       />
     </div>
   );

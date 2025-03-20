@@ -57,7 +57,7 @@ const EnteteVente = () => {
       axios.post("http://localhost:5000/api/EnteteVente", newData)
         .then(response => {
           setData([...data, response.data]);
-          setOpenForm(false); // Close form after adding
+          setOpenForm(false); 
         });
     } catch (err) {
       alert("Erreur lors de l'ajout !");

@@ -1,18 +1,23 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { Edit, Trash, Save, X, Plus } from "lucide-react";
-import { TablePagination, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, MenuItem, Select, InputLabel, FormControl } from "@mui/material";
+import {  Pencil, Trash, Save, X, Plus } from "lucide-react";
+
+import {InputAdornment, TablePagination, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, MenuItem, Select, InputLabel, FormControl } from "@mui/material";
 import "../App.css";
 import { Add } from "@mui/icons-material";
+import SearchIcon from '@mui/icons-material/Search';
+import { motion } from 'framer-motion';
 
 const Articles = () => {
   const [data, setData] = useState([]);
   const [columns, setColumns] = useState([]);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [editedItem, setEditedItem] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+  
   const [newArticle, setNewArticle] = useState({
     code: "",
     description: "",
@@ -260,15 +265,9 @@ const Articles = () => {
 
   return (
     <div>
-      <h2 style={styles.heading}>Articles</h2>
-      <input
-        type="text"
-        placeholder="Rechercher..."
-        value={searchTerm}
-        onChange={handleSearch}
-        style={styles.searchInput}
-      />
-      {/* Dropdown to filter by supplier */}
+      
+       <h2 >Articles</h2>
+      
       <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginBottom: "20px" }}>
         <FormControl style={{ width: "150px" }}>
           <InputLabel>Fournisseur</InputLabel>
@@ -299,10 +298,42 @@ const Articles = () => {
           InputLabelProps={{ shrink: true }}
         />
       </div>
-      <button onClick={handleOpenDialog} style={styles.addButton}>
-        <Plus style={styles.icon} />
-        Ajouter Article
-      </button>
+    
+      <div style={styles.header}>
+  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+    <TextField
+      label="Rechercher..."
+      variant="standard"
+      fullWidth
+      style={styles.searchInput}
+      onChange={(e) => setSearchQuery(e.target.value)}
+      InputLabelProps={{ style: { color: "#3D3D3D" } }}
+      InputProps={{
+        endAdornment: (
+          <InputAdornment position="end">
+            <SearchIcon style={{ color: "gray" }} />
+          </InputAdornment>
+        ),
+        sx: {
+          "&:before": { borderBottom: "2px solid #3D3D3D" },
+          "&:hover:before": { borderBottom: "2px solid red" },
+          "&:after": { borderBottom: "2px solid red" },
+        },
+      }}
+    />
+    <motion.button
+      onClick={handleOpenDialog}
+      style={styles.addButton}
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.9 }}
+      transition={{ type: "spring", stiffness: 300 }}
+    >
+      <Plus style={styles.icon} />
+      Ajouter Articles
+    </motion.button>
+  </div>
+</div>
+
 
       <table style={styles.table}>
         <thead>
@@ -362,7 +393,7 @@ const Articles = () => {
                     </>
                   ) : (
                     <>
-                      <Edit onClick={() => handleEdit(item)} style={{ ...styles.icon, color: "green" }} />
+                      <Pencil onClick={() => handleEdit(item)} style={{ ...styles.icon, color: "#00a3f5" }} />
                       <Trash onClick={() => handleDelete(item.code)} style={{ ...styles.icon, color: "#e74c3c" }} />
                       <Add onClick={() => handleOpenPriceDialog(item.code)} />
                     </>
@@ -381,7 +412,7 @@ const Articles = () => {
         onPageChange={setPage}
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={setRowsPerPage}
-        rowsPerPageOptions={[10, 20, 30]}
+        rowsPerPageOptions={[5, 10, 20]}
       />
 
       {/* Dialog for adding article */}
@@ -530,33 +561,36 @@ const Articles = () => {
 
 // CSS Styles remain unchanged
 const styles = { 
-  heading: {
-    textAlign: "center",
-    fontSize: "24px",
-    fontWeight: "bold",
-    color: "#c80505",
-    marginBottom: "15px",
-  },
-  searchInput: {
-    marginBottom: "20px",
-    padding: "10px",
-    fontSize: "16px",
-    width: "100%",
-    maxWidth: "400px",
-    margin: "0 auto",
-    borderRadius: "4px",
-    border: "1px solid #ddd",
+  heading:{
+    marginBottom :"30%"
   },
   addButton: {
-    backgroundColor: "#00a3f5",
-    color: "white",
-    padding: "10px 20px",
-    fontSize: "16px",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-    marginBottom: "20px",
+    padding: '10px 20px',
+    backgroundColor: '#C80505',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '5px',
+    display: 'flex',
+    alignItems: 'center',
+    cursor: 'pointer',
+    fontSize: '16px',
+    marginLeft: "600px", 
+    width:"90%"
+
   },
+ 
+  header: {
+    display: "flex",
+    justifyContent: "space-between", // Align elements side by side
+    width: "100%",
+    alignItems: "center", 
+  },
+ 
+  searchInput: {
+    maxWidth: "600px",
+    marginRight: "10px", 
+  },
+  
   table: {
     width: "100%",
     borderCollapse: "collapse",
@@ -566,8 +600,9 @@ const styles = {
     overflow: "hidden",
   },
   headerRow: {
-    backgroundColor: "#c80505",
-    color: "#fff",
+    backgroundColor: "#f8f9fa",
+    color:"black",
+
   },
   headerCell: {
     padding: "12px",

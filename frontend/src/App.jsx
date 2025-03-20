@@ -23,8 +23,11 @@ import ArticlesPage from "./pages/ArticlesPage";
 import ForgotPasswordPage from "./pages/ForgotPassword";
 import FournisseurPage from "./pages/FournisseurPage";
 import Confrontation from "./pages/ConfrontationPage";
+import ConfrotationOffrePage from "./pages/ConfrotationOffrePage";
+import Avion from "./pages/Avion";
 
 
+import "./App.css"
 function App() {
   return (
     <Router>
@@ -57,6 +60,8 @@ function MainLayout() {
     "/OffrePagearr",
     "/settings",
     "/ConfrontationPage",
+    "/ConfrotationOffrePage",
+
   ];
 
   let sidebarComponent = null;
@@ -116,6 +121,10 @@ function MainLayout() {
               <Route path="/Devise" element={<Devise/>} />
               <Route path="/FournisseurPage" element={<FournisseurPage/>} />
               <Route path="/ConfrontationPage" element={<Confrontation/>} />
+              <Route path="/ConfrotationOffrePage" element={<ConfrotationOffrePage/>} />
+              <Route path="/Avion" element={<Avion/>} />
+
+
 
 
 
@@ -131,31 +140,34 @@ function MainLayout() {
 // Styles
 const styles = {
   layout: {
-    height: "100vh",  // Full height of viewport
-    width: "100%",    // Full width of the viewport
+    height: "100vh",  // Ensure the layout takes full 
+    width: "100%",
     backgroundColor: "#ffffff",
     color: "#b91c1c",
     display: "flex",  // Flexbox layout for side-by-side
+    flexDirection: "row",  // Ensure it's side by side (Sidebar + Content)
   },
   mainContent: {
     display: "flex", // Flexbox for side-by-side content
-    width: "100%",   // Full width layout
+    width: "100%",
+    height: "100%",  // Ensure it takes full height
   },
   sidebar: {
     width: "16rem",   // Fixed sidebar width
     position: "fixed",
     left: "0",
+    top: "0",
+    height: "100%",    // Sidebar should take full height
     backgroundColor: "#b91c1c",
     boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
   },
   content: {
-    marginLeft: "16rem", // Offset content to right to fit the sidebar
-    padding: "1.5rem",
     overflowY: "auto",
     width: "100%",      // Full width for content
-    transition: "all 0.3s",
+    height: "100%",     // Ensure content area takes full height
     backgroundColor: "#ffffff",
     color: "#b91c1c",
+    transition: "all 0.3s",
   },
   loaderContainer: {
     position: "fixed",
@@ -183,7 +195,7 @@ const styles = {
   loaderSVG: {
     animation: "rotate 1s linear infinite",
   },
-  
 };
 
 export default App;
+

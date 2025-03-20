@@ -1,13 +1,16 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react"; // Import Eye and EyeOff icons from lucide-react
+import { Eye, EyeOff } from "lucide-react"; // Import Eye and EyeOff icons
+import { TextField, InputAdornment } from "@mui/material";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import airplane from '../components/Images/airplane.png'; // Import the airplane image
 
 const LoginPage = () => {
     const [matricule, setMatricule] = useState("");
     const [password, setPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
-    const [showPassword, setShowPassword] = useState(false); // State for showing/hiding password
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
@@ -29,52 +32,55 @@ const LoginPage = () => {
     };
 
     const handleShowPassword = () => {
-        setShowPassword(!showPassword); // Toggle password visibility
+        setShowPassword(!showPassword);
     };
 
     const styles = {
         container: {
             fontFamily: "Roboto",
-            textAlign: "center",
             display: "flex",
             justifyContent: "center",
-            height: "100%",
+            alignItems: "center",
             width: "100%",
-            color: "white",
+            height: "100vh", // Ensure full height
+            position: "relative", // To position the image relative to this container
+        },
+        backgroundWrapper: {
+            width: "60%",
+            height: "100vh",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            flexDirection: "column", 
+            background: "linear-gradient(to right, #c80505 50%, white 50%)",
             position: "relative",
-            marginTop: "10%",
-            maxheight: "200",
-            marginLeft: "-10%",
         },
         formWrapper: {
-            justifyContent: "center",
             width: "100%",
             maxWidth: "400px",
             padding: "25px",
-            height: "35%",
-            maxheight: "200",
-            backgroundColor: "#3D3D3D",
-            borderRadius: "8px",
-            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+            backgroundColor: "white",
+            borderRadius: "15px",
+            boxShadow: "10px 10px 30px rgba(0, 0, 0, 0.1)",
             textAlign: "center",
+            zIndex: 2, // Ensure the form is above the image
         },
-        input: {
+        TextField: {
             width: "94%",
             marginBottom: "12px",
             padding: "12px",
-            color: "#1a202c",
             borderRadius: "8px",
-            border: "1px solid #4a5568",
-            outline: "none",
+            textAlign: "left",
         },
         button: {
             width: "100%",
             padding: "12px",
             backgroundColor: "#c80505",
             color: "#fff",
-            borderRadius: "8px",
+            borderRadius: "20px",
             fontWeight: "bold",
             cursor: "pointer",
+            marginTop: "5%",
         },
         error: {
             marginTop: "12px",
@@ -82,62 +88,95 @@ const LoginPage = () => {
             textAlign: "center",
         },
         forgotPasswordLink: {
-            marginTop: "10px",
-            color: "white",
+            marginTop: "10%",
+            color: "#3D3D3D",
             fontSize: "14px",
             textDecoration: "none",
             cursor: "pointer",
         },
-        passwordToggle: {
+        airplaneImage: {
+            width: "90%",  // Adjust this value as needed
+            marginTop: "20px",  // Add margin to separate from the form
             position: "absolute",
-            right: "10px",
-            top: "10px",
-            color:"#3D3D3D",
-            cursor: "pointer",
+            bottom: "20%", 
+            left: "110%",
+            transform: "translateX(-50%)",  
+            zIndex: 1, 
+            opacity: 0.5,        
         },
     };
 
     return (
-        <div style={styles.container}>
-            <div style={styles.formWrapper}>
-                <h2 style={{ fontSize: "20px", fontWeight: "600", marginBottom: "16px" }}>Login</h2>
-                <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", position: "relative" }}>
-                    <input
-                        type="text"
-                        placeholder="MATRICULE"
-                        value={matricule}
-                        onChange={(e) => setMatricule(e.target.value)}
-                        required
-                        style={styles.input}
-                    />
-                    <div style={{ position: "relative" }}>
-                        <input
-                            type={showPassword ? "text" : "password"} // Show or hide password based on state
-                            placeholder="Password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            style={styles.input}
-                        />
-                        <span 
-                            onClick={handleShowPassword} 
-                            style={styles.passwordToggle}
-                        >
-                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />} {/* Show appropriate icon */}
-                        </span>
-                    </div>
-                    <button type="submit" style={styles.button}>
-                        Login
-                    </button>
-                    {errorMessage && <p style={styles.error}>{errorMessage}</p>}
-                    <p 
-                        style={styles.forgotPasswordLink}
-                        onClick={() => navigate("/ForgotPasswordPage")} // Link to the forgot password page
-                    >
-                        Forgot Password?
-                    </p>
-                </form>
+        <div style={styles.backgroundWrapper}>
+            <div style={styles.container}>
+                <div style={styles.formWrapper}>
+                    <h2 style={{ fontSize: "20px", fontWeight: "600", marginBottom: "16px", color: "#3D3D3D" }}>
+                        LOGIN
+                    </h2>
+                    <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", position: "relative" }}>
+                        {/* Matricule Field with Icon */}
+                        <TextField
+    type="text"
+    variant="standard"
+    label="Matricule"
+    value={matricule}
+    onChange={(e) => setMatricule(e.target.value)}
+    required
+    style={styles.TextField}
+    InputLabelProps={{
+        style: { color: "#3D3D3D" },
+    }}
+    InputProps={{
+        endAdornment: (
+            <InputAdornment position="end">
+                <PersonOutlineIcon style={{ color: "gray" }} />
+            </InputAdornment>
+        ),
+        sx: {
+            "&:before": { borderBottom: "2px solid #3D3D3D" }, // Change default border to red
+            "&:hover:before": { borderBottom: "2px solid red" }, // Darker red on hover
+            "&:after": { borderBottom: "2px solid red" }, // Active state border
+        },
+    }}
+/>
+
+<TextField
+    type={showPassword ? "text" : "password"}
+    variant="standard"
+    label="Password"
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    required
+    style={styles.TextField}
+    InputLabelProps={{
+        style: { color: "#3D3D3D" }, 
+    }}
+    InputProps={{
+        endAdornment: (
+            <InputAdornment position="end">
+                <span onClick={handleShowPassword} style={{ cursor: "pointer" }}>
+                    {showPassword ? <EyeOff style={{ color: "gray" }} /> : <Eye style={{ color: "gray" }} />}
+                </span>
+            </InputAdornment>
+        ),
+        sx: {
+            "&:before": { borderBottom: "2px solid #3D3D3D" }, // Change default border to red
+            "&:hover:before": { borderBottom: "2px solid red" }, // Darker red on hover
+            "&:after": { borderBottom: "2px solid red" }, // Active state border
+        },
+    }}
+/>
+
+    
+                        <button type="submit" style={styles.button}>Login</button>
+                        {errorMessage && <p style={styles.error}>{errorMessage}</p>}
+                        <p style={styles.forgotPasswordLink} onClick={() => navigate("/ForgotPasswordPage")}>
+                            Forgot Password?
+                        </p>
+                    </form>
+                </div>
             </div>
+            <img src={airplane} alt="Airplane" style={styles.airplaneImage} />
         </div>
     );
 };

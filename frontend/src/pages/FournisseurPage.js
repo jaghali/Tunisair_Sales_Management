@@ -31,48 +31,13 @@ const FournisseurPage = () => {
   if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
-    <div style={styles.container}>
+   
+    <div  style={{ padding: "10%", marginLeft:"15%" , marginTop:"-8%"}}>
       <Fournisseurs data={venteDetails} onDetailClick={handleDetailClick} />
     </div>
   );
 };
 
-const styles = {
-  container: {
-    padding: "5%",
-  },
-  heading: {
-    textAlign: "center",
-    fontSize: "24px",
-    fontWeight: "bold",
-    color: "#c80505",
-    marginBottom: "15px",
-  },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    marginTop: "20px",
-    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-    borderRadius: "8px",
-    overflow: "hidden",
-  },
-  headerRow: {
-    backgroundColor: "#c80505",
-    color: "#fff",
-  },
-  headerCell: {
-    padding: "12px",
-    borderBottom: "2px solid #ddd",
-    textAlign: "left",
-  },
-  row: {
-    transition: "background 0.3s",
-  },
-  cell: {
-    padding: "10px",
-    borderBottom: "1px solid #ddd",
-    textAlign: "left",
-  },
-};
+
 
 export default FournisseurPage;
