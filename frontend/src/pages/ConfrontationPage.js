@@ -59,11 +59,17 @@ const Confrontation = () => {
   return (
     <div style={{ padding: "20px" }}>
       {/* Totaux globaux dans des Box Material UI */}
-      <Box display="flex" justifyContent="space-between" p={2} bgcolor="#f5f5f5" borderRadius={2} boxShadow={2}>
-        <Typography variant="h6" color="primary">Total Départ: {totalDepart}</Typography>
-        <Typography variant="h6" color="secondary">Total Arrivée: {totalArrivee}</Typography>
-        <Typography variant="h6" color="primary">Ecart: {difference}</Typography>
-      </Box>
+      <Box display="flex" flexDirection="row" gap={5} justifyContent="center">
+        <Box display="flex" alignItems="center" justifyContent="center" p={2} bgcolor="#f5f5f5" borderRadius={2} boxShadow={2} width={200} minHeight={60}>
+              <Typography variant="h6" color="primary">Total Départ: {totalDepart}</Typography>
+        </Box>
+        <Box display="flex" alignItems="center" justifyContent="center" p={2} bgcolor="#f5f5f5" borderRadius={2} boxShadow={2} width={200} minHeight={60}>
+              <Typography variant="h6" color="secondary">Total Arrivée: {totalArrivee}</Typography>
+        </Box>
+        <Box display="flex" alignItems="center" justifyContent="center" p={2} bgcolor="#f5f5f5" borderRadius={2} boxShadow={2} width={200} minHeight={60}>
+             <Typography variant="h6" color="primary">Ecart: {difference}</Typography>
+        </Box>
+       </Box>
 
       {/* Tableau de confrontation */}
       <Paper elevation={3} sx={{ marginTop: 3, overflow: "hidden" }}>

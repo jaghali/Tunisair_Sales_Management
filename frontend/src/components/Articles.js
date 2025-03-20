@@ -7,6 +7,7 @@ import "../App.css";
 import { Add } from "@mui/icons-material";
 import SearchIcon from '@mui/icons-material/Search';
 import { motion } from 'framer-motion';
+import Swal from "sweetalert2";
 
 const Articles = () => {
   const [data, setData] = useState([]);
@@ -16,7 +17,7 @@ const Articles = () => {
   const [editedItem, setEditedItem] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   
   const [newArticle, setNewArticle] = useState({
     code: "",
@@ -41,6 +42,8 @@ const Articles = () => {
     price: "",
     currency: "",
   });
+  const [openChartDialog, setOpenChartDialog] = useState(false);
+  const [chartData, setChartData] = useState([]);
 
     // Function to open the price dialog for a selected article
     const handleOpenPriceDialog = (articleCode) => {
@@ -236,6 +239,39 @@ const Articles = () => {
     setOpenDialog(false);
   };
 
+  
+  const handleShowPrices = (prices) => {
+    if (!prices || prices.length === 0) {
+      Swal.fire({
+        icon: "info",
+        title: "Aucun prix disponible",
+        text: "Il n'y a actuellement aucun prix disponible pour cet article.",
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+  
+    const priceList = prices
+      .map(
+        (price) =>
+          `<div style="text-align: left;">
+            <strong>💲 Prix:</strong> ${price.prix}<br>
+            <strong>📅 Départ:</strong> ${price.dateDepart}<br>
+            <strong>📅 Arrivée:</strong> ${price.dateArrivee}
+          </div>`
+      )
+      .join("<hr>");
+  
+    Swal.fire({
+      icon: "success",
+      title: "📌 Prix disponibles",
+      html: priceList,
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Fermer",
+    });
+  };
+
   const getFilteredPrice = (prices, dateDebut, dateFin) => {
     // Convertir les dates en objets Date pour comparaison
     const dateDebutObj = new Date(dateDebut);
@@ -377,12 +413,14 @@ const Articles = () => {
                   )}
                 </td>
                 <td style={styles.cell}>
-  {filteredPrice ? (
-    <div>{`${filteredPrice.prix}`}</div>
-  ) : (
-    <div>Aucun prix disponible pour cette période</div>
-  )}
-</td>
+                <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={() => handleShowPrices(item.prices)}
+                  >
+                    View Prices
+                  </Button>
+               </td>
 
      
                 <td style={styles.cell}>
