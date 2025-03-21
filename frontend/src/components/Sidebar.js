@@ -1,17 +1,16 @@
-import { BarChart2, DollarSign, Settings, TableOfContents, PackageSearch, ChartSpline, Users, LogOut } from "lucide-react";
+import { BarChart2, DollarSign, PackageSearch, ChartSpline, Plane  ,Users, LogOut } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
 
 const SIDEBAR_ITEMS = [
     { name: "OverviewPage", icon: BarChart2, href: "/OverviewPage" },
-    { name: "Table", icon: TableOfContents, href: "/admin-users" },
+    { name: "Utilisateurs", icon: Users, href: "/admin-users" },
     { name: "Articles", icon: PackageSearch, href: "/ArticlesPage" },
     { name: "Fournisseur", icon: PackageSearch, href: "/FournisseurPage" },
-    { name: "Avion", icon: Users, href: "/Avion" },
+    { name: "Avion", icon: Plane , href: "/Avion" },
     { name: "Charts", icon: ChartSpline, href: "/sales" },
     { name: "Devise", icon: DollarSign, href: "/Devise" },
-    { name: "Settings", icon: Settings, href: "/settings" },
     { name: "Logout", icon: LogOut, href: "/" },
 ];
 

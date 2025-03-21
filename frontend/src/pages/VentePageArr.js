@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import EtatVentesArriveeTable from "../components/EtatVentesArriveeTable";
-import { Edit, Trash, Plus, Save, X } from "lucide-react";
+import { Edit, Trash, Plus, Save, X , Users, ShoppingBag  } from "lucide-react";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import { Button, TextField, Autocomplete } from "@mui/material";
+import { motion } from "framer-motion";
 
 const VentePageArr = () => {
   const [venteDetails, setVenteDetails] = useState([]);
@@ -70,11 +71,35 @@ const VentePageArr = () => {
 
   return (
     <div style={{ padding: "2%", maxWidth: "1000px", margin: "0 auto" }}>
-      <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)} centered textColor="secondary" indicatorColor="secondary" aria-label="secondary tabs example">
-        <Tab label="Liste Equipage" />
-        <Tab label="État Ventes Arrivée" />
+     
+      <Tabs 
+        value={tabValue} 
+        onChange={(e, newValue) => setTabValue(newValue)} 
+        centered 
+        textColor="secondary" 
+        indicatorColor="secondary"
+        aria-label="secondary tabs example"
+        sx={{
+          "& .MuiTabs-indicator": {
+            backgroundColor: "#B71C1C",
+          },
+          "& .MuiTab-root": {
+            transition: "color 0.3s ease-in-out",
+          },
+          "& .Mui-selected": {
+            color: "#B71C1C !important",
+          },
+        }}
+      >
+        <Tab 
+          label="Liste Equipage"  
+          icon={<motion.div whileHover={{ scale: 1.2 }}><Users /></motion.div>} 
+        />
+        <Tab 
+          label="État Ventes Arrivée" 
+          icon={<motion.div whileHover={{ scale: 1.2 }}><ShoppingBag /></motion.div>} 
+        />
       </Tabs>
-
       {tabValue === 0 && (
         <div>
           <Button variant="contained" color="primary" startIcon={<Plus />} onClick={() => setIsAdding(true)}>

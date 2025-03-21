@@ -1,12 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import SettingsPage from "./pages/Settings";
 import LoginPage from "./pages/Login";
 import AdminUsers from "./pages/AdminUsers";
 import Contact from "./pages/Contact";
 import OverviewPage from "./pages/OverviewPage";
 import DirectionFinanciereDashboard from "./pages/DirectionFinanciereDashboard";
-import AgentSaisieDashboard from "./pages/AgentSaisieDashboard";
 import AvancesConsultation from "./pages/AvancesConsultation";
 import EnteteVente from "./pages/EnteteVente";
 import EnteteVenteArr from "./pages/EnteteVenteArr";
@@ -61,11 +59,11 @@ function MainLayout() {
     "/settings",
     "/ConfrontationPage",
     "/ConfrotationOffrePage",
-
+    "/VentePage"
   ];
 
   let sidebarComponent = null;
-  if (location.pathname !== "/" && location.pathname !== "/ForgotPasswordPage") {
+  if (location.pathname !== "/" && location.pathname !== "/ForgotPasswordPage" && location.pathname !== "/ventePage" && location.pathname !== "/ventePagearr" && location.pathname !== "/OffrePage" && location.pathname !== "/OffrePagearr" && location.pathname !== "/ConfrontationPage" && location.pathname !== "/ConfrotationOffrePage") {
     sidebarComponent = agentSaisiePages.includes(location.pathname) ? (
       <SidebarAgentSaisie />
     ) : (
@@ -105,9 +103,7 @@ function MainLayout() {
               <Route path="/admin-users" element={<AdminUsers />} />
               <Route path="/admin-contact" element={<Contact />} />
               <Route path="/direction-financiere-dashboard" element={<DirectionFinanciereDashboard />} />
-              <Route path="/agent-saisie-dashboard" element={<AgentSaisieDashboard />} />
               <Route path="/avances-consultation" element={<AvancesConsultation />} />
-              <Route path="/settings" element={<SettingsPage />} />
               <Route path="/enteteVente" element={<EnteteVente />} />
               <Route path="/enteteVentearr" element={<EnteteVenteArr />} />
               <Route path="/enteteOffre" element={<EnteteOffres />} />

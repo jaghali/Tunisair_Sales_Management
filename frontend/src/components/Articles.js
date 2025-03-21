@@ -18,7 +18,8 @@ const Articles = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  
+  const [sortColumn, setSortColumn] = useState(null);
+  const [sortDirection, setSortDirection] = useState("asc");
   const [newArticle, setNewArticle] = useState({
     code: "",
     description: "",
@@ -42,8 +43,7 @@ const Articles = () => {
     price: "",
     currency: "",
   });
-  const [openChartDialog, setOpenChartDialog] = useState(false);
-  const [chartData, setChartData] = useState([]);
+  
 
     // Function to open the price dialog for a selected article
     const handleOpenPriceDialog = (articleCode) => {
@@ -227,9 +227,6 @@ const Articles = () => {
     setNewArticle({ ...newArticle, prices: updatedPrices });
   };
 
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value.toLowerCase());
-  };
 
   const handleOpenDialog = () => {
     setOpenDialog(true);
@@ -264,8 +261,8 @@ const Articles = () => {
       .join("<hr>");
   
     Swal.fire({
-      icon: "success",
-      title: "📌 Prix disponibles",
+      icon: "info",
+      title: "💸 Prix disponibles",
       html: priceList,
       confirmButtonColor: "#3085d6",
       confirmButtonText: "Fermer",
@@ -290,13 +287,27 @@ const Articles = () => {
     return filteredPrice || null;
   };
 
-  const filteredData = data.filter((item) => {
-    const matchesSearchTerm = columns.some((col) =>
-      item[col] && item[col].toString().toLowerCase().includes(searchTerm)
-    );
-    const matchesSupplier = selectedSupplier ? item.fournisseurId === selectedSupplier : true;
-    return matchesSearchTerm && matchesSupplier;
+  const handleSort = (column) => {
+    const isAsc = sortColumn === column && sortDirection === "asc";
+    setSortColumn(column);
+    setSortDirection(isAsc ? "desc" : "asc");
+  };
+
+  const sortedData = [...data].sort((a, b) => {
+    if (!sortColumn) return 0;
+    const aValue = a[sortColumn] || "";
+    const bValue = b[sortColumn] || "";
+    return sortDirection === "asc"
+      ? aValue.toString().localeCompare(bValue.toString())
+      : bValue.toString().localeCompare(aValue.toString());
   });
+
+  const filteredData = sortedData.filter((item) =>
+    columns.some((col) =>
+      item[col]?.toString().toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  );
+
   const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
@@ -373,6 +384,7 @@ const Articles = () => {
 
       <table style={styles.table}>
         <thead>
+       
         <tr style={styles.headerRow}>
             <th style={styles.headerCell}>Code</th>
             <th style={styles.headerCell}>Description</th>
@@ -415,7 +427,7 @@ const Articles = () => {
                 <td style={styles.cell}>
                 <Button
                     variant="outlined"
-                    color="primary"
+                    style={{backgroundColor:"#C80505" , borderColor:"#C80505" , color:"white"}}
                     onClick={() => handleShowPrices(item.prices)}
                   >
                     View Prices
@@ -447,9 +459,9 @@ const Articles = () => {
         component="div"
         count={filteredData.length}
         page={page}
-        onPageChange={setPage}
         rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={setRowsPerPage}
+        onPageChange={(e, newPage) => setPage(newPage)}
+        onRowsPerPageChange={(e) => setRowsPerPage(parseInt(e.target.value, 10))}
         rowsPerPageOptions={[5, 10, 20]}
       />
 

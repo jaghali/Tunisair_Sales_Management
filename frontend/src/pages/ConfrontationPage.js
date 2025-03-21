@@ -57,7 +57,7 @@ const Confrontation = () => {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div style={styles.container}>
       {/* Totaux globaux dans des Box Material UI */}
       <Box display="flex" flexDirection="row" gap={5} justifyContent="center">
         <Box display="flex" alignItems="center" justifyContent="center" p={2} bgcolor="#f5f5f5" borderRadius={2} boxShadow={2} width={200} minHeight={60}>
@@ -118,5 +118,17 @@ const Confrontation = () => {
     </div>
   );
 };
+const styles = {
 
+  container: {
+    padding: "50px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    borderRadius: "10px",
+  },
+  
+
+
+}
 export default Confrontation;

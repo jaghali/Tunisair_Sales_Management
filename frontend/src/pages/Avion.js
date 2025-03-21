@@ -1,42 +1,49 @@
 import React from "react";
 import "../App.css";
 import airplane from '../components/Images/airplane3d.png'; // Import the airplane image
+import { motion } from "framer-motion";
 
 const Avion = () => {
   return (
     <div style={styles.container}>
       <h2 style={styles.heading}>Gestion des Avions</h2>
 
-      <div style={styles.card}>
-        <div style={styles.content}>
-          {/* Labels on the left */}
-          <div style={styles.textContent}>
-            <div style={styles.rowContainer}>
-              <label style={styles.Littlelabel}>Modèle:</label>
-              <label style={styles.label}>A303</label>
-            </div>
-
-            <div style={styles.rowContainer}>
-              <label style={styles.Littlelabel}>Poids:</label>
-              <label style={styles.label}>299000lbs</label>
-              <label style={styles.Littlelabel}>Passagers:</label>
-              <label style={styles.label}>2000</label>
-            </div>
-
-            <div style={styles.rowContainer}>
-              <label style={styles.Littlelabel}>Vol:</label>
-              <label style={styles.label}>TUN/IT</label>
-              <label style={styles.Littlelabel}>Articles:</label>
-              <label style={styles.label}>100</label>
-            </div>
-          </div>
-
-          {/* Airplane image on the right */}
-          <div style={styles.imageContainer}>
-            <img src={airplane} alt="Airplane" style={styles.airplaneImage} />
-          </div>
-        </div>
+      <motion.div
+  style={styles.card}
+  initial={{ opacity: 0, y: 30 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.8, delay: 0.1 }}
+>
+  <div style={styles.content}>
+    {/* Labels on the left */}
+    <div style={styles.textContent}>
+      <div style={styles.rowContainer}>
+        <label style={styles.Littlelabel}>Modèle:</label>
+        <label style={styles.label}>A303</label>
       </div>
+
+      <div style={styles.rowContainer}>
+        <label style={styles.Littlelabel}>Poids:</label>
+        <label style={styles.label}>299000lbs</label>
+        <label style={styles.Littlelabel}>Passagers:</label>
+        <label style={styles.label}>2000</label>
+      </div>
+
+      <div style={styles.rowContainer}>
+        <label style={styles.Littlelabel}>Vol:</label>
+        <label style={styles.label}>TUN/IT</label>
+        <label style={styles.Littlelabel}>Articles:</label>
+        <label style={styles.label}>100</label>
+      </div>
+    </div>
+
+    {/* Airplane image on the right */}
+    <div style={styles.imageContainer}>
+      <img src={airplane} alt="Airplane" style={styles.airplaneImage} />
+    </div>
+  </div>
+</motion.div>
+
 
       {/* Map Container */}
       <div style={styles.mapContainer}>

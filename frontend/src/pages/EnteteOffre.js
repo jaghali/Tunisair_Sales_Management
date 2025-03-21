@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
-import { Edit, Trash, Save, X } from "lucide-react";
+import { Plus , Edit, Trash, Save, X } from "lucide-react";
 import EnteteOffreForm from "../components/EnteteOffreForm";
+import { motion } from 'framer-motion';
 
 import "../App.css"; 
 
@@ -82,14 +83,19 @@ const EnteteOffre = () => {
   };
 
   return (
-    <div className="container">
-      <h2 className="heading">Entête des Offres</h2>
+    <div  style={styles.container}>
+      <h2  style={styles.heading}>Etat Des Offres Départ</h2>
 
-      <div className="button-container">
-        <Button variant="contained" color="primary" onClick={() => setOpenForm(true)}>
-          Ajouter Etat De Offre
-        </Button>
-      </div>
+      <motion.button
+          onClick={() => setOpenForm(true)}
+          style={styles.addButton}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          transition={{ type: "spring", stiffness: 300 }}
+  >
+    <Plus style={styles.icon} />
+    Ajouter Un Etat D'Offre
+    </motion.button>
 
       {loading && (
         <div className="loader-container">
@@ -103,23 +109,23 @@ const EnteteOffre = () => {
       {error && <p className="error">{error}</p>}
 
       {!loading && !error && (
-        <div className="table-container">
-          <table className="table">
+        <div  style={styles.tableContainer}>
+          <table  style={styles.table}>
             <thead>
-              <tr className="header-row">
-                <th className="header-cell">AVION</th>
-                <th className="header-cell">AIROPORT</th>
-                <th className="header-cell">DATE_EDITION</th>
-                <th className="header-cell">NUMERO_ETAT</th>
-                <th className="header-cell">PNC_1</th>
-                <th className="header-cell">Actions</th>
-                <th className="header-cell">Details</th>
+              <tr style={styles.headerRow}>
+                <th style={styles.headerCell}>AVION</th>
+                <th style={styles.headerCell}>AIROPORT</th>
+                <th style={styles.headerCell}>DATE_EDITION</th>
+                <th style={styles.headerCell}>NUMERO_ETAT</th>
+                <th style={styles.headerCell}>PNC_1</th>
+                <th style={styles.headerCell}>Actions</th>
+                <th style={styles.headerCell}>Details</th>
               </tr>
             </thead>
             <tbody>
               {data.length > 0 ? (
                 data.map((row) => (
-                  <tr key={row.id} className="row">
+                  <tr key={row.id} style={styles.cell}>
                     <td className="cell">
                       {isEditing === row.id ? (
                         <input
@@ -142,8 +148,8 @@ const EnteteOffre = () => {
                         row.airoport
                       )}
                     </td>
-                    <td className="cell">{row.datE_EDITION}</td>
-                    <td className="cell">
+                    <td style={styles.cell}>{row.datE_EDITION}</td>
+                    <td style={styles.cell}>
                       {isEditing === row.id ? (
                         <input
                           type="text"
@@ -154,7 +160,7 @@ const EnteteOffre = () => {
                         row.numerO_ETAT
                       )}
                     </td>
-                    <td className="cell">
+                    <td style={styles.cell}>
                       {isEditing === row.id ? (
                         <input
                           type="text"
@@ -166,16 +172,16 @@ const EnteteOffre = () => {
                       )}
                     </td>
 
-                    <td className="cell">
+                    <td style={styles.cell}>
                       {isEditing === row.id ? (
                         <>
-                          <Save onClick={() => handleSaveEdit(editedItem)} style={{ ...styles.icon, color: "green" }} />
-                          <X onClick={handleCancelEdit} style={{ ...styles.icon, color: "red" }} />
+                          <Save onClick={() => handleSaveEdit(editedItem)} style={{ ...styles.icon, color: "green", cursor:"pointer" }} />
+                          <X onClick={handleCancelEdit} style={{ ...styles.icon, color: "red" , cursor:"pointer"}} />
                         </>
                       ) : (
                         <>
-                          <Edit onClick={() => handleEdit(row)} style={{ ...styles.icon, color: "#00a3f5" }} />
-                          <Trash onClick={() => handleDelete(row.id)} style={{ ...styles.icon, color: "#e74c3c" }} />
+                          <Edit onClick={() => handleEdit(row)} style={{ ...styles.icon, color: "#00a3f5", cursor:"pointer" }} />
+                          <Trash onClick={() => handleDelete(row.id)} style={{ ...styles.icon, color: "#e74c3c" , cursor:"pointer"}} />
                         </>
                       )}
                     </td>
@@ -212,9 +218,74 @@ const EnteteOffre = () => {
 };
 
 const styles = {
-  icon: {
-    cursor: "pointer",
-    marginRight: "8px",
+  addButton: {
+    padding: '10px 20px',
+    backgroundColor: '#C80505',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '5px',
+    display: 'flex',
+    alignItems: 'center',
+    cursor: 'pointer',
+    fontSize: '16px',
+    marginLeft:"50%",
+  },
+  container: {
+    padding: "10px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    borderRadius: "10px",
+  },
+  
+  heading: {
+    flex: 1,
+    marginRight:"500px",
+    marginTop:"50px"
+  },
+  searchInput: {
+    maxWidth: "400px",
+    marginRight: "10px", 
+  },
+  table: {
+    borderCollapse: "collapse",
+    borderRadius: "10px",
+    backgroundColor: "#fff",
+    boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.15)",
+    width: "100%",
+    marginTop:"10%",
+    marginLeft:"5%",
+  },
+  headerRow: {
+    backgroundColor: "#f8f9fa",
+    fontWeight: "bold",
+    borderRadius: "30px",
+  },
+  headerCell: {
+    padding: "12px",
+    textAlign: "left",
+    borderBottom: "2px solid #ddd",
+    color: "#333",
+  },
+  row: {
+    transition: "background 0.3s",
+    borderBottom: "1px solid #ddd",
+  },
+  cell: {
+    padding: "10px",
+    color: "#333",
+    borderBottom: "1px solid #ddd",
+  },
+  dialog: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    backgroundColor: "#fff",
+    padding: "20px",
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+    borderRadius: "10px",
+    zIndex: "999",
   },
 };
 

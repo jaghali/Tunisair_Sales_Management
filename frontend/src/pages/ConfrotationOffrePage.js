@@ -23,8 +23,8 @@ const ConfrotationOffrePage = () => {
   }, []);
 
   // Calculer les totaux globaux
-  const totalDepart = etatOffresDepart.reduce((acc, item) => acc + item.valeur, 0);
-  const totalArrivee = etatOffresArrivee.reduce((acc, item) => acc + item.valeur, 0);
+  const totalDepart = etatOffresDepart.reduce((acc, item) => acc + item.quantiteOfferte, 0);
+  const totalArrivee = etatOffresArrivee.reduce((acc, item) => acc + item.quantiteOfferte, 0);
   const difference = totalDepart - totalArrivee;
 
   // Indexer etatOffresDepart pour un accès rapide
@@ -55,7 +55,7 @@ const ConfrotationOffrePage = () => {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div style={styles.container}>
 <div>
   <Box display="flex" flexDirection="row" gap={5} justifyContent="center">
     <Box display="flex" alignItems="center" justifyContent="center" p={2} bgcolor="#f5f5f5" borderRadius={2} boxShadow={2} width={200} minHeight={60}>
@@ -117,5 +117,17 @@ const ConfrotationOffrePage = () => {
     </div>
   );
 };
+const styles = {
 
+  container: {
+    padding: "50px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    borderRadius: "10px",
+  },
+  
+
+
+}
 export default ConfrotationOffrePage;
