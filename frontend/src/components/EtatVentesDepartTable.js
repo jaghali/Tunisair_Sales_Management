@@ -272,7 +272,7 @@ const EtatVentesDepartTable = () => {
         </DialogActions>
       </Dialog>
 
-      <table>
+      <table className="table">
         <thead >
           <tr style={style.headerRow}>
             {columns.map((col) => (
@@ -354,14 +354,6 @@ const style = {
     fontSize: "16px",
     marginBottom: "10px",
   },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    marginTop: "20px",
-    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-    borderRadius: "8px",
-    overflow: "hidden",
-  },
   headerRow: {
     backgroundColor: "#f2f2f2",
     color: "#fff",
@@ -372,21 +364,9 @@ const style = {
     textAlign: "left",
     color:"black",
   },
-  row: {
-    borderBottom: "1px solid #ddd",
-    transition: "background 0.3s",
-    color:"black",
-  },
-  cell: {
-    padding: "10px",
-    borderBottom: "1px solid #ddd",
-    textAlign: "left",
-  },
-  icon: {
-    cursor: "pointer",
-    marginLeft: "10px",
-    transition: "transform 0.2s",
-  },
+  row: { transition: "background 0.3s" },
+  cell: { padding: "10px", borderBottom: "1px solid #ddd", textAlign: "left",color: "#000", },
+  icon: { cursor: "pointer", marginLeft: "5px" },
   input: {
     width: "100%",
     padding: "5px",

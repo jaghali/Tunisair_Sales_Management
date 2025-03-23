@@ -199,7 +199,7 @@ const handleClose = () => {
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth maxWidth="sm">
         <DialogTitle>Ajouter un nouvel élément</DialogTitle></Dialog>
       {isAdding && (
-        <div style={styles.formContainer}>
+        <div>
           <DialogContent>
           <Autocomplete
             options={articles} 
@@ -291,16 +291,16 @@ const handleClose = () => {
       <div>
         <table className="table">
           <thead>
-            <tr className="header-row">
-              <th className="header-cell">Code</th>
-              <th className="header-cell">Description</th>
-              <th className="header-cell">Quantité de Dotation</th>
-              <th className="header-cell">TotEm</th>
-              <th className="header-cell">Quantité Vendue</th>
-              <th className="header-cell">Prix Unitaire HT</th>
-              <th className="header-cell">Valeur</th>
-              <th className="header-cell">Restant</th>
-              <th className="header-cell">Action</th>
+            <tr style={styles.headerRow}>
+              <th style={styles.headerCell}>Code</th>
+              <th style={styles.headerCell}>Description</th>
+              <th style={styles.headerCell}>Quantité de Dotation</th>
+              <th style={styles.headerCell}>TotEm</th>
+              <th style={styles.headerCell}>Quantité Vendue</th>
+              <th style={styles.headerCell}>Prix Unitaire HT</th>
+              <th style={styles.headerCell}>Valeur</th>
+              <th style={styles.headerCell}>Restant</th>
+              <th style={styles.headerCell}>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -355,7 +355,11 @@ const handleClose = () => {
 };
 
 const styles = {
-  heading: { textAlign: "center", fontSize: "24px", fontWeight: "bold", color: "#c80505", marginBottom: "15px" },
+  heading: { textAlign: "center",
+    fontSize: "20px",
+    fontWeight: "bold",
+    color: "#c80505",
+    marginBottom: "15px", },
   addButton: {
     display: "flex",
     backgroundColor: "#28a745",
@@ -370,14 +374,19 @@ const styles = {
   searchBar: { 
     width: "300px", marginBottom: "50px", 
   },
-  table: { 
-    width: "100%", borderCollapse: "collapse", marginTop: "20px", boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", borderRadius: "8px", overflow: "hidden" 
+  headerRow: {
+    backgroundColor: "#f2f2f2",
+    color: "#fff",
   },
-  headerRow: { backgroundColor: "#c80505", color: "#fff" },
-  headerCell: { padding: "12px", textAlign: "left" },
+  headerCell: {
+    padding: "10px",
+    borderBottom: "2px solid #ddd",
+    textAlign: "left",
+    color:"black",
+  },
   row: { transition: "background 0.3s" },
   cell: { padding: "10px", borderBottom: "1px solid #ddd", textAlign: "left",color: "#000", },
-  icon: { cursor: "pointer", marginLeft: "10px" },
+  icon: { cursor: "pointer", marginLeft: "5px" },
   input: { width: "100%", padding: "5px", borderRadius: "4px" },
 };
 

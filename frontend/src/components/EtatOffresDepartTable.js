@@ -16,13 +16,9 @@ const EtatOffresDepartTable = () => {
     code: "",
     description: "",
     qtDotation: "",
-    qtCompJ: "",
     totEm: "",
-    quantiteCasse: "",
-    quantiteOffre: "",
+    quantiteOfferte: "",
     quantiteVente: "",
-    prixUnitaireHT: "",
-    valeur: "", 
     restant: "", 
   });
   const [articles, setArticles] = useState([]);
@@ -142,9 +138,8 @@ const EtatOffresDepartTable = () => {
     const formattedItem = {
       code: newItem.code, 
       description: newItem.description,
-      qtCompJ:parseInt(newItem.qtCompJ, 10),
       qtDotation:parseInt(newItem.qtDotation, 10),
-      quantiteOfferte:parseInt(newItem.quantiteOffre, 10),
+      quantiteOfferte:parseInt(newItem.quantiteOfferte, 10),
       restant: newItem.restant,
       totEm:parseInt(newItem.totEm, 10),
        
@@ -157,7 +152,6 @@ const EtatOffresDepartTable = () => {
         code: "",
         description: "",
         qtDotation: "",
-        qtCompJ: "",
         totEm: "",
       
         quantiteOfferte: "",
@@ -194,13 +188,11 @@ const EtatOffresDepartTable = () => {
                      options={articles} 
                      getOptionLabel={(option) => option.description || ''} 
                      onChange={(event, value) => {
-                       if (value) {
-                         const prix = prixArticles.find((p) => p.code === value.articleCode)?.prix || 0; 
+                       if (value) { 
                          setNewItem({
                            ...newItem,
                            code: value.code,
                            description: value.description,
-                           prixUnitaireHT: prix, // Assigne le prix récupéré
                          });
                        }
                      }}
@@ -250,7 +242,7 @@ const EtatOffresDepartTable = () => {
         </DialogActions>
       </Dialog>
 
-      <table>
+      <table className="table">
         <thead >
           <tr style={style.headerRow}>
             {columns.map((col) => (
@@ -362,7 +354,7 @@ const style = {
   },
   icon: {
     cursor: "pointer",
-    marginLeft: "10px",
+    marginLeft: "5px",
     transition: "transform 0.2s",
   },
   input: {

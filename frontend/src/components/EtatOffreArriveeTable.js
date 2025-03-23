@@ -1,19 +1,69 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { Edit, Trash, Save, X, Plus, Search } from "lucide-react";
-import { TablePagination, TextField,Autocomplete } from "@mui/material";
+import { Edit, Trash, Save, X, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { TablePagination, Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField,Autocomplete, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
 
 const EtatOffreArriveeTable = () => {
   const [data, setData] = useState([]);
   const [columns, setColumns] = useState([]);
   const [page, setPage] = useState(0);
-  const [articles, setArticles] = useState([]);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [editedItem, setEditedItem] = useState(null);
-  const [newItem, setNewItem] = useState(null);
-  const [isAdding, setIsAdding] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const [showDialog, setShowDialog] = useState(false);
+  const [prixArticles, setPrixArticles] = useState([]);
+  const [newItem, setNewItem] = useState({
+    code: "",
+    description: "",
+    qtDotation: "",
+    totEm: "",
+    quantiteOfferte: "",
+    quantiteVente: "",
+    restant: "", 
+  });
+  const [articles, setArticles] = useState([]);
 
+
+  // Fonction pour récupérer les articles
+  const fetchArticles = useCallback(async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/Articles");
+      setArticles(response.data);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des articles :", error);
+    }
+  }, []);
+
+  // Fonction pour récupérer le prix d'un article en fonction de la description
+  const fetchPrixArticles = useCallback(async ()  => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/PrixArticles");
+      setPrixArticles(response.data);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des prix :", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPrixArticles();
+  }, [fetchPrixArticles]);
+
+  // Fonction pour récupérer le code d'un article en fonction de la description
+  const fetchCodeByDescription = useCallback(async (description) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/Articles/code/${description}`);
+      if (response.data) {
+        setNewItem((prevItem) => ({
+          ...prevItem,
+          code: response.data.code,
+        }));
+      }
+    } catch (error) {
+      console.error("Erreur lors de la récupération du code :", error);
+    }
+  }, []);
+
+  // Fonction de récupération des données des Offres
   const fetchData = useCallback(async () => {
     try {
       const response = await axios.get("http://localhost:5000/api/EtatOffresArrivee");
@@ -26,33 +76,12 @@ const EtatOffreArriveeTable = () => {
     }
   }, []);
 
-  const fetchArticles = useCallback(async () => {
-    try {
-      const response = await axios.get("http://localhost:5000/api/Articles");
-      setArticles(response.data);
-    } catch (error) {
-      console.error("Erreur lors de la récupération des articles :", error);
-    }
-  }, []);
-
-   useEffect(() => {
-     fetchData();
-     fetchArticles();
-   }, [fetchData, fetchArticles]);
-
-
-  // Filter data based on search query (code or description)
-  const filteredData = data.filter((item) => {
-    const codeMatch = item.code && item.code.toLowerCase().includes(searchQuery.toLowerCase());
-    const descriptionMatch = item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return codeMatch || descriptionMatch;
-  });
+  useEffect(() => {
+    fetchData();
+    fetchArticles(); // Récupérer les articles au démarrage
+  }, [fetchData, fetchArticles]);
 
   const handleDelete = async (code) => {
-    if (!code) {
-      console.error("Code invalide pour la suppression");
-      return;
-    }
     try {
       await axios.delete(`http://localhost:5000/api/EtatOffresArrivee/${code}`);
       fetchData();
@@ -70,8 +99,6 @@ const EtatOffreArriveeTable = () => {
   };
 
   const handleSaveEdit = async () => {
-    if (!editedItem) return;
-
     try {
       await axios.put(`http://localhost:5000/api/EtatOffresArrivee/${editedItem.code}`, editedItem);
       fetchData();
@@ -85,31 +112,6 @@ const EtatOffreArriveeTable = () => {
     setEditedItem({ ...editedItem, [key]: e.target.value });
   };
 
-  const handleAdd = () => {
-    setNewItem({});
-    setIsAdding(true);
-  };
-
-  const handleChangeNew = (e, key) => {
-    setNewItem({ ...newItem, [key]: e.target.value });
-  };
-
-  const handleSaveNew = async () => {
-    try {
-      await axios.post("http://localhost:5000/api/EtatOffresArrivee", newItem);
-      fetchData();
-      setNewItem(null);
-      setIsAdding(false);
-    } catch (error) {
-      console.error("Erreur lors de l'ajout :", error);
-    }
-  };
-
-  const handleCancelAdd = () => {
-    setNewItem(null);
-    setIsAdding(false);
-  };
-
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -119,96 +121,162 @@ const EtatOffreArriveeTable = () => {
     setPage(0);
   };
 
-  const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  const handleAddChange = (e, key) => {
+    const value = e.target.value;
+    const updatedItem = { ...newItem, [key]: value };
+
+    if (key === "quantiteOfferte" || key === "qtDotation" ) {
+      updatedItem.restant = parseFloat(updatedItem.qtDotation || 0) - parseFloat(updatedItem.quantiteOfferte || 0);
+    }
+
+    setNewItem(updatedItem);
+  };
+
+  const handleAddItem = async () => {
+    console.log("Données envoyées :", newItem);
+    const formattedItem = {
+      code: newItem.code, 
+      description: newItem.description,
+      qtDotation:parseInt(newItem.qtDotation, 10),
+      quantiteOfferte:parseInt(newItem.quantiteOfferte, 10),
+      restant: newItem.restant,
+      totEm:parseInt(newItem.totEm, 10),
+       
+    };
+    try {
+      await axios.post("http://localhost:5000/api/EtatOffresArrivee", formattedItem);
+      fetchData();
+      setShowDialog(false);
+      setNewItem({
+        code: "",
+        description: "",
+        qtDotation: "",
+        totEm: "",
+      
+        quantiteOfferte: "",
+        restant: "", 
+      });
+    } catch (error) {
+      console.error("Erreur lors de l'ajout :", error);
+    }
+  };
+
+
+  const paginatedData = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
     <div>
-      <h2 style={styles.heading}>Etat des Offres Arrivée</h2>
-      
-      {/* Search Input */}
-      <TextField 
-             startIcon={<Search/>}
-             label="Rechercher"
-             variant="outlined"
-             fullWidth
-             value={searchQuery}
-             onChange={(e) => setSearchQuery(e.target.value)}
-             style={styles.searchBar}
-           />
-
-      <button onClick={handleAdd} style={styles.addButton}>
-        <Plus size={20} style={{ marginRight: "5px" }} />
+      <h2 style={style.heading}>Etat des Offres Départ</h2>
+      <Button
+        variant="contained"
+        color="primary"
+        startIcon={<Plus />}
+        onClick={() => setShowDialog(true)}
+        style={style.addButton}
+      >
         Ajouter
-      </button>
-      <table style={styles.table}>
+      </Button>
+
+      <Dialog open={showDialog} onClose={() => setShowDialog(false)}>
+        <DialogTitle>Ajouter un nouvel élément</DialogTitle>
+        <DialogContent>
+         <Autocomplete
+                     options={articles} 
+                     getOptionLabel={(option) => option.description || ''} 
+                     onChange={(event, value) => {
+                       if (value) { 
+                         setNewItem({
+                           ...newItem,
+                           code: value.code,
+                           description: value.description,
+                         });
+                       }
+                     }}
+                     
+                     renderInput={(params) => (
+                       
+                       <TextField
+                         {...params}
+                         label="Description"
+                         fullWidth
+                         style={style.inputField}
+                       />
+           
+                     )}
+                   />
+
+          {["code","qtDotation", "totEm", "quantiteOfferte"].map((col) => (
+            <TextField
+              key={col}
+              label={col}
+              value={newItem[col] || ""}
+              onChange={(e) => handleAddChange(e, col)}
+              fullWidth
+              margin="dense"
+              style={style.input}
+              disabled={col === "code" || col === "description" } 
+            />
+          ))}
+      
+   
+          <TextField
+            label="Restant"
+            value={newItem.restant || ""}
+            fullWidth
+            margin="dense"
+            style={style.input}
+            disabled
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleAddItem} color="primary">
+            Enregistrer
+          </Button>
+          <Button onClick={() => setShowDialog(false)} color="secondary">
+            Annuler
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <table className="table">
         <thead>
-          <tr style={styles.headerRow}>
+          <tr style={style.headerRow}>
             {columns.map((col) => (
-              <th key={col} style={styles.headerCell}>
+              <th key={col} style={style.headerCell}>
                 {col}
               </th>
             ))}
-            <th style={styles.headerCell}>Actions</th>
+            <th style={style.headerCell}>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {isAdding && (
-            <tr style={styles.row}>
-              {columns.map((col) => (
-                <td key={col} style={styles.cell}>
-                  {col === "description" ? (
-                      <Autocomplete
-                      options={articles}
-                      getOptionLabel={(option) => option.description}
-                      value={articles.find((article) => article.description === newItem[col]) || null}
-                      onChange={(event, newValue) => {
-                        setNewItem({ ...newItem, [col]: newValue ? newValue.description : "" });
-                      }}
-                      renderInput={(params) => <TextField {...params} label="Search" variant="outlined" />}
-                    />
-                   ) : (
-                  <TextField
-                    value={newItem[col] || ""}
-                    onChange={(e) => handleChangeNew(e, col)}
-                    style={styles.input}
-                  />
-                 )}
-                </td>
-              ))}
-              <td style={styles.cell}>
-                <Save onClick={handleSaveNew} style={{ ...styles.icon, color: "green" }} />
-                <X onClick={handleCancelAdd} style={{ ...styles.icon, color: "red" }} />
-              </td>
-            </tr>
-          )}
           {paginatedData.map((item, index) => {
             const isEditing = editedItem && editedItem.code === item.code;
             return (
-              <tr key={index} style={styles.row}>
+              <tr key={index} style={style.row}>
                 {columns.map((col) => (
-                  <td key={col} style={styles.cell}>
+                  <td key={col} style={style.cell}>
                     {isEditing ? (
                       <TextField
-                        type="text"
                         value={editedItem[col]}
                         onChange={(e) => handleChange(e, col)}
-                        style={styles.input}
+                        style={style.input}
                       />
                     ) : (
                       item[col]
                     )}
                   </td>
                 ))}
-                <td style={styles.cell}>
+                <td style={style.cell}>
                   {isEditing ? (
                     <>
-                      <Save onClick={handleSaveEdit} style={{ ...styles.icon, color: "green" }} />
-                      <X onClick={handleCancelEdit} style={{ ...styles.icon, color: "red" }} />
+                      <Save onClick={handleSaveEdit} style={{ ...style.icon, color: "green" }} />
+                      <X onClick={handleCancelEdit} style={{ ...style.icon, color: "red" }} />
                     </>
                   ) : (
                     <>
-                      <Edit onClick={() => handleEdit(item)} style={{ ...styles.icon, color: "#00a3f5" }} />
-                      <Trash onClick={() => handleDelete(item.code)} style={{ ...styles.icon, color: "#e74c3c" }} />
+                      <Edit onClick={() => handleEdit(item)} style={{...style.icon, color: "#00a3f5"}} />
+                      <Trash onClick={() => handleDelete(item.code)} style={{...style.icon, color: "#e74c3c"}} />
                     </>
                   )}
                 </td>
@@ -219,23 +287,23 @@ const EtatOffreArriveeTable = () => {
       </table>
 
       <TablePagination
+        rowsPerPageOptions={[5, 10, 25]}
         component="div"
-        count={filteredData.length}
+        count={data.length}
+        rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
-        rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleChangeRowsPerPage}
-        rowsPerPageOptions={[10, 20, 30]}
       />
     </div>
   );
 };
 
-// CSS Styles
-const styles = {
+
+const style = {
   heading: {
     textAlign: "center",
-    fontSize: "24px",
+    fontSize: "20px",
     fontWeight: "bold",
     color: "#c80505",
     marginBottom: "15px",
@@ -252,11 +320,6 @@ const styles = {
     fontSize: "16px",
     marginBottom: "10px",
   },
-  searchBar: {
-    width: "300px",
-    marginBottom: "20px",
-  
-  },
   table: {
     width: "100%",
     borderCollapse: "collapse",
@@ -266,33 +329,34 @@ const styles = {
     overflow: "hidden",
   },
   headerRow: {
-    backgroundColor: "#c80505",
+    backgroundColor: "#f2f2f2",
     color: "#fff",
   },
   headerCell: {
-    padding: "12px",
+    padding: "10px",
     borderBottom: "2px solid #ddd",
     textAlign: "left",
+    color:"black",
   },
   row: {
+    borderBottom: "1px solid #ddd",
     transition: "background 0.3s",
+    color:"black",
   },
   cell: {
     padding: "10px",
     borderBottom: "1px solid #ddd",
     textAlign: "left",
-    color: "#000",
   },
   icon: {
     cursor: "pointer",
-    marginLeft: "10px",
+    marginLeft: "5px",
     transition: "transform 0.2s",
   },
   input: {
     width: "100%",
     padding: "5px",
-    borderRadius: "4px",
+  
   },
 };
-
 export default EtatOffreArriveeTable;
