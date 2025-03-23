@@ -68,7 +68,7 @@ namespace TunisairSalesManagement.Controllers
 
         // DELETE: api/EtatVentesDepart/5
         [HttpDelete("{code}")]
-        public async Task<IActionResult> DeleteEtatVentesDepart(int code)
+        public async Task<IActionResult> DeleteEtatVentesDepart(string code)
         {
             var etatVentesDepart = await _context.EtatVentesDepart.FindAsync(code);
             if (etatVentesDepart == null)

@@ -87,11 +87,12 @@ const EtatVentesDepartTable = () => {
   }, [fetchData, fetchArticles]);
 
   const handleDelete = async (code) => {
+    console.log("Suppression du code :", code);
     try {
       await axios.delete(`http://localhost:5000/api/EtatVentesDepart/${code}`);
       fetchData();
     } catch (error) {
-      console.error("Erreur lors de la suppression :", error);
+      console.error("Erreur lors de la suppression :", error.response?.data || error.message);
     }
   };
 

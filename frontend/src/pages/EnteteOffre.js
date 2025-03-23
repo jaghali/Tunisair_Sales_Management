@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
-import { Plus , Edit, Trash, Save, X } from "lucide-react";
-import EnteteOffreForm from "../components/EnteteOffreForm";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle ,TextField} from "@mui/material";
+import { Edit, Trash, Save, X ,  Plus } from "lucide-react";
 import { motion } from 'framer-motion';
-
-import "../App.css"; 
 
 const EnteteOffre = () => {
   const [data, setData] = useState([]);
@@ -14,8 +11,8 @@ const EnteteOffre = () => {
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(null);
   const [editedItem, setEditedItem] = useState(null);
-  const [openForm, setOpenForm] = useState(false); 
-
+  const [openForm, setOpenForm] = useState(false);
+  const [newItem, setNewItem] = useState({ avion: "", airoport: "", datE_EDITION: "", numerO_ETAT: "",fL01:"" ,fL02:"" , fL03:"",cC1:"", pnC1: "" , noM1:"" ,noM2:"" , cC2:""  , pnC2: "" ,agenT_SAISIE: "" });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -39,7 +36,6 @@ const EnteteOffre = () => {
   const handleEdit = (item) => {
     setIsEditing(item.id);
     setEditedItem({ ...item });
-    
   };
 
   const handleSaveEdit = async (newData) => {
@@ -53,17 +49,41 @@ const EnteteOffre = () => {
     }
   };
 
-  const handleAddNew = (newData) => {
+  const validateNewItem = (item) => {
+    const errors = [];
+  
+    if (typeof item.numerO_ETAT !== "string") errors.push("Numéro État doit être une chaîne.");
+    if (typeof item.avion !== "string") errors.push("Avion doit être une chaîne.");
+    if (typeof item.airoport !== "string") errors.push("Aéroport doit être une chaîne.");
+    if (isNaN(Date.parse(item.datE_EDITION))) errors.push("Date Edition doit être une date valide.");
+    if (typeof item.agenT_SAISIE !== "string") errors.push("Agent Saisie doit être une chaîne.");
+    if (isNaN(Number(item.fL01))) errors.push("FL 01 doit être un nombre.");
+    if (isNaN(Number(item.fL02))) errors.push("FL 02 doit être un nombre.");
+    if (isNaN(Number(item.fL03))) errors.push("FL 03 doit être un nombre.");
+  
+    if (errors.length > 0) {
+      console.error("Erreurs de validation :", errors);
+      alert(errors.join("\n"));
+      return false;
+    }
+    return true;
+  };
+  
+
+  const handleAddNew = async () => {
+    if (!validateNewItem(newItem)) return; // Vérification avant d'envoyer
+    
     try {
-      axios.post("http://localhost:5000/api/EnteteOffre", newData)
-        .then(response => {
-          setData([...data, response.data]);
-          setOpenForm(false); // Close form after adding
-        });
+      const response = await axios.post("http://localhost:5000/api/EnteteOffre", newItem);
+      setData([...data, response.data]);
+      setOpenForm(false);
     } catch (err) {
+      console.error("Erreur lors de l'ajout :", err.response?.data || err.message);
       alert("Erreur lors de l'ajout !");
     }
   };
+  
+  
 
   const handleCancelEdit = () => {
     setIsEditing(null);
@@ -83,9 +103,10 @@ const EnteteOffre = () => {
   };
 
   return (
-    <div  style={styles.container}>
-      <h2  style={styles.heading}>Etat Des Offres Départ</h2>
+    <div style={styles.container}>
+        <h2 style={styles.heading}>Etat Des Offres Départ</h2>
 
+    
       <motion.button
           onClick={() => setOpenForm(true)}
           style={styles.addButton}
@@ -94,103 +115,53 @@ const EnteteOffre = () => {
           transition={{ type: "spring", stiffness: 300 }}
   >
     <Plus style={styles.icon} />
-    Ajouter Un Etat D'Offre
+    Ajouter Etat De Vente
     </motion.button>
-
-      {loading && (
-        <div className="loader-container">
-          <svg viewBox="0 0 37 37" height="50" width="50">
-            <path className="track" fill="none" strokeWidth="5" pathLength="100" d="M36.63 31.746 c0 -13.394 -7.326 -25.16 -18.13 -31.376 C7.696 6.66 0.37 18.352 0.37 31.746 c5.328 3.108 11.544 4.884 18.13 4.884 S31.302 34.854 36.63 31.746z" />
-            <path className="car" fill="none" strokeWidth="5" pathLength="100" d="M36.63 31.746 c0 -13.394 -7.326 -25.16 -18.13 -31.376 C7.696 6.66 0.37 18.352 0.37 31.746 c5.328 3.108 11.544 4.884 18.13 4.884 S31.302 34.854 36.63 31.746z" />
-          </svg>
-        </div>
-      )}
-
-      {error && <p className="error">{error}</p>}
+      {loading && <div style={styles.loader}>Chargement...</div>}
+      {error && <p style={styles.error}>{error}</p>}
 
       {!loading && !error && (
-        <div  style={styles.tableContainer}>
-          <table  style={styles.table}>
+        <div style={styles.tableContainer}>
+          <table style={styles.table}>
             <thead>
               <tr style={styles.headerRow}>
-                <th style={styles.headerCell}>AVION</th>
-                <th style={styles.headerCell}>AIROPORT</th>
-                <th style={styles.headerCell}>DATE_EDITION</th>
-                <th style={styles.headerCell}>NUMERO_ETAT</th>
-                <th style={styles.headerCell}>PNC_1</th>
-                <th style={styles.headerCell}>Actions</th>
-                <th style={styles.headerCell}>Details</th>
+                {['AVION', 'AIROPORT', 'DATE_EDITION', 'NUMERO_ETAT', 'PNC_1', 'Actions', 'Details'].map(header => (
+                  <th key={header} style={styles.headerCell}>{header}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {data.length > 0 ? (
                 data.map((row) => (
-                  <tr key={row.id} style={styles.cell}>
-                    <td className="cell">
-                      {isEditing === row.id ? (
-                        <input
-                          type="text"
-                          value={editedItem.avion}
-                          onChange={(e) => setEditedItem({ ...editedItem, avion: e.target.value })}
-                        />
-                      ) : (
-                        row.avion
-                      )}
-                    </td>
-                    <td className="cell">
-                      {isEditing === row.id ? (
-                        <input
-                          type="text"
-                          value={editedItem.airoport}
-                          onChange={(e) => setEditedItem({ ...editedItem, airoport: e.target.value })}
-                        />
-                      ) : (
-                        row.airoport
-                      )}
-                    </td>
-                    <td style={styles.cell}>{row.datE_EDITION}</td>
-                    <td style={styles.cell}>
-                      {isEditing === row.id ? (
-                        <input
-                          type="text"
-                          value={editedItem.numerO_ETAT}
-                          onChange={(e) => setEditedItem({ ...editedItem, numerO_ETAT: e.target.value })}
-                        />
-                      ) : (
-                        row.numerO_ETAT
-                      )}
-                    </td>
-                    <td style={styles.cell}>
-                      {isEditing === row.id ? (
-                        <input
-                          type="text"
-                          value={editedItem.pnC1}
-                          onChange={(e) => setEditedItem({ ...editedItem, pnC1: e.target.value })}
-                        />
-                      ) : (
-                        row.pnC1
-                      )}
-                    </td>
-
+                  <tr key={row.id}>
+                    {['avion', 'airoport', 'datE_EDITION', 'numerO_ETAT',  'pnC1'  ].map((field) => (
+                      <td key={field} style={styles.cell}>
+                        {isEditing === row.id ? (
+                          <input type="text" value={editedItem[field]} onChange={(e) => setEditedItem({ ...editedItem, [field]: e.target.value })} />
+                        ) : (
+                          row[field]
+                        )}
+                      </td>
+                    ))}
                     <td style={styles.cell}>
                       {isEditing === row.id ? (
                         <>
-                          <Save onClick={() => handleSaveEdit(editedItem)} style={{ ...styles.icon, color: "green", cursor:"pointer" }} />
+                          <Save onClick={() => handleSaveEdit(editedItem)} style={{ ...styles.icon,  color: "#00a3f5", cursor:"pointer"}} />
                           <X onClick={handleCancelEdit} style={{ ...styles.icon, color: "red" , cursor:"pointer"}} />
                         </>
                       ) : (
                         <>
-                          <Edit onClick={() => handleEdit(row)} style={{ ...styles.icon, color: "#00a3f5", cursor:"pointer" }} />
+                          <Edit onClick={() => handleEdit(row)} style={{ ...styles.icon, color: "#00a3f5" , cursor:"pointer"}} />
                           <Trash onClick={() => handleDelete(row.id)} style={{ ...styles.icon, color: "#e74c3c" , cursor:"pointer"}} />
                         </>
                       )}
                     </td>
-                    <td className="cell"><Button onClick={handleDetailClick}>View More ...</Button></td>
+                    <td style={styles.cell}><Button onClick={handleDetailClick}>View More ...</Button></td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="4" className="no-data">Aucune donnée trouvée.</td>
+                  <td colSpan="7" style={styles.noData}>Aucune donnée trouvée.</td>
                 </tr>
               )}
             </tbody>
@@ -198,19 +169,43 @@ const EnteteOffre = () => {
         </div>
       )}
 
-      {/* Dialog for Add Form Only */}
-      <Dialog open={openForm} onClose={handleCancelEdit}>
-        <DialogTitle>Ajouter Etat De Offre</DialogTitle>
+<Dialog open={openForm} onClose={() => setOpenForm(false)}>
+        <DialogTitle>Ajouter Etat De Vente</DialogTitle>
         <DialogContent>
-          <EnteteOffreForm
-            onClose={handleCancelEdit}
-            onSave={handleAddNew} 
-          />
+          <div style={{ display: "flex", gap: "15px", marginBottom: "10px" }}>
+          <TextField label="Numéro Etat" value={newItem.numerO_ETAT} onChange={(e) => setNewItem({ ...newItem, numerO_ETAT: e.target.value })} fullWidth />
+
+            <TextField label="Fournisseur" value={newItem.avion} onChange={(e) => setNewItem({ ...newItem, avion: e.target.value })} fullWidth />
+          </div>
+          <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
+          <TextField label="Airoport" value={newItem.airoport} onChange={(e) => setNewItem({ ...newItem, airoport: e.target.value })} fullWidth />
+
+          <TextField label="Date Edition" type="date" InputLabelProps={{ shrink: true }} value={newItem.datE_EDITION} onChange={(e) => setNewItem({ ...newItem, datE_EDITION: e.target.value })} fullWidth />
+          <TextField label="Agent Saisie" value={newItem.agenT_SAISIE} onChange={(e) => setNewItem({ ...newItem, agenT_SAISIE: e.target.value })} fullWidth />
+          </div>
+          
+          
+          <div style={{ display: "flex", gap: "15px", marginBottom: "10px" }}>
+          <TextField label="fL 01" value={newItem.fL01} onChange={(e) => setNewItem({ ...newItem, fL01: e.target.value })} fullWidth />
+          <TextField label="fL 02" value={newItem.fL02} onChange={(e) => setNewItem({ ...newItem, fL02: e.target.value })} fullWidth />
+            <TextField label="fL 03" value={newItem.fL03} onChange={(e) => setNewItem({ ...newItem, fL03: e.target.value })} fullWidth />
+            
+          </div>
+          <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
+          <TextField label="cc 1" value={newItem.cC1} onChange={(e) => setNewItem({ ...newItem, cC1: e.target.value })} fullWidth />
+          <TextField label="PNC 1" value={newItem.pnC1} onChange={(e) => setNewItem({ ...newItem, pnC1: e.target.value })} fullWidth />
+            <TextField label="noM 1" value={newItem.noM1} onChange={(e) => setNewItem({ ...newItem, noM1: e.target.value })} fullWidth />
+            
+          </div>  
+          <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
+          <TextField label="noM 2" value={newItem.noM2} onChange={(e) => setNewItem({ ...newItem, noM2: e.target.value })} fullWidth />
+          <TextField label="cC 2" value={newItem.cC2} onChange={(e) => setNewItem({ ...newItem, cC2: e.target.value })} fullWidth />
+            <TextField label="PNC 2" value={newItem.pnC2} onChange={(e) => setNewItem({ ...newItem, pnC2: e.target.value })} fullWidth />
+          </div>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancelEdit} color="secondary">
-            Annuler
-          </Button>
+          <Button onClick={() => setOpenForm(false)} color="secondary">Annuler</Button>
+          <Button onClick={handleAddNew} color="primary">Ajouter</Button>
         </DialogActions>
       </Dialog>
     </div>

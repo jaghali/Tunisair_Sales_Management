@@ -7,7 +7,7 @@ import { TextField, InputAdornment, IconButton } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
 import { motion } from 'framer-motion';
 
-const UserTable = ({ users, onEdit, onDelete }) => {
+const UserTable = ({ users, onEdit, onDelete, onAdd }) => {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const [searchQuery, setSearchQuery] = useState("");
   const [openDialog, setOpenDialog] = useState(false); // Corrected to openDialog state
@@ -20,13 +20,6 @@ const UserTable = ({ users, onEdit, onDelete }) => {
     setSortConfig({ key, direction });
   };
 
-  const handleOpenDialog = () => {
-    setOpenDialog(true);
-  };
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-  };
 
   const sortedUsers = [...users].sort((a, b) => {
     if (!sortConfig.key) return 0;
@@ -82,7 +75,7 @@ const UserTable = ({ users, onEdit, onDelete }) => {
     }}
   />
   <motion.button
-    onClick={handleOpenDialog}
+    onClick={onAdd}
     style={styles.addButton}
     whileHover={{ scale: 1.1 }}
     whileTap={{ scale: 0.9 }}
@@ -133,13 +126,6 @@ const UserTable = ({ users, onEdit, onDelete }) => {
         </tbody>
       </table>
 
-      {openDialog && (
-        <div style={styles.dialog}>
-          <h3>Ajouter un article</h3>
-          {/* Add your dialog content and form here */}
-          <button onClick={handleCloseDialog}>Close</button>
-        </div>
-      )}
     </div>
   );
 };

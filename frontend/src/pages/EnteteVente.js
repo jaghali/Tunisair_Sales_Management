@@ -12,7 +12,7 @@ const EnteteVente = () => {
   const [isEditing, setIsEditing] = useState(null);
   const [editedItem, setEditedItem] = useState(null);
   const [openForm, setOpenForm] = useState(false);
-  const [newItem, setNewItem] = useState({ avion: "", airoport: "", date_EDITION: "", numero_ETAT: "",fL01:"" ,fL02:"" , fL03:"",cC1:"", pnC1: "" , noM1:"" ,noM2:"" , cC2:""  , pnC2: ""  });
+  const [newItem, setNewItem] = useState({ avion: "", airoport: "", datE_EDITION: "", numerO_ETAT: "",fL01:"" ,fL02:"" , fL03:"",cC1:"", pnC1: "" , noM1:"" ,noM2:"" , cC2:""  , pnC2: "" ,agenT_SAISIE: "" });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -47,17 +47,41 @@ const EnteteVente = () => {
     }
   };
 
-  const handleAddNew = (newData) => {
+  const validateNewItem = (item) => {
+    const errors = [];
+  
+    if (typeof item.numerO_ETAT !== "string") errors.push("Numéro État doit être une chaîne.");
+    if (typeof item.avion !== "string") errors.push("Avion doit être une chaîne.");
+    if (typeof item.airoport !== "string") errors.push("Aéroport doit être une chaîne.");
+    if (isNaN(Date.parse(item.datE_EDITION))) errors.push("Date Edition doit être une date valide.");
+    if (typeof item.agenT_SAISIE !== "string") errors.push("Agent Saisie doit être une chaîne.");
+    if (isNaN(Number(item.fL01))) errors.push("FL 01 doit être un nombre.");
+    if (isNaN(Number(item.fL02))) errors.push("FL 02 doit être un nombre.");
+    if (isNaN(Number(item.fL03))) errors.push("FL 03 doit être un nombre.");
+  
+    if (errors.length > 0) {
+      console.error("Erreurs de validation :", errors);
+      alert(errors.join("\n"));
+      return false;
+    }
+    return true;
+  };
+  
+
+  const handleAddNew = async () => {
+    if (!validateNewItem(newItem)) return; // Vérification avant d'envoyer
+    
     try {
-      axios.post("http://localhost:5000/api/EnteteVente", newData)
-        .then(response => {
-          setData([...data, response.data]);
-          setOpenForm(false);
-        });
+      const response = await axios.post("http://localhost:5000/api/EnteteVente", newItem);
+      setData([...data, response.data]);
+      setOpenForm(false);
     } catch (err) {
+      console.error("Erreur lors de l'ajout :", err.response?.data || err.message);
       alert("Erreur lors de l'ajout !");
     }
   };
+  
+  
 
   const handleCancelEdit = () => {
     setIsEditing(null);
@@ -78,7 +102,7 @@ const EnteteVente = () => {
 
   return (
     <div style={styles.container}>
-        <h2 style={styles.heading}>Etat Des Vente Départ</h2>
+        <h2 style={styles.heading}>Etat Des Ventes Départ</h2>
 
     
       <motion.button
@@ -147,16 +171,15 @@ const EnteteVente = () => {
         <DialogTitle>Ajouter Etat De Vente</DialogTitle>
         <DialogContent>
           <div style={{ display: "flex", gap: "15px", marginBottom: "10px" }}>
-          <TextField label="Numéro Etat" value={newItem.numero_ETAT} onChange={(e) => setNewItem({ ...newItem, numero_ETAT: e.target.value })} fullWidth />
+          <TextField label="Numéro Etat" value={newItem.numerO_ETAT} onChange={(e) => setNewItem({ ...newItem, numerO_ETAT: e.target.value })} fullWidth />
 
             <TextField label="Fournisseur" value={newItem.avion} onChange={(e) => setNewItem({ ...newItem, avion: e.target.value })} fullWidth />
           </div>
           <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
           <TextField label="Airoport" value={newItem.airoport} onChange={(e) => setNewItem({ ...newItem, airoport: e.target.value })} fullWidth />
 
-          <TextField label="Date Edition" type="date" InputLabelProps={{ shrink: true }} value={newItem.date_EDITION} onChange={(e) => setNewItem({ ...newItem, date_EDITION: e.target.value })} fullWidth />
-
-            
+          <TextField label="Date Edition" type="date" InputLabelProps={{ shrink: true }} value={newItem.datE_EDITION} onChange={(e) => setNewItem({ ...newItem, datE_EDITION: e.target.value })} fullWidth />
+          <TextField label="Agent Saisie" value={newItem.agenT_SAISIE} onChange={(e) => setNewItem({ ...newItem, agenT_SAISIE: e.target.value })} fullWidth />
           </div>
           
           

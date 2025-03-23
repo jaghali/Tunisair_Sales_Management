@@ -3,8 +3,9 @@ import {Dialog, DialogTitle, DialogContent, DialogActions, TablePagination, Butt
 import {motion } from "framer-motion";
 import UserTable from "../components/UserTable";
 import UserForm from "../components/UserForm";
-import { getUsers, deleteUser, saveUser } from "../api/api";
+import { getUsers, deleteUser} from "../api/api";
 import "../App.css";
+import axios from "axios";
 
 const AdminUsers = () => {
     const [users, setUsers] = useState([]);
@@ -16,6 +17,33 @@ const AdminUsers = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [page, setPage] = useState(0); 
     const [rowsPerPage, setRowsPerPage] = useState(5);
+
+    // Fonction API pour créer ou mettre à jour un utilisateur
+    const saveUser = async (user) => {
+        let response; 
+        try {
+            // Vérifier si 'user.matricule' existe et n'est pas vide
+            if (user.matricule && user.matricule.trim() !== "") {
+                // Vérifier si l'utilisateur existe déjà
+                const checkUserResponse = await axios.get(`http://localhost:5000/api/pn/${user.matricule}`);
+                
+                if (checkUserResponse.status === 200) {
+                    // Si l'utilisateur existe déjà, faire une mise à jour (PUT)
+                    console.log("Mise à jour de l'utilisateur :", user);
+                    response = await axios.put(`http://localhost:5000/api/pn/${user.matricule}`, user);
+                }
+            } 
+            return response.data;
+        } catch (error) {
+            if (error.response && error.response.status === 404) {
+                // Si l'utilisateur n'existe pas, on peut créer un nouvel utilisateur (POST)
+                response = await axios.post('http://localhost:5000/api/pn', user);
+            } else {
+                console.error("Erreur lors de l'enregistrement de l'utilisateur :", error.response || error);
+                throw error; // Relancer l'erreur pour pouvoir la gérer dans le composant appelant
+            }
+        }
+    };
 
     useEffect(() => {
         fetchUsers();
@@ -47,10 +75,21 @@ const AdminUsers = () => {
 
     const handleSave = async (user) => {
         setIsLoading(true);
-        await saveUser(user);
-        fetchUsers();
-        setIsDialogOpen(false);
+        try {
+            // Appel à saveUser, qui gère la création ou mise à jour selon le matricule
+            await saveUser(user); 
+            fetchUsers();
+            setIsDialogOpen(false);  // Ferme la fenêtre après l'enregistrement
+        } catch (error) {
+            console.error("Erreur lors de l'enregistrement de l'utilisateur :", error);
+        }
+        setIsLoading(false);
     };
+
+    const handleAddUser = () => {
+        setSelectedUser(null); // Ensure a new user is added
+        setIsDialogOpen(true);
+      };
 
     const sortedUsers = [...filteredUsers].sort((a, b) => a.matricule.localeCompare(b.matricule));
 
@@ -80,10 +119,9 @@ const AdminUsers = () => {
                     users={usersToDisplay}  
                     onEdit={(user) => { setSelectedUser(user); setIsDialogOpen(true); }}
                     onDelete={confirmDeleteUser}
+                    onAdd={handleAddUser}
                 />
             </div>
-
-         
 
             <TablePagination
                 component="div"
@@ -95,6 +133,7 @@ const AdminUsers = () => {
                 rowsPerPageOptions={[5, 10 , 20]}
                 style={{ color: "#c80505" }}
             />
+            
 
             <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} fullWidth maxWidth="sm">
                 <DialogTitle>{selectedUser ? "Modifier l'utilisateur" : "Ajouter un utilisateur"}</DialogTitle>

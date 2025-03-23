@@ -287,11 +287,6 @@ const Articles = () => {
     return filteredPrice || null;
   };
 
-  const handleSort = (column) => {
-    const isAsc = sortColumn === column && sortDirection === "asc";
-    setSortColumn(column);
-    setSortDirection(isAsc ? "desc" : "asc");
-  };
 
   const sortedData = [...data].sort((a, b) => {
     if (!sortColumn) return 0;
@@ -302,13 +297,19 @@ const Articles = () => {
       : bValue.toString().localeCompare(aValue.toString());
   });
 
-  const filteredData = sortedData.filter((item) =>
-    columns.some((col) =>
+  const filteredData = sortedData
+  .filter((item) => {
+    // Filter by supplier if one is selected
+    if (selectedSupplier && item.fournisseurId !== selectedSupplier) {
+      return false;
+    }
+    return columns.some((col) =>
       item[col]?.toString().toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  );
+    );
+  });
 
   const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  
 
   return (
     <div>
@@ -316,19 +317,26 @@ const Articles = () => {
        <h2 >Articles</h2>
       
       <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginBottom: "20px" }}>
-        <FormControl style={{ width: "150px" }}>
-          <InputLabel>Fournisseur</InputLabel>
-          <Select
-            value={selectedSupplier}
-            onChange={(e) => setSelectedSupplier(e.target.value)}
-            label="Fournisseur"
-          >
-            <MenuItem value="">Tous</MenuItem>
-            {suppliers.map((supplier) => (
-              <MenuItem key={supplier.id} value={supplier.id}>{supplier.nom}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+      <FormControl style={{ width: "150px" }}>
+  <InputLabel>Fournisseur</InputLabel>
+  <Select
+    value={selectedSupplier}
+    onChange={(e) => {
+    const value = e.target.value;
+    setSelectedSupplier(value);
+    }}
+    label="Fournisseur"
+  >
+  <MenuItem value="">Tous</MenuItem>
+    {suppliers.map((supplier) => (
+  <MenuItem key={supplier.id} value={supplier.id}>
+      {supplier.nom}
+  </MenuItem>
+    ))}
+  </Select>
+</FormControl>
+
+        
 
         <TextField
           label="Date Debut"
