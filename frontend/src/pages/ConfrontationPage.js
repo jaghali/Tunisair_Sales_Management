@@ -34,6 +34,7 @@ const Confrontation = () => {
   const confrontationData = etatVenteArrivee.map(arriveeItem => {
     const departItem = departMap[arriveeItem.description] || {};
     return {
+      code: arriveeItem.code,
       description: arriveeItem.description,
       qtDotationDepart: departItem.qtDotation || 0,
       qtDotationArrivee: arriveeItem.quantiteDotation,
@@ -41,6 +42,8 @@ const Confrontation = () => {
       quantiteVenteArrivee: arriveeItem.quantiteVendue,
       prixUnitaireHTDepart: departItem.prixUnitaireHT || 0,
       prixUnitaireHTArrivee: arriveeItem.prixUnitaireHT,
+      valeurDepart: departItem.valeur,
+      valeurArrivee: arriveeItem.valeur,
       restantDepart: departItem.restant || 0,
       restantArrivee: arriveeItem.restant,
     };
@@ -76,6 +79,7 @@ const Confrontation = () => {
         <Table>
           <TableHead sx={{ backgroundColor: "#f2f2f2" }}>
             <TableRow>
+              <TableCell>Code</TableCell>
               <TableCell>Description</TableCell>
               <TableCell>Qt Dotation Départ</TableCell>
               <TableCell>Qt Dotation Arrivée</TableCell>
@@ -83,6 +87,8 @@ const Confrontation = () => {
               <TableCell>Qt Vente Arrivée</TableCell>
               <TableCell>Prix Unitaire HT Départ</TableCell>
               <TableCell>Prix Unitaire HT Arrivée</TableCell>
+              <TableCell>Valeur Départ</TableCell>
+              <TableCell>Valeur Arrivée</TableCell>
               <TableCell>Restant Départ</TableCell>
               <TableCell>Restant Arrivée</TableCell>
             </TableRow>
@@ -92,6 +98,7 @@ const Confrontation = () => {
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((item, index) => (
                 <TableRow key={index}>
+                  <TableCell>{item.code}</TableCell>
                   <TableCell>{item.description}</TableCell>
                   <TableCell>{item.qtDotationDepart}</TableCell>
                   <TableCell>{item.qtDotationArrivee}</TableCell>
@@ -99,6 +106,8 @@ const Confrontation = () => {
                   <TableCell>{item.quantiteVenteArrivee}</TableCell>
                   <TableCell>{item.prixUnitaireHTDepart}</TableCell>
                   <TableCell>{item.prixUnitaireHTArrivee}</TableCell>
+                  <TableCell>{item.valeurDepart}</TableCell>
+                  <TableCell>{item.valeurArrivee}</TableCell>
                   <TableCell>{item.restantDepart}</TableCell>
                   <TableCell>{item.restantArrivee}</TableCell>
                 </TableRow>

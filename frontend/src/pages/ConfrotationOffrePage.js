@@ -34,6 +34,7 @@ const ConfrotationOffrePage = () => {
   const confrontationData = etatOffresArrivee.map(arriveeItem => {
     const departItem = departMap[arriveeItem.description] || {};
     return {
+      code: arriveeItem.code,
       description: arriveeItem.description,
       qtDotationDepart: departItem.quantiteDotation ,
       qtDotationArrivee: arriveeItem.quantiteDotation,
@@ -77,7 +78,7 @@ const ConfrotationOffrePage = () => {
         <Table>
           <TableHead sx={{ backgroundColor: "#f2f2f2" }}>
             <TableRow>
-
+              <TableCell>Code</TableCell>
               <TableCell>Description</TableCell>
               <TableCell>Qt Dotation Départ</TableCell>
               <TableCell>Qt Dotation Arrivée</TableCell>
@@ -92,7 +93,7 @@ const ConfrotationOffrePage = () => {
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((item, index) => (
                 <TableRow key={index}>
-
+                  <TableCell>{item.code}</TableCell>
                   <TableCell>{item.description}</TableCell>
                   <TableCell>{item.qtDotationDepart}</TableCell>
                   <TableCell>{item.qtDotationArrivee}</TableCell>
