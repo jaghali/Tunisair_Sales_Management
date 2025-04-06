@@ -6,7 +6,7 @@ import { Edit, Trash, Save, X ,  Plus } from "lucide-react";
 import { motion } from 'framer-motion';
 import {Euro} from "lucide-react";
 
-const EnteteVenteArr = () => {
+const DetailsEtat = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -114,19 +114,6 @@ const EnteteVenteArr = () => {
 
   return (
     <div style={styles.container}>
-        <h2 style={styles.heading}>Etat Des Ventes Fournisseur</h2>
-
-    
-      <motion.button
-          onClick={() => setOpenForm(true)}
-          style={styles.addButton}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          transition={{ type: "spring", stiffness: 300 }}
-  >
-    <Plus style={styles.icon} />
-    Ajouter Etat De Vente
-    </motion.button>
       {loading && <div style={styles.loader}>Chargement...</div>}
       {error && <p style={styles.error}>{error}</p>}
 
@@ -135,7 +122,7 @@ const EnteteVenteArr = () => {
           <table style={styles.table}>
             <thead>
               <tr style={styles.headerRow}>
-                {['AVION', 'AIROPORT', 'DATE_EDITION', 'NUMERO_ETAT', 'PNC_1' ,'TotaleValeur' ,'TotaleEncaisse' ,'Status', 'Actions', 'Details'].map(header => (
+                {['AVION', 'AIROPORT', 'DATE_EDITION', 'NUMERO_ETAT', 'fL01' , 'fL02' ,'fL03', 'cC2','PNC_1' , 'noM1' ,'noM2', 'cC2', 'pnC2','Status','Actions'].map(header => (
                   <th key={header} style={styles.headerCell}>{header}</th>
                 ))}
               </tr>
@@ -144,7 +131,7 @@ const EnteteVenteArr = () => {
               {data.length > 0 ? (
                 data.map((row) => (
                   <tr key={row.id}>
-                    {['avion', 'airoport', 'datE_EDITION', 'numerO_ETAT',  'pnC1'  ].map((field) => (
+                    {['avion', 'airoport', 'datE_EDITION', 'numerO_ETAT',  'fL01' , 'fL02' ,'fL03','cC2', 'pnC1'  , 'noM1' ,'noM2', 'cC2', 'pnC2'].map((field) => (
                       <td key={field} style={styles.cell}>
                         {isEditing === row.id ? (
                           <input type="text" value={editedItem[field]} onChange={(e) => setEditedItem({ ...editedItem, [field]: e.target.value })} />
@@ -153,11 +140,7 @@ const EnteteVenteArr = () => {
                         )}
                       </td>
                     ))}
-                    <td style={styles.cell}>{totalArrivee}<Euro size={14}  style={{ marginLeft: "2px" }}/></td>
-
-
-                    <td style={styles.cell}>{totalEncaisse}<Euro size={14}  style={{ marginLeft: "2px" }}/></td>
-
+                
                     <td style={styles.cell}>
   {totalArrivee === totalEncaisse ? (
     <div 
@@ -202,7 +185,6 @@ const EnteteVenteArr = () => {
                         </>
                       )}
                     </td>
-                    <td style={styles.cell}><Button onClick={handleDetailClick}>View More ...</Button></td>
                   </tr>
                 ))
               ) : (
@@ -293,9 +275,10 @@ const styles = {
     borderRadius: "10px",
     backgroundColor: "#fff",
     boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.15)",
-    width: "95%",
-    marginTop:"10%",
-    marginLeft:"13%",
+    width: "100%",
+    marginTop:"4%",
+    marginBottom:"5%",
+    marginLeft:"0",
   },
   headerRow: {
     backgroundColor: "#f8f9fa",
@@ -330,4 +313,4 @@ const styles = {
   },
 };
 
-export default EnteteVenteArr;
+export default DetailsEtat;

@@ -18,7 +18,7 @@ public class ExchangeRateController : ControllerBase
     public async Task<IActionResult> GetRate(string currency)
     {
         string baseCurrency = "EUR";
-        string apiKey = "9e2aba096b8e82ceeaab0558"; 
+        string apiKey = "e5923cd8530f1ce9548e37f2"; 
         string url = $"https://v6.exchangerate-api.com/v6/{apiKey}/latest/{baseCurrency}";
 
         var response = await _httpClient.GetAsync(url);

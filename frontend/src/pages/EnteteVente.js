@@ -121,49 +121,54 @@ const EnteteVente = () => {
       {!loading && !error && (
         <div style={styles.tableContainer}>
           <table style={styles.table}>
-            <thead>
-              <tr style={styles.headerRow}>
-                {['AVION', 'AIROPORT', 'DATE_EDITION', 'NUMERO_ETAT', 'PNC_1', 'Actions', 'Details'].map(header => (
-                  <th key={header} style={styles.headerCell}>{header}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {data.length > 0 ? (
-                data.map((row) => (
-                  <tr key={row.id}>
-                    {['avion', 'airoport', 'datE_EDITION', 'numerO_ETAT',  'pnC1'  ].map((field) => (
-                      <td key={field} style={styles.cell}>
-                        {isEditing === row.id ? (
-                          <input type="text" value={editedItem[field]} onChange={(e) => setEditedItem({ ...editedItem, [field]: e.target.value })} />
-                        ) : (
-                          row[field]
-                        )}
-                      </td>
-                    ))}
-                    <td style={styles.cell}>
-                      {isEditing === row.id ? (
-                        <>
-                          <Save onClick={() => handleSaveEdit(editedItem)} style={{ ...styles.icon,  color: "#00a3f5", cursor:"pointer"}} />
-                          <X onClick={handleCancelEdit} style={{ ...styles.icon, color: "red" , cursor:"pointer"}} />
-                        </>
-                      ) : (
-                        <>
-                          <Edit onClick={() => handleEdit(row)} style={{ ...styles.icon, color: "#00a3f5" , cursor:"pointer"}} />
-                          <Trash onClick={() => handleDelete(row.id)} style={{ ...styles.icon, color: "#e74c3c" , cursor:"pointer"}} />
-                        </>
-                      )}
-                    </td>
-                    <td style={styles.cell}><Button onClick={handleDetailClick}>View More ...</Button></td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="7" style={styles.noData}>Aucune donnée trouvée.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+  <thead>
+    <tr style={styles.headerRow}>
+      {['AVION', 'AIROPORT', 'DATE_EDITION', 'NUMERO_ETAT', 'PNC_1', 'Actions', 'Details'].map(header => (
+        <th key={header} style={styles.headerCell}>{header}</th>
+      ))}
+    </tr>
+  </thead>
+  <tbody>
+  {data.length > 0 ? (
+    data.map((row) => (
+      <tr key={row.id}>
+        {['avion', 'airoport', 'datE_EDITION', 'numerO_ETAT', 'pnC1'].map((field) => (
+          <td key={field} style={styles.cell}>
+            {isEditing === row.id ? (
+              <input type="text" value={editedItem[field]} onChange={(e) => setEditedItem({ ...editedItem, [field]: e.target.value })} />
+            ) : (
+              row[field]
+            )}
+          </td>
+        ))}
+        <td style={styles.cell}>
+          {isEditing === row.id ? (
+            <>
+              <Save onClick={() => handleSaveEdit(editedItem)} style={{ ...styles.icon, color: "#00a3f5", cursor: "pointer" }} />
+              <X onClick={handleCancelEdit} style={{ ...styles.icon, color: "red", cursor: "pointer" }} />
+            </>
+          ) : (
+            <>
+              <Edit onClick={() => handleEdit(row)} style={{ ...styles.icon, color: "#00a3f5", cursor: "pointer" }} />
+              <Trash onClick={() => handleDelete(row.id)} style={{ ...styles.icon, color: "#e74c3c", cursor: "pointer" }} />
+            </>
+          )}
+        </td>
+        <td style={styles.cell}>
+          <Button onClick={handleDetailClick}>View More ...</Button>
+        </td>
+        
+      </tr>
+    ))
+  ) : (
+    <tr>
+      <td colSpan="8" style={styles.noData}>Aucune donnée trouvée.</td>
+    </tr>
+  )}
+</tbody>
+
+</table>
+
         </div>
       )}
 

@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Edit, Trash, Save, X, Plus, Search } from "lucide-react";
 import { TablePagination, Button, TextField, Autocomplete, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
+import {Euro} from "lucide-react";
+import { color } from "framer-motion";
 
 const EtatVentesArriveeTable = () => {
   const [data, setData] = useState([]);
@@ -12,6 +14,9 @@ const EtatVentesArriveeTable = () => {
   const [isEditing, setIsEditing] = useState(null);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [openDialog, setOpenDialog] = useState(false);
+  const [animatedTotal, setAnimatedTotal] = useState(0); 
+  const [totalArrivee, setTotalArrivee] = useState(0);
+
   const [newItem, setNewItem] = useState({
     code: "",
     description: "",
@@ -26,10 +31,15 @@ const EtatVentesArriveeTable = () => {
   const [editedItem, setEditedItem] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
   const [prixArticles, setPrixArticles] = useState([]);
+      const [etatVenteArrivee, setEtatVenteArrivee] = useState([]);
+  
 
 const fetchPrixArticles = useCallback(async ()  => {
   try {
     const response = await axios.get("http://localhost:5000/api/PrixArticles");
+        const responseArrivee = await axios.get("http://localhost:5000/api/EtatVentesarrivee");
+    setEtatVenteArrivee(responseArrivee.data);
+    
     setPrixArticles(response.data);
   } catch (error) {
     console.error("Erreur lors de la récupération des prix :", error);
@@ -43,7 +53,25 @@ useEffect(() => {
 const handleClose = () => {
   setIsAdding(false); 
 };
+const animateTotal = (finalValue) => {
+  let currentValue = 0;
+  const step = (finalValue - currentValue) / 50; // Change steps for speed
+  const interval = setInterval(() => {
+    currentValue += step;
+    if (currentValue >= finalValue) {
+      currentValue = finalValue;
+      clearInterval(interval);
+    }
+    setAnimatedTotal(currentValue);
+  }, 20); // Adjust interval time for smoother animation
+};
 
+useEffect(() => {
+  // Assuming etatVenteArrivee is fetched and set here
+  const total = etatVenteArrivee.reduce((acc, item) => acc + item.valeur, 0);
+  setTotalArrivee(total);
+  animateTotal(total); // Trigger animation when totalArrivee changes
+}, [etatVenteArrivee]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -174,7 +202,6 @@ const handleClose = () => {
   return (
     <div>
       <h2 style={styles.heading}>État des Ventes Fournisseur</h2>
-
       {/* Search Input */}
     
         <TextField 
@@ -195,6 +222,10 @@ const handleClose = () => {
       >
         Ajouter
       </Button>
+      <h3 style={styles.price}>
+        Totale Vendue : {animatedTotal.toFixed(2)}
+        <Euro size={14} style={{ marginLeft: "2px" }} />
+      </h3>
       {/* Add Item Form */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth maxWidth="sm">
         <DialogTitle>Ajouter un nouvel élément</DialogTitle></Dialog>
@@ -355,6 +386,11 @@ const handleClose = () => {
 };
 
 const styles = {
+  price:{
+    color:"black" , 
+    marginLeft:"78%"
+
+  },
   heading: { textAlign: "center",
     fontSize: "20px",
     fontWeight: "bold",

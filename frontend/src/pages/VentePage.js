@@ -95,7 +95,7 @@ const VentePage = () => {
     icon={<motion.div whileHover={{ scale: 1.2 }}><Users /></motion.div>} 
   />
   <Tab 
-    label="État Ventes Départ" 
+    label="État Ventes Tunisair" 
     icon={<motion.div whileHover={{ scale: 1.2 }}><ShoppingBag /></motion.div>} 
   />
 </Tabs>

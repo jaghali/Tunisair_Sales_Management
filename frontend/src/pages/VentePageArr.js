@@ -6,7 +6,7 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import { Button, TextField, Autocomplete } from "@mui/material";
 import { motion } from "framer-motion";
-
+import DetailsEtat from "../components/DetailsEtat"
 const VentePageArr = () => {
   const [venteDetails, setVenteDetails] = useState([]);
   const [venteEtatArrivee, setVenteEtatArrivee] = useState([]);
@@ -96,12 +96,14 @@ const VentePageArr = () => {
           icon={<motion.div whileHover={{ scale: 1.2 }}><Users /></motion.div>} 
         />
         <Tab 
-          label="État Ventes Arrivée" 
+          label="État Ventes Fournisseurs" 
           icon={<motion.div whileHover={{ scale: 1.2 }}><ShoppingBag /></motion.div>} 
         />
       </Tabs>
       {tabValue === 0 && (
         <div>
+          
+          <DetailsEtat data={DetailsEtat} />
           <Button variant="contained" color="primary" startIcon={<Plus />} onClick={() => setIsAdding(true)}>
             Ajouter
           </Button>
