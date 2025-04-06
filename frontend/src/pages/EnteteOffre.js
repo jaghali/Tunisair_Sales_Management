@@ -104,7 +104,7 @@ const EnteteOffre = () => {
 
   return (
     <div style={styles.container}>
-        <h2 style={styles.heading}>Etat Des Offres Départ</h2>
+        <h2 style={styles.heading}>Etat Des Offres Tunisair</h2>
 
     
       <motion.button

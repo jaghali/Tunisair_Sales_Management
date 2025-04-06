@@ -166,7 +166,7 @@ const EtatOffreArriveeTable = () => {
 
   return (
     <div>
-      <h2 style={style.heading}>Etat des Offres Départ</h2>
+      <h2 style={style.heading}>Etat des Offres Fournisseur</h2>
       <Button
         variant="contained"
         color="primary"

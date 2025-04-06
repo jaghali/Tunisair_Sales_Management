@@ -4,10 +4,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
 
 const SIDEBAR_ITEMS = [
-    { name: "Ventes Départ", icon: Plane, color: "#6366f1", href: "/enteteVente" },
-    { name: "Ventes Arrivée", icon: PlaneLanding, color: "#6366f1", href: "/enteteVentearr" },
-    { name: "Offres Départ", icon:GiftIcon , color: "#8B5CF6", href: "/enteteOffre" },
-    { name: "Offres Arrivée", icon:GiftIcon , color: "#8B5CF6", href: "/enteteOffrearr" },
+    { name: "Ventes Tunisair", icon: Plane, color: "#6366f1", href: "/enteteVente" },
+    { name: "Ventes Fournisseur", icon: PlaneLanding, color: "#6366f1", href: "/enteteVentearr" },
+    { name: "Offres Tunisair", icon:GiftIcon , color: "#8B5CF6", href: "/enteteOffre" },
+    { name: "Offres Fournisseur", icon:GiftIcon , color: "#8B5CF6", href: "/enteteOffrearr" },
     { name: "Logout", icon: LogOut, color: "#6EE7B7", href: "/" },
 ];
 
@@ -33,7 +33,7 @@ const Sidebaragentsaisie = () => {
             display: "flex",
             alignItems: "center",
             padding: "10px 30px",
-            fontSize: "1.25rem",
+            fontSize: "1.09rem",
             fontWeight: 500,
             color: "#555",
             transition: "color 0.3s ease-in-out, background 0.3s ease-in-out",

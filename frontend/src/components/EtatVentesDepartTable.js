@@ -184,7 +184,7 @@ const EtatVentesDepartTable = () => {
 
   return (
     <div>
-      <h2 style={style.heading}>Etat des Ventes Départ</h2>
+      <h2 style={style.heading}>Etat des Ventes Tunisair</h2>
       <Button
         variant="contained"
         color="primary"

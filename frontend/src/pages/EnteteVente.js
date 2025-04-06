@@ -102,7 +102,7 @@ const EnteteVente = () => {
 
   return (
     <div style={styles.container}>
-        <h2 style={styles.heading}>Etat Des Ventes Départ</h2>
+        <h2 style={styles.heading}>Etat Des Ventes Tunisair</h2>
 
     
       <motion.button

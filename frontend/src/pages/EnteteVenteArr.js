@@ -104,7 +104,7 @@ const EnteteVenteArr = () => {
 
   return (
     <div style={styles.container}>
-        <h2 style={styles.heading}>Etat Des Ventes Arrivee</h2>
+        <h2 style={styles.heading}>Etat Des Ventes Fournisseur</h2>
 
     
       <motion.button

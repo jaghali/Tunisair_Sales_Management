@@ -173,7 +173,7 @@ const handleClose = () => {
 
   return (
     <div>
-      <h2 style={styles.heading}>État des Ventes Arrivées</h2>
+      <h2 style={styles.heading}>État des Ventes Fournisseur</h2>
 
       {/* Search Input */}
     

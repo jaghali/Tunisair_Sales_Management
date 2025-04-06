@@ -15,6 +15,9 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders(); // This ensures that the UserManager can be injected
 
+// Enregistrement de HttpClient pour les appels d'API externes
+builder.Services.AddHttpClient();
+
 // Ajout de CORS pour autoriser les requêtes du frontend React
 builder.Services.AddCors(options =>
 {

@@ -169,7 +169,7 @@ const EtatOffresDepartTable = () => {
 
   return (
     <div>
-      <h2 style={style.heading}>Etat des Offres Départ</h2>
+      <h2 style={style.heading}>Etat des Offres Tunisair</h2>
       <Button
         variant="contained"
         color="primary"
