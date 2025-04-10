@@ -7,7 +7,6 @@ const Confrontation = () => {
   const [etatVenteArrivee, setEtatVenteArrivee] = useState([]);
   const [page, setPage] = useState(0); // Current page
   const [rowsPerPage, setRowsPerPage] = useState(5); // Rows per page
-
   useEffect(() => {
     const fetchData = async () => {
       try {

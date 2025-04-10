@@ -40,6 +40,7 @@ namespace TunisairSalesManagement.Controllers
             return equipage;
         }
 
+
         // 🔹 POST: api/ListeEquipageV (Ajouter un équipage)
         [HttpPost]
         public async Task<ActionResult<ListeEquipageV>> PostListeEquipageV(ListeEquipageV equipage)

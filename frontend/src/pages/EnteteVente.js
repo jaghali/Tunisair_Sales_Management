@@ -251,7 +251,7 @@ const styles = {
     backgroundColor: "#fff",
     boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.15)",
     width: "100%",
-    marginTop:"10%",
+    marginTop:"8%",
     marginLeft:"5%",
   },
   headerRow: {

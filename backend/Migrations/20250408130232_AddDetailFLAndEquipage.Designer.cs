@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TunisairSalesManagement.Data;
 
@@ -11,9 +12,11 @@ using TunisairSalesManagement.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250408130232_AddDetailFLAndEquipage")]
+    partial class AddDetailFLAndEquipage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25,12 +28,10 @@ namespace backend.Migrations
             modelBuilder.Entity("DetailFL", b =>
                 {
                     b.Property<int>("NUMFL")
-                        .HasColumnType("int")
-                        .HasColumnOrder(0);
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                    b.Property<int>("NUMVOL")
-                        .HasColumnType("int")
-                        .HasColumnOrder(1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NUMFL"));
 
                     b.Property<float>("CARBCOEFCONV")
                         .HasColumnType("real");
@@ -102,41 +103,34 @@ namespace backend.Migrations
                     b.Property<int>("NUMORDRE")
                         .HasColumnType("int");
 
+                    b.Property<string>("NUMVOL")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("VOLOPERATIONNEL")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("NUMFL", "NUMVOL");
-
-                    b.HasIndex("NUMFL");
+                    b.HasKey("NUMFL");
 
                     b.ToTable("DetailFLs");
                 });
 
             modelBuilder.Entity("Equipage", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("MAT")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MAT"));
 
                     b.Property<string>("CLE")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("DetailFLNUMFL")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("DetailFLNUMVOL")
-                        .HasColumnType("int");
-
                     b.Property<string>("FONCTION")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("MAT")
-                        .HasColumnType("int");
 
                     b.Property<int>("NUMFL")
                         .HasColumnType("int");
@@ -145,9 +139,9 @@ namespace backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("ID");
+                    b.HasKey("MAT");
 
-                    b.HasIndex("DetailFLNUMFL", "DetailFLNUMVOL");
+                    b.HasIndex("NUMFL");
 
                     b.ToTable("Equipages");
                 });
@@ -811,9 +805,13 @@ namespace backend.Migrations
 
             modelBuilder.Entity("Equipage", b =>
                 {
-                    b.HasOne("DetailFL", null)
+                    b.HasOne("DetailFL", "DetailFL")
                         .WithMany("Equipages")
-                        .HasForeignKey("DetailFLNUMFL", "DetailFLNUMVOL");
+                        .HasForeignKey("NUMFL")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DetailFL");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

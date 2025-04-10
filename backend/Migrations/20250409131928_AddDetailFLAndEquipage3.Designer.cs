@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TunisairSalesManagement.Data;
 
@@ -11,9 +12,11 @@ using TunisairSalesManagement.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250409131928_AddDetailFLAndEquipage3")]
+    partial class AddDetailFLAndEquipage3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -125,12 +128,6 @@ namespace backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("DetailFLNUMFL")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("DetailFLNUMVOL")
-                        .HasColumnType("int");
-
                     b.Property<string>("FONCTION")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -147,7 +144,7 @@ namespace backend.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("DetailFLNUMFL", "DetailFLNUMVOL");
+                    b.HasIndex("NUMFL");
 
                     b.ToTable("Equipages");
                 });
@@ -811,9 +808,14 @@ namespace backend.Migrations
 
             modelBuilder.Entity("Equipage", b =>
                 {
-                    b.HasOne("DetailFL", null)
+                    b.HasOne("DetailFL", "DetailFL")
                         .WithMany("Equipages")
-                        .HasForeignKey("DetailFLNUMFL", "DetailFLNUMVOL");
+                        .HasForeignKey("NUMFL")
+                        .HasPrincipalKey("NUMFL")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DetailFL");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

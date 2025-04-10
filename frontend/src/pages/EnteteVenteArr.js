@@ -294,7 +294,7 @@ const styles = {
     backgroundColor: "#fff",
     boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.15)",
     width: "95%",
-    marginTop:"10%",
+    marginTop:"5%",
     marginLeft:"13%",
   },
   headerRow: {
