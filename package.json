@@ -29,6 +29,8 @@
     "@mui/material": "^6.4.8",
     "bcryptjs": "^3.0.2",
     "crypto-js": "^4.2.0",
+    "echarts": "^5.6.0",
+    "echarts-gl": "^2.0.9",
     "emailjs": "^4.0.3",
     "formatDate": "^1.0.0",
     "framer-motion": "^12.5.0",
@@ -50,7 +52,7 @@
     "react-scripts": "^5.0.1",
     "react-select": "^5.10.1",
     "react-spinners": "^0.15.0",
-    "recharts": "^2.15.1",
+    "recharts": "^2.15.2",
     "sweetalert2": "^11.17.2"
   },
   "devDependencies": {

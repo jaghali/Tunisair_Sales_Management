@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { DollarSign, Euro, BadgePoundSterling } from "lucide-react";
+import { DollarSign, Euro, BadgePoundSterling , ArrowLeftRight } from "lucide-react";
 
 function Devise() {
   const [currency, setCurrency] = useState("TND");
@@ -40,12 +40,14 @@ function Devise() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#f2f2f2",
+        
       }}
     >
       <div
         style={{
-          backgroundColor: "#fff",
+          backgroundColor: '#E5E6EB', 
+          marginLeft:"15%",
+
           padding: "30px",
           borderRadius: "12px",
           boxShadow: "0 0 20px rgba(0, 0, 0, 0.1)",
@@ -56,43 +58,48 @@ function Devise() {
       >
         <h2>Convertisseur de devises</h2>
 
-        <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-          <div style={{ flex: 1 }}>
-            <label>Montant (EUR):</label>
-            <input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              style={{
-                padding: "8px",
-                width: "100%",
-                borderRadius: "6px",
-                border: "1px solid #ccc",
-                marginTop: "5px",
-              }}
-            />
-          </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
+  <div style={{ flex: 1 }}>
+    <label  style={{color:"black"}}>Montant (EUR):</label>
+    <input
+      type="number"
+      value={amount}
+      onChange={(e) => setAmount(e.target.value)}
+      style={{
+        padding: "8px",
+        width: "100%",
+        borderRadius: "6px",
+        border: "1px solid #ccc",
+        marginTop: "5px",
+      }}
+    />
+  </div>
 
-          <div style={{ flex: 1 }}>
-            <label>Converti en {currency}:</label>
-            <input
-              type="text"
-              value={converted}
-              readOnly
-              style={{
-                padding: "8px",
-                width: "100%",
-                borderRadius: "6px",
-                border: "1px solid #ccc",
-                marginTop: "5px",
-                backgroundColor: "#f0f0f0",
-              }}
-            />
-          </div>
-        </div>
+  <div style={{ display: "flex", justifyContent: "center", marginTop: "22px"  , marginLeft:"3%"}}>
+    <ArrowLeftRight size={24} />
+  </div>
+
+  <div style={{ flex: 1 }}>
+    <label style={{color:"black"}}>Convert en {currency}:</label>
+    <input
+      type="text"
+      value={converted}
+      readOnly
+      style={{
+        padding: "8px",
+        width: "100%",
+        borderRadius: "6px",
+        border: "1px solid #ccc",
+        marginTop: "5px",
+        backgroundColor: "#f0f0f0",
+      }}
+    />
+  </div>
+</div>
+
 
         <div style={{ marginBottom: "10px" }}>
-          <label>Choisir la devise :</label>
+          <label style={{color:"black"}}>Choisir la devise :</label>
           <div
             onClick={() => setIsOpen(!isOpen)}
             style={{
@@ -122,6 +129,7 @@ function Devise() {
                 maxHeight: "200px",
                 overflowY: "auto",
                 backgroundColor: "#fff",
+                color:"black"
               }}
             >
               <div
@@ -153,7 +161,7 @@ function Devise() {
         </div>
 
         {rate && (
-          <p style={{ marginTop: "10px", color: "#555" }}>
+          <p style={{ marginTop: "10px", color:"black"}}>
             Taux : 1 EUR = <strong>{rate}</strong> {currency}
           </p>
         )}
@@ -163,6 +171,7 @@ function Devise() {
 }
 
 const optionStyle = {
+  color:"black",
   padding: "10px ",
   borderBottom: "1px solid #eee",
   display: "flex",

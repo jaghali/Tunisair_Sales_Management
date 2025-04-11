@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import EtatVentesArriveeTable from "../components/EtatVentesArriveeTable";
-import { Edit, Trash, Plus, Save, X , Users, ShoppingBag  } from "lucide-react";
+import { Edit, Trash, Plus, Save, X , Users, ShoppingBag , Undo2   } from "lucide-react";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import { Button, TextField, Autocomplete } from "@mui/material";
 import { motion } from "framer-motion";
 import DetailsEtat from "../components/DetailsEtat"
+import { useNavigate } from "react-router-dom";
+
 const VentePageArr = () => {
   const [venteDetails, setVenteDetails] = useState([]);
   const [venteEtatArrivee, setVenteEtatArrivee] = useState([]);
@@ -45,6 +47,7 @@ const VentePageArr = () => {
       setError("Erreur lors de l'ajout.");
     }
   };
+  const navigate = useNavigate();
 
   const handleEdit = (item) => {
     setEditedItem(item);
@@ -71,7 +74,7 @@ const VentePageArr = () => {
 
   return (
     <div style={{ padding: "2%", maxWidth: "1000px", margin: "0 auto" }}>
-     
+
       <Tabs 
         value={tabValue} 
         onChange={(e, newValue) => setTabValue(newValue)} 
@@ -100,6 +103,9 @@ const VentePageArr = () => {
           icon={<motion.div whileHover={{ scale: 1.2 }}><ShoppingBag /></motion.div>} 
         />
       </Tabs>
+ 
+      <Undo2  style={{cursor:"pointer" , color:"#B71C1C"}} size={28} onClick={() => navigate(-1)}/>
+
       {tabValue === 0 && (
         <div>
           
