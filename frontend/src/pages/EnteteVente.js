@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle ,TextField} from "@mui/material";
 import { Edit, Trash, Save, X ,  Plus } from "lucide-react";
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 const EnteteVente = () => {
   const [data, setData] = useState([]);
@@ -81,7 +82,6 @@ const EnteteVente = () => {
     }
   };
   
-  
 
   const handleCancelEdit = () => {
     setIsEditing(null);
@@ -123,7 +123,7 @@ const EnteteVente = () => {
           <table style={styles.table}>
   <thead>
     <tr style={styles.headerRow}>
-      {['AVION', 'AIROPORT', 'DATE_EDITION', 'NUMERO_ETAT', 'PNC_1', 'Actions', 'Details'].map(header => (
+      {['AVION', 'AIROPORT', 'DATE_EDITION', 'NUMERO_ETAT', 'PNC_1','Status', 'Actions', 'Details'].map(header => (
         <th key={header} style={styles.headerCell}>{header}</th>
       ))}
     </tr>
@@ -132,12 +132,28 @@ const EnteteVente = () => {
   {data.length > 0 ? (
     data.map((row) => (
       <tr key={row.id}>
-        {['avion', 'airoport', 'datE_EDITION', 'numerO_ETAT', 'pnC1'].map((field) => (
-          <td key={field} style={styles.cell}>
+        {['avion', 'airoport', 'datE_EDITION', 'numerO_ETAT', 'pnC1', 'statut'].map((field) => (
+          <td
+            key={field}
+            style={{
+              ...styles.cell,
+              ...(field === 'statut' ? { 
+                backgroundColor: "#D1FAE5",
+                borderRadius: "20px",
+                color: "#0f543f", 
+                padding: "10px",
+                textAlign: "center",
+                fontWeight:"bold" } : {}), // Style spécifique pour la colonne 'statut'
+            }}
+          >
             {isEditing === row.id ? (
-              <input type="text" value={editedItem[field]} onChange={(e) => setEditedItem({ ...editedItem, [field]: e.target.value })} />
+              <input
+                type="text"
+                value={editedItem[field]}
+                onChange={(e) => setEditedItem({ ...editedItem, [field]: e.target.value })}
+              />
             ) : (
-              row[field]
+              row[field] || '-'
             )}
           </td>
         ))}
@@ -155,11 +171,13 @@ const EnteteVente = () => {
           )}
         </td>
         <td style={styles.cell}>
-          <Button onClick={handleDetailClick}>View More ...</Button>
+          <Link to={`/ventePage/${row.id}`}>
+            <Button>View More ...</Button>
+          </Link>
         </td>
-        
       </tr>
     ))
+    
   ) : (
     <tr>
       <td colSpan="8" style={styles.noData}>Aucune donnée trouvée.</td>
@@ -250,7 +268,7 @@ const styles = {
     borderRadius: "10px",
     backgroundColor: "#fff",
     boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.15)",
-    width: "100%",
+    width: "95%",
     marginTop:"8%",
     marginLeft:"5%",
   },

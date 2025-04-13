@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Box, Typography, Table, TableHead, TableRow, TableCell, TableBody, Paper, TablePagination } from "@mui/material";
+import { Box, Typography, Table, TableHead, TableRow, TableCell, TableBody, Paper, TablePagination, Select, MenuItem, FormControl, InputLabel, Button } from "@mui/material";
+import { useParams } from 'react-router-dom';
 
 const Confrontation = () => {
   const [etatVenteDepart, setEtatVenteDepart] = useState([]);
   const [etatVenteArrivee, setEtatVenteArrivee] = useState([]);
   const [page, setPage] = useState(0); // Current page
   const [rowsPerPage, setRowsPerPage] = useState(5); // Rows per page
+  const [selectedStatus, setSelectedStatus] = useState(""); // Statut global sélectionné
+  const [confrontationData, setConfrontationData] = useState([]);
+  const { id } = useParams(); // ID de EnteteVente
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -30,23 +35,43 @@ const Confrontation = () => {
   const departMap = Object.fromEntries(etatVenteDepart.map(item => [item.description, item]));
 
   // Construire la liste des comparaisons
-  const confrontationData = etatVenteArrivee.map(arriveeItem => {
-    const departItem = departMap[arriveeItem.description] || {};
-    return {
-      code: arriveeItem.code,
-      description: arriveeItem.description,
-      qtDotationDepart: departItem.qtDotation || 0,
-      qtDotationArrivee: arriveeItem.quantiteDotation,
-      quantiteVenteDepart: departItem.quantiteVente || 0,
-      quantiteVenteArrivee: arriveeItem.quantiteVendue,
-      prixUnitaireHTDepart: departItem.prixUnitaireHT || 0,
-      prixUnitaireHTArrivee: arriveeItem.prixUnitaireHT,
-      valeurDepart: departItem.valeur,
-      valeurArrivee: arriveeItem.valeur,
-      restantDepart: departItem.restant || 0,
-      restantArrivee: arriveeItem.restant,
-    };
-  });
+  const generateConfrontationData = () => {
+    const data = etatVenteArrivee.map(arriveeItem => {
+      const departItem = departMap[arriveeItem.description] || {};
+      return {
+        code: arriveeItem.code,
+        description: arriveeItem.description,
+        qtDotationDepart: departItem.qtDotation || 0,
+        qtDotationArrivee: arriveeItem.quantiteDotation,
+        quantiteVenteDepart: departItem.quantiteVente || 0,
+        quantiteVenteArrivee: arriveeItem.quantiteVendue,
+        prixUnitaireHTDepart: departItem.prixUnitaireHT || 0,
+        prixUnitaireHTArrivee: arriveeItem.prixUnitaireHT,
+        valeurDepart: departItem.valeur,
+        valeurArrivee: arriveeItem.valeur,
+        restantDepart: departItem.restant || 0,
+        restantArrivee: arriveeItem.restant,
+        id: arriveeItem._id // Assuming each item has a unique _id
+      };
+    });
+    setConfrontationData(data);
+  };
+
+  useEffect(() => {
+    generateConfrontationData();
+  }, [etatVenteArrivee, etatVenteDepart]); // Rebuild data when data changes
+
+  // Fonction pour mettre à jour le statut via l'API
+  const updateStatut = async (statut) => {
+    try {
+      console.log("Request Data: ", { statut,id});  // Log request data to verify it's correct
+      const response = await axios.put("http://localhost:5000/api/EnteteVente/updateStatus", { statut, id });
+      console.log("Réponse de la mise à jour du statut:", response.data);
+      alert("Statut mis à jour avec succès dans la base de données!");
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du statut", error.response ? error.response.data : error);
+    }
+  };  
 
   // Pagination handling
   const handleChangePage = (event, newPage) => {
@@ -63,15 +88,33 @@ const Confrontation = () => {
       {/* Totaux globaux dans des Box Material UI */}
       <Box display="flex" flexDirection="row" gap={5} justifyContent="center">
         <Box display="flex" alignItems="center" justifyContent="center" p={2} bgcolor="#f5f5f5" borderRadius={2} boxShadow={2} width={200} minHeight={60}>
-              <Typography variant="h6" color="primary">Total Départ: {totalDepart}</Typography>
+          <Typography variant="h6" color="primary">Total Tunisair: {totalDepart}</Typography>
         </Box>
         <Box display="flex" alignItems="center" justifyContent="center" p={2} bgcolor="#f5f5f5" borderRadius={2} boxShadow={2} width={200} minHeight={60}>
-              <Typography variant="h6" color="secondary">Total Arrivée: {totalArrivee}</Typography>
+          <Typography variant="h6" color="secondary">Total Fournisseur: {totalArrivee}</Typography>
         </Box>
         <Box display="flex" alignItems="center" justifyContent="center" p={2} bgcolor="#f5f5f5" borderRadius={2} boxShadow={2} width={200} minHeight={60}>
-             <Typography variant="h6" color="primary">Ecart: {difference}</Typography>
+          <Typography variant="h6" color="primary">Ecart: {difference}</Typography>
         </Box>
-       </Box>
+      </Box>
+
+      {/* Sélecteur de statut global */}
+      <Box display="flex" justifyContent="center" mb={3}>
+        <FormControl>
+          <InputLabel>Statut</InputLabel>
+          <Select
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            label="Statut"
+          >
+            <MenuItem value="Approved">Approved</MenuItem>
+            <MenuItem value="Not Approved">Not Approved</MenuItem>
+          </Select>
+        </FormControl>
+        <Button variant="contained" color="primary" onClick={() => updateStatut(selectedStatus)} sx={{ marginLeft: 2 }}>
+          Mettre à jour le statut global
+        </Button>
+      </Box>
 
       {/* Tableau de confrontation */}
       <Paper elevation={3} sx={{ marginTop: 3, overflow: "hidden" }}>
@@ -126,17 +169,14 @@ const Confrontation = () => {
     </div>
   );
 };
-const styles = {
 
+const styles = {
   container: {
     padding: "50px",
     display: "flex",
     flexDirection: "column",
-    alignItems: "center",
-    borderRadius: "10px",
-  },
-  
+    gap: "20px"
+  }
+};
 
-
-}
 export default Confrontation;

@@ -59,7 +59,7 @@ function MainLayout() {
     "/settings",
     "/ConfrontationPage",
     "/ConfrotationOffrePage",
-    "/VentePage"
+    "/VentePage/:id"
   ];
 
   let sidebarComponent = null;
@@ -108,7 +108,7 @@ function MainLayout() {
               <Route path="/enteteVentearr" element={<EnteteVenteArr />} />
               <Route path="/enteteOffre" element={<EnteteOffres />} />
               <Route path="/enteteOffrearr" element={<EnteteOffresArr />} />
-              <Route path="/ventePage" element={<VentePage />} />
+              <Route path="/ventePage/:id" element={<VentePage />} />
               <Route path="/ventePagearr" element={<VentePageArr />} />
               <Route path="/OffrePage" element={<OffrePage />} />
               <Route path="/OffrePagearr" element={<OffrePageArr />} />
@@ -116,7 +116,7 @@ function MainLayout() {
               <Route path="/ForgotPasswordPage" element={<ForgotPasswordPage />} />
               <Route path="/Devise" element={<Devise/>} />
               <Route path="/FournisseurPage" element={<FournisseurPage/>} />
-              <Route path="/ConfrontationPage" element={<Confrontation/>} />
+              <Route path="/ConfrontationPage/:id" element={<Confrontation />} />
               <Route path="/ConfrotationOffrePage" element={<ConfrotationOffrePage/>} />
               <Route path="/Avion" element={<Avion/>} />
 

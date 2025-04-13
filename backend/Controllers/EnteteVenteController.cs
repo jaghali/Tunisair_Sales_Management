@@ -42,6 +42,12 @@ public class EnteteVenteController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<EnteteVente>> PostEnteteVente(EnteteVente enteteVente)
     {
+        // Si le statut n'est pas fourni, on assigne "Not Approved" par défaut
+        if (string.IsNullOrEmpty(enteteVente.Statut))
+        {
+        enteteVente.Statut = "Not Approved";
+        }
+
         _context.EnteteVente.Add(enteteVente);
         await _context.SaveChangesAsync();
 
@@ -78,6 +84,32 @@ public class EnteteVenteController : ControllerBase
         return NoContent();
     }
 
+    // PUT: api/EnteteVente/updateStatut
+      [HttpPut("updateStatus")]
+        public async Task<IActionResult> UpdateStatus([FromBody] UpdateStatusRequest request)
+        {
+            if (request == null || request.Id <= 0 || string.IsNullOrEmpty(request.Statut))
+            {
+                return BadRequest(new { message = "Données invalides" });
+            }
+
+            // Chercher l'EnteteVente par l'ID
+            var enteteVente = await _context.EnteteVente.FindAsync(request.Id);
+            if (enteteVente == null)
+            {
+                return NotFound(new { message = "Entête de vente non trouvé" });
+            }
+
+            // Mettre à jour le statut
+            enteteVente.Statut = request.Statut;
+            _context.EnteteVente.Update(enteteVente);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Statut mis à jour avec succès" });
+        }
+        
+
+
     // DELETE: api/EnteteVente/5
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteEnteteVente(int id)
@@ -99,3 +131,10 @@ public class EnteteVenteController : ControllerBase
         return _context.EnteteVente.Any(e => e.ID == id);
     }
 }
+ // Classe de requête pour recevoir l'ID et le statut
+    public class UpdateStatusRequest
+    {
+        public int Id { get; set; }
+        public string Statut { get; set; }
+    }
+

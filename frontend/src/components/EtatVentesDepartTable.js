@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Edit, Trash, Save, X, Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from 'react-router-dom';
 import { TablePagination, Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField,Autocomplete, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
 
 const EtatVentesDepartTable = () => {
@@ -12,6 +12,7 @@ const EtatVentesDepartTable = () => {
   const [editedItem, setEditedItem] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
   const [prixArticles, setPrixArticles] = useState([]);
+  const { id } = useParams();
   const [newItem, setNewItem] = useState({
     code: "",
     description: "",
@@ -177,7 +178,7 @@ const EtatVentesDepartTable = () => {
     }
   };
   const handleDetailClick = () => {
-    navigate(`/ConfrontationPage`);
+    navigate(`/ConfrontationPage/${id}`);
   };
 
   const paginatedData = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
