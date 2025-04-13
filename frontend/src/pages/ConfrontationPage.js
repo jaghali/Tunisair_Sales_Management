@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Box, Typography, Table, TableHead, TableRow, TableCell, TableBody, Paper, TablePagination, Select, MenuItem, FormControl, InputLabel, Button } from "@mui/material";
 import { useParams } from 'react-router-dom';
+import {  Undo2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Confrontation = () => {
   const [etatVenteDepart, setEtatVenteDepart] = useState([]);
@@ -10,6 +12,8 @@ const Confrontation = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5); // Rows per page
   const [selectedStatus, setSelectedStatus] = useState(""); // Statut global sélectionné
   const [confrontationData, setConfrontationData] = useState([]);
+  const navigate = useNavigate();
+
   const { id } = useParams(); // ID de EnteteVente
 
   useEffect(() => {
@@ -85,6 +89,11 @@ const Confrontation = () => {
 
   return (
     <div style={styles.container}>
+       <Undo2
+              style={{ cursor: "pointer", color: "#B71C1C" }}
+              size={28}
+              onClick={() => navigate(-1)}
+            />
       {/* Totaux globaux dans des Box Material UI */}
       <Box display="flex" flexDirection="row" gap={5} justifyContent="center">
         <Box display="flex" alignItems="center" justifyContent="center" p={2} bgcolor="#f5f5f5" borderRadius={2} boxShadow={2} width={200} minHeight={60}>

@@ -24,17 +24,16 @@ const VentePage = () => {
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        const [response, etatDepartResponse, pncResponse , entete] = await Promise.all([
+        const [response, etatDepartResponse, pncResponse, enteteResponse] = await Promise.all([
           axios.get("http://localhost:5000/api/ListeEquipageV"),
           axios.get("http://localhost:5000/api/EtatVentesDepart"),
           axios.get("http://localhost:5000/api/pn"),
           axios.get("http://localhost:5000/api/EnteteVente"),
-          
         ]);
         setVenteDetails(response.data);
         setVenteEtatDepart(etatDepartResponse.data);
         setPncs(pncResponse.data);
-        setEntete(etatDepartResponse.data[0]); // Assuming you want the first one
+        setEntete(enteteResponse.data[0]); // Assuming first one is relevant
       } catch (err) {
         setError("Erreur lors du chargement des données.");
       }
@@ -61,7 +60,9 @@ const VentePage = () => {
     try {
       await axios.put(`http://localhost:5000/api/ListeEquipageV/${editedItem.matricule}`, editedItem);
       setVenteDetails(
-        venteDetails.map(item => item.matricule === editedItem.matricule ? editedItem : item)
+        venteDetails.map(item =>
+          item.matricule === editedItem.matricule ? editedItem : item
+        )
       );
       setEditedItem(null);
     } catch (error) {
@@ -97,26 +98,27 @@ const VentePage = () => {
         <Tab label="État Ventes Tunisair" icon={<motion.div whileHover={{ scale: 1.2 }}><ShoppingBag /></motion.div>} />
       </Tabs>
 
-      <Undo2 style={{ cursor: "pointer", color: "#B71C1C" }} size={28} onClick={() => navigate(-1)} />
+      <Undo2
+        style={{ cursor: "pointer", color: "#B71C1C" }}
+        size={28}
+        onClick={() => navigate(-1)}
+      />
 
       {tabValue === 0 && (
         <div>
-          <DetailsEtat data={DetailsEtat} />
-          <Button variant="contained" color="primary" startIcon={<Plus />} onClick={() => setIsAdding(true)}>
+          <DetailsEtat data={entete} />
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<Plus />}
+            onClick={() => setIsAdding(true)}
+            style={{ marginTop: "1rem" }}
+          >
             Ajouter
           </Button>
-          <table style={{
-            width: "70%",
-            borderCollapse: "collapse",
-            marginTop: "1rem",
-            marginLeft: "auto",
-            marginRight: "auto",
-            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-            borderRadius: "8px",
-            overflow: "hidden"
-          }}>
+          <table style={tableStyle}>
             <thead>
-              <tr style={{ backgroundColor: "#b71c1c", color: "#ffffff" }}>
+              <tr style={headerRowStyle}>
                 <th style={tableHeaderStyle}>PNC</th>
                 <th style={tableHeaderStyle}>Matricule</th>
                 <th style={tableHeaderStyle}>Status</th>
@@ -129,9 +131,12 @@ const VentePage = () => {
                   <td style={tableCellStyle}>
                     <Autocomplete
                       options={pncs}
-                      getOptionLabel={(option) => option.nom}
+                      getOptionLabel={(option) => option?.nom || ""}
                       onChange={(e, newValue) => {
-                        setNewItem({ pnc: newValue?.nom || "", matricule: newValue?.matricule || "" });
+                        setNewItem({
+                          pnc: newValue?.nom || "",
+                          matricule: newValue?.matricule || ""
+                        });
                       }}
                       renderInput={(params) => <TextField {...params} label="PNC" />}
                     />
@@ -148,7 +153,7 @@ const VentePage = () => {
               )}
               {venteDetails.map((item, index) => {
                 const isEditing = editedItem && editedItem.matricule === item.matricule;
-                const isApproved = item.matricule === entete.pnC1;
+                const isApproved = item.matricule === entete?.pnC1;
 
                 return (
                   <tr key={index}>
@@ -173,20 +178,19 @@ const VentePage = () => {
                       )}
                     </td>
                     <td style={tableCellStyle}>
-  <div
-    style={{
-      backgroundColor: isApproved ? "#D1FAE5" : "#ffcccb",
-      color: isApproved ? "#0f543f" : "#C80505",
-      fontWeight: "bold",
-      borderRadius: "10px",
-      padding: "5px 10px",
-      textAlign: "center"
-    }}
-  >
-    {isApproved ? "PNC Vendeur" : "PNC"}
-  </div>
-</td>
-
+                      <div
+                        style={{
+                          backgroundColor: isApproved ? "#D1FAE5" : "#ffcccb",
+                          color: isApproved ? "#0f543f" : "#C80505",
+                          fontWeight: "bold",
+                          borderRadius: "10px",
+                          padding: "5px 10px",
+                          textAlign: "center"
+                        }}
+                      >
+                        {isApproved ? "PNC Vendeur" : "PNC"}
+                      </div>
+                    </td>
                     <td style={tableCellStyle}>
                       {isEditing ? (
                         <>
@@ -211,6 +215,22 @@ const VentePage = () => {
       {tabValue === 1 && <EtatVentesDepartTable data={venteEtatDepart} />}
     </div>
   );
+};
+
+const tableStyle = {
+  width: "70%",
+  borderCollapse: "collapse",
+  marginTop: "1rem",
+  marginLeft: "auto",
+  marginRight: "auto",
+  boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+  borderRadius: "8px",
+  overflow: "hidden"
+};
+
+const headerRowStyle = {
+  backgroundColor: "#b71c1c",
+  color: "#ffffff"
 };
 
 const tableHeaderStyle = {
