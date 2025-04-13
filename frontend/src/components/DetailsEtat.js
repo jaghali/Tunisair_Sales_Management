@@ -122,7 +122,7 @@ const DetailsEtat = () => {
           <table style={styles.table}>
             <thead>
               <tr style={styles.headerRow}>
-                {['AVION', 'AIROPORT', 'DATE_EDITION', 'NUMERO_ETAT', 'fL01' , 'fL02' ,'fL03', 'cC2','PNC_1' , 'noM1' ,'noM2', 'cC2', 'pnC2','Status','Actions'].map(header => (
+                {['AVION', 'AIROPORT', 'DATE_EDITION', 'NUMERO_ETAT', 'fL01' , 'fL02' ,'fL03', 'cC2','PNC_1' , 'noM1' ,'noM2', 'cC2', 'pnC2','totaleEncaisse','Status','Actions'].map(header => (
                   <th key={header} style={styles.headerCell}>{header}</th>
                 ))}
               </tr>
@@ -131,15 +131,26 @@ const DetailsEtat = () => {
               {data.length > 0 ? (
                 data.map((row) => (
                   <tr key={row.id}>
-                    {['avion', 'airoport', 'datE_EDITION', 'numerO_ETAT',  'fL01' , 'fL02' ,'fL03','cC2', 'pnC1'  , 'noM1' ,'noM2', 'cC2', 'pnC2'].map((field) => (
-                      <td key={field} style={styles.cell}>
-                        {isEditing === row.id ? (
-                          <input type="text" value={editedItem[field]} onChange={(e) => setEditedItem({ ...editedItem, [field]: e.target.value })} />
-                        ) : (
-                          row[field]
-                        )}
-                      </td>
-                    ))}
+                    {['avion', 'airoport', 'datE_EDITION', 'numerO_ETAT',  'fL01' , 'fL02' ,'fL03','cC2', 'pnC1'  , 'noM1' ,'noM2', 'cC2', 'pnC2', 'totaleEncaisse'].map((field) => (
+  <td key={field} style={styles.cell}>
+    {isEditing === row.id ? (
+      <input
+        type="text"
+        value={editedItem[field]}
+        onChange={(e) => setEditedItem({ ...editedItem, [field]: e.target.value })}
+      />
+    ) : (
+      field === 'totaleEncaisse' ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          {row[field]} <Euro size={16} color="#4a4a4a" />
+        </div>
+      ) : (
+        row[field]
+      )
+    )}
+  </td>
+))}
+
                 
                     <td style={styles.cell}>
   {totalArrivee === totalEncaisse ? (

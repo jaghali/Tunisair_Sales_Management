@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, matchPath } from "react-router-dom";
 import { useState, useEffect } from "react";
 import LoginPage from "./pages/Login";
 import AdminUsers from "./pages/AdminUsers";
@@ -24,8 +24,8 @@ import Confrontation from "./pages/ConfrontationPage";
 import ConfrotationOffrePage from "./pages/ConfrotationOffrePage";
 import Avion from "./pages/Avion";
 
-
 import "./App.css"
+
 function App() {
   return (
     <Router>
@@ -61,20 +61,32 @@ function MainLayout() {
     "/ConfrotationOffrePage",
   ];
 
+  const hideSidebarRoutes = [
+    "/", 
+    "/ForgotPasswordPage",
+    "/ventePagearr",
+    "/OffrePage",
+    "/OffrePagearr",
+    "/ConfrotationOffrePage"
+  ];
+
+  const hideSidebar =
+    hideSidebarRoutes.includes(location.pathname) ||
+    matchPath("/ventePage/:id", location.pathname) ||
+    matchPath("/ConfrontationPage/:id", location.pathname);
+
   let sidebarComponent = null;
-  if (location.pathname !== "/" && location.pathname !== "/ForgotPasswordPage" && location.pathname !== "/ventePage" && location.pathname !== "/ventePagearr" && location.pathname !== "/OffrePage" && location.pathname !== "/OffrePagearr" && location.pathname !== "/ConfrontationPage/:id" && location.pathname !== "/ConfrotationOffrePage") {
-    sidebarComponent = agentSaisiePages.includes(location.pathname) ? (
-      <SidebarAgentSaisie />
-    ) : (
-      <Sidebar />
-    );
+  if (!hideSidebar) {
+    sidebarComponent = agentSaisiePages.includes(location.pathname)
+      ? <SidebarAgentSaisie />
+      : <Sidebar />;
   }
 
   return (
     <div style={styles.layout}>
       {loading ? (
         <div style={styles.loaderContainer}>
-        <svg viewBox="0 -10 30 50" height="70" width="70" style={styles.loaderSVG}>
+          <svg viewBox="0 -10 30 50" height="70" width="70" style={styles.loaderSVG}>
             <path
               style={styles.track}
               fill="none"
@@ -113,17 +125,11 @@ function MainLayout() {
               <Route path="/OffrePagearr" element={<OffrePageArr />} />
               <Route path="/ArticlesPage" element={<ArticlesPage />} />
               <Route path="/ForgotPasswordPage" element={<ForgotPasswordPage />} />
-              <Route path="/Devise" element={<Devise/>} />
-              <Route path="/FournisseurPage" element={<FournisseurPage/>} />
+              <Route path="/Devise" element={<Devise />} />
+              <Route path="/FournisseurPage" element={<FournisseurPage />} />
               <Route path="/ConfrontationPage/:id" element={<Confrontation />} />
-              <Route path="/ConfrotationOffrePage" element={<ConfrotationOffrePage/>} />
-              <Route path="/Avion" element={<Avion/>} />
-
-
-
-
-
-
+              <Route path="/ConfrotationOffrePage" element={<ConfrotationOffrePage />} />
+              <Route path="/Avion" element={<Avion />} />
             </Routes>
           </div>
         </div>
@@ -132,34 +138,33 @@ function MainLayout() {
   );
 }
 
-// Styles
 const styles = {
   layout: {
-    height: "100vh",  // Ensure the layout takes full 
+    height: "100vh",
     width: "100%",
     backgroundColor: "#ffffff",
     color: "#b91c1c",
-    display: "flex",  // Flexbox layout for side-by-side
-    flexDirection: "row",  // Ensure it's side by side (Sidebar + Content)
+    display: "flex",
+    flexDirection: "row",
   },
   mainContent: {
-    display: "flex", // Flexbox for side-by-side content
+    display: "flex",
     width: "100%",
-    height: "100%",  // Ensure it takes full height
+    height: "100%",
   },
   sidebar: {
-    width: "16rem",   // Fixed sidebar width
+    width: "16rem",
     position: "fixed",
     left: "0",
     top: "0",
-    height: "100%",    // Sidebar should take full height
+    height: "100%",
     backgroundColor: "#b91c1c",
     boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
   },
   content: {
     overflowY: "auto",
-    width: "100%",      // Full width for content
-    height: "100%",     // Ensure content area takes full height
+    width: "100%",
+    height: "100%",
     backgroundColor: "#ffffff",
     color: "#b91c1c",
     transition: "all 0.3s",
@@ -193,4 +198,3 @@ const styles = {
 };
 
 export default App;
-

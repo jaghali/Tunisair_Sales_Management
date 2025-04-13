@@ -26,6 +26,6 @@ namespace TunisairSalesManagement.Models
         public string CC2 { get; set; }
         public string PNC2 { get; set; }
         public string Statut { get; set; } = "Not Approved";
-        public float? TotaleEncaisse { get; set; }
+        public double? TotaleEncaisse { get; set; }
     }
 }

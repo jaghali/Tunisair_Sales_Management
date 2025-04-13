@@ -1,333 +1,231 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import EtatVentesDepartTable from "../components/EtatVentesDepartTable";
+import { Edit, Trash, Plus, Save, X, Users, ShoppingBag, Undo2 } from "lucide-react";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import { Button, TextField, Autocomplete } from "@mui/material";
+import { motion } from "framer-motion";
+import DetailsEtat from "../components/DetailsEtat";
 import { useNavigate } from "react-router-dom";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle ,TextField} from "@mui/material";
-import { Edit, Trash, Save, X ,  Plus } from "lucide-react";
-import { motion } from 'framer-motion';
-import {Euro} from "lucide-react";
 
-const EnteteVenteArr = () => {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
+const VentePage = () => {
+  const [venteDetails, setVenteDetails] = useState([]);
+  const [venteEtatDepart, setVenteEtatDepart] = useState([]);
   const [error, setError] = useState(null);
-  const [isEditing, setIsEditing] = useState(null);
+  const [tabValue, setTabValue] = useState(0);
+  const [isAdding, setIsAdding] = useState(false);
+  const [newItem, setNewItem] = useState({ pnc: "", matricule: "" });
   const [editedItem, setEditedItem] = useState(null);
-  const [openForm, setOpenForm] = useState(false);
-    const [etatVenteArrivee, setEtatVenteArrivee] = useState([]);
-  
-  const [newItem, setNewItem] = useState({ avion: "", airoport: "", datE_EDITION: "", numerO_ETAT: "",fL01:"" ,fL02:"" , fL03:"",cC1:"", pnC1: "" , noM1:"" ,noM2:"" , cC2:""  , pnC2: "" ,agenT_SAISIE: "" });
+  const [pncs, setPncs] = useState([]);
+  const [entete, setEntete] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDetails = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/EnteteVente");
-        const responseArrivee = await axios.get("http://localhost:5000/api/EtatVentesarrivee");
-
-        setData(response.data);
-        setEtatVenteArrivee(responseArrivee.data);
-
+        const [response, etatDepartResponse, pncResponse, enteteResponse] = await Promise.all([
+          axios.get("http://localhost:5000/api/ListeEquipageV"),
+          axios.get("http://localhost:5000/api/EtatVentesDepart"),
+          axios.get("http://localhost:5000/api/pn"),
+          axios.get("http://localhost:5000/api/EnteteVente"),
+        ]);
+        setVenteDetails(response.data);
+        setVenteEtatDepart(etatDepartResponse.data);
+        setPncs(pncResponse.data);
+        setEntete(enteteResponse.data[0]); // assuming the first entete
       } catch (err) {
         setError("Erreur lors du chargement des données.");
-      } finally {
-        setLoading(false);
       }
     };
-    fetchData();
+    fetchDetails();
   }, []);
-  const totalArrivee = etatVenteArrivee.reduce((acc, item) => acc + item.valeur, 0);
-  const totalEncaisse = 531.5;
 
-
-  const handleDetailClick = () => {
-    navigate(`/ventePagearr`);
+  const handleAddNew = async () => {
+    try {
+      const response = await axios.post("http://localhost:5000/api/ListeEquipageV", newItem);
+      setVenteDetails([...venteDetails, response.data]);
+      setIsAdding(false);
+      setNewItem({ pnc: "", matricule: "" });
+    } catch (error) {
+      setError("Erreur lors de l'ajout.");
+    }
   };
 
   const handleEdit = (item) => {
-    setIsEditing(item.id);
-    setEditedItem({ ...item });
+    setEditedItem(item);
   };
 
-  const handleSaveEdit = async (newData) => {
+  const handleSaveEdit = async () => {
     try {
-      await axios.put(`http://localhost:5000/api/EnteteVente/${newData.id}`, newData);
-      setData(data.map((row) => (row.id === newData.id ? newData : row)));
-      setIsEditing(null);
+      await axios.put(`http://localhost:5000/api/ListeEquipageV/${editedItem.matricule}`, editedItem);
+      setVenteDetails(
+        venteDetails.map(item => item.matricule === editedItem.matricule ? editedItem : item)
+      );
       setEditedItem(null);
-    } catch (err) {
-      alert("Erreur lors de la mise à jour !");
+    } catch (error) {
+      setError("Erreur lors de la modification.");
     }
   };
 
-  const validateNewItem = (item) => {
-    const errors = [];
-  
-    if (typeof item.numerO_ETAT !== "string") errors.push("Numéro État doit être une chaîne.");
-    if (typeof item.avion !== "string") errors.push("Avion doit être une chaîne.");
-    if (typeof item.airoport !== "string") errors.push("Aéroport doit être une chaîne.");
-    if (isNaN(Date.parse(item.datE_EDITION))) errors.push("Date Edition doit être une date valide.");
-    if (typeof item.agenT_SAISIE !== "string") errors.push("Agent Saisie doit être une chaîne.");
-    if (isNaN(Number(item.fL01))) errors.push("FL 01 doit être un nombre.");
-    if (isNaN(Number(item.fL02))) errors.push("FL 02 doit être un nombre.");
-    if (isNaN(Number(item.fL03))) errors.push("FL 03 doit être un nombre.");
-  
-    if (errors.length > 0) {
-      console.error("Erreurs de validation :", errors);
-      alert(errors.join("\n"));
-      return false;
-    }
-    return true;
-  };
-  
-
-  const handleAddNew = async () => {
-    if (!validateNewItem(newItem)) return; // Vérification avant d'envoyer
-    
+  const handleDelete = async (matricule) => {
     try {
-      const response = await axios.post("http://localhost:5000/api/EnteteVente", newItem);
-      setData([...data, response.data]);
-      setOpenForm(false);
-    } catch (err) {
-      console.error("Erreur lors de l'ajout :", err.response?.data || err.message);
-      alert("Erreur lors de l'ajout !");
-    }
-  };
-  
-  
-
-  const handleCancelEdit = () => {
-    setIsEditing(null);
-    setEditedItem(null);
-    setOpenForm(false);
-  };
-
-  const handleDelete = async (id) => {
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer cet élément ?")) {
-      try {
-        await axios.delete(`http://localhost:5000/api/EnteteVente/${id}`);
-        setData(data.filter((row) => row.id !== id));
-      } catch (err) {
-        alert("Erreur lors de la suppression !");
-      }
+      await axios.delete(`http://localhost:5000/api/ListeEquipageV/${matricule}`);
+      setVenteDetails(venteDetails.filter(item => item.matricule !== matricule));
+    } catch (error) {
+      setError("Erreur lors de la suppression.");
     }
   };
 
   return (
-    <div style={styles.container}>
-        <h2 style={styles.heading}>Etat Des Ventes Fournisseur</h2>
+    <div style={{ padding: "2%", maxWidth: "1000px", margin: "0 auto" }}>
+      <Tabs
+        value={tabValue}
+        onChange={(e, newValue) => setTabValue(newValue)}
+        centered
+        textColor="secondary"
+        indicatorColor="secondary"
+        aria-label="secondary tabs example"
+        sx={{
+          "& .MuiTabs-indicator": { backgroundColor: "#B71C1C" },
+          "& .MuiTab-root": { transition: "color 0.3s ease-in-out" },
+          "& .Mui-selected": { color: "#B71C1C !important" },
+        }}
+      >
+        <Tab label="Liste Equipage" icon={<motion.div whileHover={{ scale: 1.2 }}><Users /></motion.div>} />
+        <Tab label="État Ventes Tunisair" icon={<motion.div whileHover={{ scale: 1.2 }}><ShoppingBag /></motion.div>} />
+      </Tabs>
 
-    
-      <motion.button
-          onClick={() => setOpenForm(true)}
-          style={styles.addButton}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          transition={{ type: "spring", stiffness: 300 }}
-  >
-    <Plus style={styles.icon} />
-    Ajouter Etat De Vente
-    </motion.button>
-      {loading && <div style={styles.loader}>Chargement...</div>}
-      {error && <p style={styles.error}>{error}</p>}
+      <Undo2 style={{ cursor: "pointer", color: "#B71C1C" }} size={28} onClick={() => navigate(-1)} />
 
-      {!loading && !error && (
-        <div style={styles.tableContainer}>
-          <table style={styles.table}>
+      {tabValue === 0 && (
+        <div>
+          <DetailsEtat data={DetailsEtat} />
+          <Button variant="contained" color="primary" startIcon={<Plus />} onClick={() => setIsAdding(true)}>
+            Ajouter
+          </Button>
+          <table style={{
+            width: "70%",
+            borderCollapse: "collapse",
+            marginTop: "1rem",
+            marginLeft: "auto",
+            marginRight: "auto",
+            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+            borderRadius: "8px",
+            overflow: "hidden"
+          }}>
             <thead>
-              <tr style={styles.headerRow}>
-                {['AVION', 'AIROPORT', 'DATE_EDITION', 'NUMERO_ETAT', 'PNC_1' ,'TotaleValeur' ,'TotaleEncaisse' ,'Status', 'Actions', 'Details'].map(header => (
-                  <th key={header} style={styles.headerCell}>{header}</th>
-                ))}
+              <tr style={{ backgroundColor: "#b71c1c", color: "#ffffff" }}>
+                <th style={tableHeaderStyle}>PNC</th>
+                <th style={tableHeaderStyle}>Matricule</th>
+                <th style={tableHeaderStyle}>Status</th>
+                <th style={tableHeaderStyle}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {data.length > 0 ? (
-                data.map((row) => (
-                  <tr key={row.id}>
-                    {['avion', 'airoport', 'datE_EDITION', 'numerO_ETAT',  'pnC1'  ].map((field) => (
-                      <td key={field} style={styles.cell}>
-                        {isEditing === row.id ? (
-                          <input type="text" value={editedItem[field]} onChange={(e) => setEditedItem({ ...editedItem, [field]: e.target.value })} />
-                        ) : (
-                          row[field]
-                        )}
-                      </td>
-                    ))}
-                    <td style={styles.cell}>{totalArrivee}<Euro size={14}  style={{ marginLeft: "2px" }}/></td>
+              {isAdding && (
+                <tr>
+                  <td style={tableCellStyle}>
+                    <Autocomplete
+                      options={pncs}
+                      getOptionLabel={(option) => option.nom}
+                      onChange={(e, newValue) => {
+                        setNewItem({ pnc: newValue?.nom || "", matricule: newValue?.matricule || "" });
+                      }}
+                      renderInput={(params) => <TextField {...params} label="PNC" />}
+                    />
+                  </td>
+                  <td style={tableCellStyle}>
+                    <TextField value={newItem.matricule} disabled />
+                  </td>
+                  <td style={tableCellStyle}></td>
+                  <td style={tableCellStyle}>
+                    <Save onClick={handleAddNew} style={{ color: "green", cursor: "pointer" }} />
+                    <X onClick={() => setIsAdding(false)} style={{ color: "red", cursor: "pointer" }} />
+                  </td>
+                </tr>
+              )}
+              {venteDetails.map((item, index) => {
+                const isEditing = editedItem && editedItem.matricule === item.matricule;
+                const isApproved = entete && item.matricule === entete.pnC1;
 
-
-                    <td style={styles.cell}>{totalEncaisse}<Euro size={14}  style={{ marginLeft: "2px" }}/></td>
-
-                    <td style={styles.cell}>
-  {totalArrivee === totalEncaisse ? (
-    <div 
-      style={{
-        backgroundColor: "#D1FAE5",
-        borderRadius: "20px",
-        color: "#0f543f", 
-        padding: "10px",
-        textAlign: "center",
-        fontWeight:"bold"
-      }}
-    >
-      Approved
-    </div>
-  ) : (
-    <div 
-      style={{
-        backgroundColor: "#ffcccb", 
-        borderRadius: "20px", 
-        color: "#C80505", 
-        padding: "10px",
-        textAlign: "center",
-        fontWeight:"bold"
-
-      }}
-    >
-      Not Approved
-    </div>
-  )}
-</td>
-
-                    <td style={styles.cell}>
-                      {isEditing === row.id ? (
+                return (
+                  <tr key={index}>
+                    <td style={tableCellStyle}>
+                      {isEditing ? (
+                        <TextField
+                          value={editedItem.pnc}
+                          onChange={(e) => setEditedItem({ ...editedItem, pnc: e.target.value })}
+                        />
+                      ) : (
+                        item.pnc
+                      )}
+                    </td>
+                    <td style={tableCellStyle}>
+                      {isEditing ? (
+                        <TextField
+                          value={editedItem.matricule}
+                          onChange={(e) => setEditedItem({ ...editedItem, matricule: e.target.value })}
+                        />
+                      ) : (
+                        item.matricule
+                      )}
+                    </td>
+                    
+                    <td style={tableCellStyle}>
+                      <div
+                        style={{
+                          backgroundColor: isApproved ? "#D1FAE5" : "#ffcccb",
+                          color: isApproved ? "#0f543f" : "#C80505",
+                          fontWeight: "bold",
+                          borderRadius: "10px",
+                          padding: "5px 10px",
+                          textAlign: "center"
+                        }}
+                      >
+                        {isApproved ? "PNC Vendeur" : "PNC"}
+                      </div>
+                    </td>
+                    <td style={tableCellStyle}>
+                      {isEditing ? (
                         <>
-                          <Save onClick={() => handleSaveEdit(editedItem)} style={{ ...styles.icon,  color: "#00a3f5", cursor:"pointer"}} />
-                          <X onClick={handleCancelEdit} style={{ ...styles.icon, color: "red" , cursor:"pointer"}} />
+                          <Save onClick={handleSaveEdit} style={{ color: "green", cursor: "pointer" }} />
+                          <X onClick={() => setEditedItem(null)} style={{ color: "red", cursor: "pointer" }} />
                         </>
                       ) : (
                         <>
-                          <Edit onClick={() => handleEdit(row)} style={{ ...styles.icon, color: "#00a3f5" , cursor:"pointer"}} />
-                          <Trash onClick={() => handleDelete(row.id)} style={{ ...styles.icon, color: "#e74c3c" , cursor:"pointer"}} />
+                          <Edit onClick={() => handleEdit(item)} style={{ color: "#00a3f5", cursor: "pointer" }} />
+                          <Trash onClick={() => handleDelete(item.matricule)} style={{ color: "#e74c3c", cursor: "pointer" }} />
                         </>
                       )}
                     </td>
-                    <td style={styles.cell}><Button onClick={handleDetailClick}>View More ...</Button></td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="7" style={styles.noData}>Aucune donnée trouvée.</td>
-                </tr>
-              )}
+                );
+              })}
             </tbody>
           </table>
         </div>
       )}
 
-<Dialog open={openForm} onClose={() => setOpenForm(false)}>
-        <DialogTitle>Ajouter Etat De Vente</DialogTitle>
-        <DialogContent>
-          <div style={{ display: "flex", gap: "15px", marginBottom: "10px" }}>
-          <TextField label="Numéro Etat" value={newItem.numerO_ETAT} onChange={(e) => setNewItem({ ...newItem, numerO_ETAT: e.target.value })} fullWidth />
-
-            <TextField label="Fournisseur" value={newItem.avion} onChange={(e) => setNewItem({ ...newItem, avion: e.target.value })} fullWidth />
-          </div>
-          <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
-          <TextField label="Airoport" value={newItem.airoport} onChange={(e) => setNewItem({ ...newItem, airoport: e.target.value })} fullWidth />
-
-          <TextField label="Date Edition" type="date" InputLabelProps={{ shrink: true }} value={newItem.datE_EDITION} onChange={(e) => setNewItem({ ...newItem, datE_EDITION: e.target.value })} fullWidth />
-          <TextField label="Agent Saisie" value={newItem.agenT_SAISIE} onChange={(e) => setNewItem({ ...newItem, agenT_SAISIE: e.target.value })} fullWidth />
-          </div>
-          
-          
-          <div style={{ display: "flex", gap: "15px", marginBottom: "10px" }}>
-          <TextField label="fL 01" value={newItem.fL01} onChange={(e) => setNewItem({ ...newItem, fL01: e.target.value })} fullWidth />
-          <TextField label="fL 02" value={newItem.fL02} onChange={(e) => setNewItem({ ...newItem, fL02: e.target.value })} fullWidth />
-            <TextField label="fL 03" value={newItem.fL03} onChange={(e) => setNewItem({ ...newItem, fL03: e.target.value })} fullWidth />
-            
-          </div>
-          <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
-          <TextField label="cc 1" value={newItem.cC1} onChange={(e) => setNewItem({ ...newItem, cC1: e.target.value })} fullWidth />
-          <TextField label="PNC 1" value={newItem.pnC1} onChange={(e) => setNewItem({ ...newItem, pnC1: e.target.value })} fullWidth />
-            <TextField label="noM 1" value={newItem.noM1} onChange={(e) => setNewItem({ ...newItem, noM1: e.target.value })} fullWidth />
-            
-          </div>  
-          <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
-          <TextField label="noM 2" value={newItem.noM2} onChange={(e) => setNewItem({ ...newItem, noM2: e.target.value })} fullWidth />
-          <TextField label="cC 2" value={newItem.cC2} onChange={(e) => setNewItem({ ...newItem, cC2: e.target.value })} fullWidth />
-            <TextField label="PNC 2" value={newItem.pnC2} onChange={(e) => setNewItem({ ...newItem, pnC2: e.target.value })} fullWidth />
-          </div>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenForm(false)} color="secondary">Annuler</Button>
-          <Button onClick={handleAddNew} color="primary">Ajouter</Button>
-        </DialogActions>
-      </Dialog>
+      {tabValue === 1 && <EtatVentesDepartTable data={venteEtatDepart} />}
     </div>
   );
 };
 
-const styles = {
-  addButton: {
-    padding: '10px 20px',
-    backgroundColor: '#C80505',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '5px',
-    display: 'flex',
-    alignItems: 'center',
-    cursor: 'pointer',
-    fontSize: '16px',
-    marginLeft:"50%",
-  },
-  container: {
-    padding: "10px",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    borderRadius: "10px",
-  },
-  
-  heading: {
-    flex: 1,
-    marginRight:"500px",
-    marginTop:"50px"
-  },
-  searchInput: {
-    maxWidth: "400px",
-    marginRight: "10px", 
-  },
-  table: {
-    borderCollapse: "collapse",
-    borderRadius: "10px",
-    backgroundColor: "#fff",
-    boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.15)",
-    width: "95%",
-    marginTop:"5%",
-    marginLeft:"13%",
-  },
-  headerRow: {
-    backgroundColor: "#f8f9fa",
-    fontWeight: "bold",
-    borderRadius: "30px",
-  },
-  headerCell: {
-    padding: "12px",
-    textAlign: "left",
-    borderBottom: "2px solid #ddd",
-    color: "#333",
-  },
-  row: {
-    transition: "background 0.3s",
-    borderBottom: "1px solid #ddd",
-  },
-  cell: {
-    padding: "10px",
-    color: "#333",
-    borderBottom: "1px solid #ddd",
-  },
-  dialog: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    backgroundColor: "#fff",
-    padding: "20px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-    borderRadius: "10px",
-    zIndex: "999",
-  },
+const tableHeaderStyle = {
+  padding: "0.8rem",
+  fontSize: "0.9rem",
+  fontWeight: "600",
+  borderBottom: "2px solid #880e0e",
+  textAlign: "left"
 };
 
-export default EnteteVenteArr;
+const tableCellStyle = {
+  padding: "0.7rem",
+  fontSize: "0.85rem",
+  borderBottom: "1px solid #ddd",
+  textAlign: "left",
+  color: "#333"
+};
+
+export default VentePage;
