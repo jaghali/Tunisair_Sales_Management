@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import EtatVentesDepartTable from "../components/EtatVentesDepartTable";
+import EtatVentesArriveeTable from "../components/EtatVentesArriveeTable";
 import { Edit, Trash, Plus, Save, X, Users, ShoppingBag, Undo2 } from "lucide-react";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
@@ -26,7 +26,7 @@ const VentePageArr = () => {
       try {
         const [response, etatDepartResponse, pncResponse, enteteResponse] = await Promise.all([
           axios.get("http://localhost:5000/api/ListeEquipageV"),
-          axios.get("http://localhost:5000/api/EtatVentesDepart"),
+          axios.get("http://localhost:5000/api/EtatVentesArrivee"),
           axios.get("http://localhost:5000/api/pn"),
           axios.get("http://localhost:5000/api/EnteteVente"),
         ]);
@@ -93,7 +93,7 @@ const VentePageArr = () => {
         }}
       >
         <Tab label="Liste Equipage" icon={<motion.div whileHover={{ scale: 1.2 }}><Users /></motion.div>} />
-        <Tab label="État Ventes Tunisair" icon={<motion.div whileHover={{ scale: 1.2 }}><ShoppingBag /></motion.div>} />
+        <Tab label="État Ventes Fournisseur" icon={<motion.div whileHover={{ scale: 1.2 }}><ShoppingBag /></motion.div>} />
       </Tabs>
 
       <Undo2 style={{ cursor: "pointer", color: "#B71C1C" }} size={28} onClick={() => navigate(-1)} />
@@ -207,7 +207,7 @@ const VentePageArr = () => {
         </div>
       )}
 
-      {tabValue === 1 && <EtatVentesDepartTable data={venteEtatDepart} />}
+      {tabValue === 1 && <EtatVentesArriveeTable data={venteEtatDepart} />}
     </div>
   );
 };
