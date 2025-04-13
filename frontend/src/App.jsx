@@ -13,6 +13,8 @@ import EnteteOffresArr from "./pages/EnteteOffreArr";
 import Devise from "./pages/Devise";
 import Sidebar from "./components/Sidebar";
 import SidebarAgentSaisie from "./components/Sidebaragentsaisie";
+import SidebarFinancier from "./components/SidebarFinancier";
+
 import VentePage from "./pages/VentePage";
 import VentePageArr from "./pages/VentePageArr";
 import OffrePage from "./pages/OffrePage";
@@ -23,6 +25,8 @@ import FournisseurPage from "./pages/FournisseurPage";
 import Confrontation from "./pages/ConfrontationPage";
 import ConfrotationOffrePage from "./pages/ConfrotationOffrePage";
 import Avion from "./pages/Avion";
+import Redevance from "./pages/Redevance";
+
 
 import "./App.css"
 
@@ -69,18 +73,25 @@ function MainLayout() {
     "/OffrePagearr",
     "/ConfrotationOffrePage"
   ];
-
+  const FinancierPages = [
+   "/direction-financiere-dashboard",
+   "/Redevance"
+  ];
   const hideSidebar =
     hideSidebarRoutes.includes(location.pathname) ||
     matchPath("/ventePage/:id", location.pathname) ||
     matchPath("/ConfrontationPage/:id", location.pathname);
 
-  let sidebarComponent = null;
-  if (!hideSidebar) {
-    sidebarComponent = agentSaisiePages.includes(location.pathname)
-      ? <SidebarAgentSaisie />
-      : <Sidebar />;
-  }
+    let sidebarComponent = null;
+    if (!hideSidebar) {
+      if (FinancierPages.includes(location.pathname)) {
+        sidebarComponent = <SidebarFinancier />;  
+      } else if (agentSaisiePages.includes(location.pathname)) {
+        sidebarComponent = <SidebarAgentSaisie />;
+      } else {
+        sidebarComponent = <Sidebar />;
+      }
+    }
 
   return (
     <div style={styles.layout}>
@@ -109,6 +120,8 @@ function MainLayout() {
           {sidebarComponent && <div style={styles.sidebar}>{sidebarComponent}</div>}
           <div style={styles.content}>
             <Routes>
+            <Route path="/direction-financiere-dashboard" element={<DirectionFinanciereDashboard />} />
+
               <Route path="/" element={<LoginPage />} />
               <Route path="/overviewPage" element={<OverviewPage />} />
               <Route path="/admin-users" element={<AdminUsers />} />
@@ -130,6 +143,8 @@ function MainLayout() {
               <Route path="/ConfrontationPage/:id" element={<Confrontation />} />
               <Route path="/ConfrotationOffrePage" element={<ConfrotationOffrePage />} />
               <Route path="/Avion" element={<Avion />} />
+              <Route path="/Redevance" element={<Redevance />} />
+
             </Routes>
           </div>
         </div>
