@@ -52,18 +52,17 @@ function MainLayout() {
     "/enteteOffrearr",
     "/enteteVente",
     "/enteteVentearr",
-    "/ventePage",
+    "/ventePage/:id",
     "/ventePagearr",
     "/OffrePage",
     "/OffrePagearr",
     "/settings",
-    "/ConfrontationPage",
+    "/ConfrontationPage/:id",
     "/ConfrotationOffrePage",
-    "/VentePage/:id"
   ];
 
   let sidebarComponent = null;
-  if (location.pathname !== "/" && location.pathname !== "/ForgotPasswordPage" && location.pathname !== "/ventePage" && location.pathname !== "/ventePagearr" && location.pathname !== "/OffrePage" && location.pathname !== "/OffrePagearr" && location.pathname !== "/ConfrontationPage" && location.pathname !== "/ConfrotationOffrePage") {
+  if (location.pathname !== "/" && location.pathname !== "/ForgotPasswordPage" && location.pathname !== "/ventePage" && location.pathname !== "/ventePagearr" && location.pathname !== "/OffrePage" && location.pathname !== "/OffrePagearr" && location.pathname !== "/ConfrontationPage/:id" && location.pathname !== "/ConfrotationOffrePage") {
     sidebarComponent = agentSaisiePages.includes(location.pathname) ? (
       <SidebarAgentSaisie />
     ) : (
