@@ -9,7 +9,7 @@ import {
   Title,
   Tooltip,
   Legend,
-  LineController
+  LineController,
 } from "chart.js";
 
 // Enregistrer les composants de Chart.js
@@ -20,8 +20,8 @@ const Redevance = () => {
   const [selectedMonth, setSelectedMonth] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const chartRef = useRef(null); // référence au canvas
-  const chartInstanceRef = useRef(null); // pour stocker l'instance Chart.js
+  const chartRef = useRef(null);
+  const chartInstanceRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,14 +52,13 @@ const Redevance = () => {
     if (!chartRef.current) return;
 
     const labels = groupedData.map((item) => `${item.mois}-${item.annee}`);
-    // Calcul de la redevance (15% de totalValeur) pour chaque mois
-    const data = groupedData.map((item) => item.totalValeur * 0.15);
+    const data = groupedData.map((item) => item.totalValeur * 0.85); // Redevance nette (après retenue)
 
     const chartData = {
       labels,
       datasets: [
         {
-          label: "Redevance (15%)",
+          label: "Redevance (85%)",
           data,
           borderColor: "#2980b9",
           backgroundColor: "rgba(41, 128, 185, 0.2)",
@@ -77,23 +76,20 @@ const Redevance = () => {
         },
         title: {
           display: true,
-          text: "Redevance Mensuelle",
+          text: "Redevance Mensuelle (après retenue)",
         },
       },
     };
 
-    // Détruire l'ancienne instance du graphique si elle existe
     if (chartInstanceRef.current) {
       chartInstanceRef.current.destroy();
     }
 
-    // Créer un nouveau graphique
     chartInstanceRef.current = new ChartJS(chartRef.current, {
       type: "line",
       data: chartData,
       options: chartOptions,
     });
-
   }, [groupedData]);
 
   return (
@@ -124,7 +120,11 @@ const Redevance = () => {
                     {selectedData.totalValeur.toFixed(2)} TND
                   </p>
                   <p style={styles.dataText}>
-                    <strong>Redevance (15%) :</strong>{" "}
+                    <strong>Redevance (85%) :</strong>{" "}
+                    {(selectedData.totalValeur * 0.85).toFixed(2)} TND
+                  </p>
+                  <p style={styles.dataText}>
+                    <strong>Retenue (15%) :</strong>{" "}
                     {(selectedData.totalValeur * 0.15).toFixed(2)} TND
                   </p>
                 </div>
@@ -177,22 +177,22 @@ const styles = {
     width: "75%",
     maxWidth: "1200px",
     gap: "20px",
-    marginTop: "20px",  // This gives some space above the cards
-    paddingLeft: "220px", // To make space on the left
+    marginTop: "20px",
+    paddingLeft: "220px",
   },
   card: {
     backgroundColor: "#ffffff",
-    padding: "30px", // Reduced padding
+    padding: "30px",
     borderRadius: "12px",
     boxShadow: "0 6px 20px rgba(0, 0, 0, 0.1)",
-    width: "45%",  // Reduced width to make them smaller
+    width: "45%",
     textAlign: "center",
     border: "1px solid #e0e0e0",
-    boxSizing: "border-box", // Ensures the padding doesn't affect the width
+    boxSizing: "border-box",
   },
   title: {
     color: "#2c3e50",
-    fontSize: "22px",  // Slightly smaller font size for the title
+    fontSize: "22px",
     marginBottom: "20px",
     fontWeight: "600",
   },
