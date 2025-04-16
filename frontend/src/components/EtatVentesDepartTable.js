@@ -74,13 +74,16 @@ const EtatVentesDepartTable = () => {
     try {
       const response = await axios.get("http://localhost:5000/api/EtatVentesDepart");
       if (response.data.length > 0) {
-        setColumns(Object.keys(response.data[0]));
+        // Filter out 'dateVente' column from the list
+        const filteredColumns = Object.keys(response.data[0]).filter(col => col !== 'dateVente');
+        setColumns(filteredColumns);
       }
       setData(response.data);
     } catch (error) {
       console.error("Erreur lors de la récupération des données :", error);
     }
   }, []);
+  
 
   useEffect(() => {
     fetchData();
@@ -290,6 +293,7 @@ const EtatVentesDepartTable = () => {
             return (
               <tr key={index} style={style.row}>
                 {columns.map((col) => (
+                  col !== 'dateVente' && (
                   <td key={col} style={style.cell}>
                     {isEditing ? (
                       <TextField
@@ -301,6 +305,7 @@ const EtatVentesDepartTable = () => {
                       item[col]
                     )}
                   </td>
+                )
                 ))}
                 <td style={style.cell}>
                   {isEditing ? (

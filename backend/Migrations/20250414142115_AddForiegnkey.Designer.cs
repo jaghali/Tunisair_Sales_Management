@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TunisairSalesManagement.Data;
 
@@ -11,9 +12,11 @@ using TunisairSalesManagement.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250414142115_AddForiegnkey")]
+    partial class AddForiegnkey
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -625,12 +628,12 @@ namespace backend.Migrations
                     b.Property<string>("Code")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<DateTime?>("DateVente")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("EnteteVenteID")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("PrixUnitaireHT")
                         .HasColumnType("decimal(18,2)");
@@ -660,6 +663,8 @@ namespace backend.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Code");
+
+                    b.HasIndex("EnteteVenteID");
 
                     b.ToTable("EtatVentesDepart");
                 });
@@ -891,6 +896,17 @@ namespace backend.Migrations
                     b.Navigation("Fournisseur");
                 });
 
+            modelBuilder.Entity("TunisairSalesManagement.Models.EtatVentesDepart", b =>
+                {
+                    b.HasOne("TunisairSalesManagement.Models.EnteteVente", "EnteteVente")
+                        .WithMany("EtatVentesDepart")
+                        .HasForeignKey("EnteteVenteID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("EnteteVente");
+                });
+
             modelBuilder.Entity("TunisairSalesManagement.Models.PrixArticle", b =>
                 {
                     b.HasOne("TunisairSalesManagement.Models.Articles", "Article")
@@ -923,6 +939,11 @@ namespace backend.Migrations
             modelBuilder.Entity("TunisairSalesManagement.Models.Devise", b =>
                 {
                     b.Navigation("PrixArticles");
+                });
+
+            modelBuilder.Entity("TunisairSalesManagement.Models.EnteteVente", b =>
+                {
+                    b.Navigation("EtatVentesDepart");
                 });
 
             modelBuilder.Entity("TunisairSalesManagement.Models.Fournisseur", b =>

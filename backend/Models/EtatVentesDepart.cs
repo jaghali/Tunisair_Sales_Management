@@ -17,5 +17,7 @@ namespace TunisairSalesManagement.Models
         public decimal PrixUnitaireHT { get; set; } 
         public decimal Valeur { get; set; } 
         public int Restant { get; set; } 
+        public DateTime? DateVente { get; set; }
+
     }
 }

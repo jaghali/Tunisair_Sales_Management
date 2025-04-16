@@ -18,6 +18,7 @@ namespace TunisairSalesManagement.Controllers
             _context = context;
         }
 
+
         // GET: api/EtatVentesDepart
         [HttpGet]
         public async Task<ActionResult<IEnumerable<EtatVentesDepart>>> GetEtatVentesDepart()
@@ -35,6 +36,27 @@ namespace TunisairSalesManagement.Controllers
 
             return CreatedAtAction(nameof(GetEtatVentesDepart), new { code = etatVentesDepart.Code }, etatVentesDepart);
         }
+
+        // GET: api/EtatVentesDepart/GroupByMonth
+[HttpGet("GroupByMonth")]
+public async Task<ActionResult> GetVentesGroupéesParMois()
+{
+    var grouped = await _context.EtatVentesDepart
+        .Where(e => e.DateVente.HasValue)
+        .GroupBy(e => new { e.DateVente.Value.Year, e.DateVente.Value.Month })
+        .Select(g => new
+        {
+            Annee = g.Key.Year,
+            Mois = g.Key.Month,
+            TotalValeur = g.Sum(e => e.Valeur),
+            TotalVente = g.Sum(e => e.QuantiteVente),
+            Articles = g.ToList()
+        })
+        .ToListAsync();
+
+    return Ok(grouped);
+}
+
 
         // PUT: api/EtatVentesDepart/5
         [HttpPut("{code}")]
