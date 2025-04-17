@@ -109,35 +109,18 @@ const DetailsEtat = () => {
                   </td>
                 ))}
 
-                <td style={styles.cell}>
-                  {totalArrivee === totalEncaisse ? (
-                    <div
-                      style={{
-                        backgroundColor: "#D1FAE5",
-                        borderRadius: "20px",
-                        color: "#0f543f",
-                        padding: "10px",
-                        textAlign: "center",
-                        fontWeight: "bold"
-                      }}
-                    >
-                      Approved
-                    </div>
-                  ) : (
-                    <div
-                      style={{
-                        backgroundColor: "#ffcccb",
-                        borderRadius: "20px",
-                        color: "#C80505",
-                        padding: "10px",
-                        textAlign: "center",
-                        fontWeight: "bold"
-                      }}
-                    >
-                      Not Approved
-                    </div>
-                  )}
-                </td>
+<div
+    style={{
+      backgroundColor: data.statut === "Approved" ? "#D1FAE5" : "#ffcccb",
+      borderRadius: "20px",
+      color: data.statut === "Approved" ? "#0f543f" : "#C80505",
+      padding: "10px",
+      textAlign: "center",
+      fontWeight: "bold",
+    }}
+  >
+    {data.statut}
+  </div>
 
                 <td style={styles.cell}>
                   {isEditing === data.id ? (

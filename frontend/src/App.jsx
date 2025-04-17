@@ -11,6 +11,7 @@ import EnteteVenteArr from "./pages/EnteteVenteArr";
 import EnteteOffres from "./pages/EnteteOffre";
 import EnteteOffresArr from "./pages/EnteteOffreArr";
 import Devise from "./pages/Devise";
+import Tauxdechange from "./pages/Tauxdechange";
 import Sidebar from "./components/Sidebar";
 import SidebarAgentSaisie from "./components/Sidebaragentsaisie";
 import SidebarFinancier from "./components/SidebarFinancier";
@@ -143,6 +144,7 @@ function MainLayout() {
               <Route path="/ArticlesPage" element={<ArticlesPage />} />
               <Route path="/ForgotPasswordPage" element={<ForgotPasswordPage />} />
               <Route path="/Devise" element={<Devise />} />
+              <Route path="/Tauxdechange" element={<Tauxdechange />} />
               <Route path="/FournisseurPage" element={<FournisseurPage />} />
               <Route path="/ConfrontationPage/:id" element={<Confrontation />} />
               <Route path="/ConfrotationOffrePage" element={<ConfrotationOffrePage />} />

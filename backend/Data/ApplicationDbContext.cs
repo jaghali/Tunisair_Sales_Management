@@ -29,7 +29,7 @@ namespace TunisairSalesManagement.Data
         public DbSet<PrixArticle> PrixArticles { get; set; }
         public DbSet<Fournisseur> Fournisseurs { get; set; }
         public DbSet<Devise> Devises { get; set; }
-
+        public DbSet<TauxChange> TauxChange { get; set; }
         public DbSet<DetailFL> DetailFLs { get; set; }
         public DbSet<Equipage> Equipages { get; set; }
 

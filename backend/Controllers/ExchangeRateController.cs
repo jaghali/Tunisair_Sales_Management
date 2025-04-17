@@ -36,4 +36,5 @@ public class ExchangeRateController : ControllerBase
 
         return BadRequest("Devise inconnue");
     }
+    
 }

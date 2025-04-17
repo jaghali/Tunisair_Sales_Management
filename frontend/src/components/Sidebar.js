@@ -1,4 +1,4 @@
-import { BarChart2, DollarSign, PackageSearch, ChartSpline, Plane  ,Users, LogOut } from "lucide-react";
+import { BarChart2, DollarSign, PackageSearch, ChartSpline, Plane  ,Users, LogOut, VariableIcon } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
@@ -11,6 +11,7 @@ const SIDEBAR_ITEMS = [
     { name: "Avion", icon: Plane , href: "/Avion" },
     { name: "Charts", icon: ChartSpline, href: "/sales" },
     { name: "Devise", icon: DollarSign, href: "/Devise" },
+    { name: "TauxDeChange", icon:ChartSpline, href: "/Tauxdechange" },
     { name: "Logout", icon: LogOut, href: "/" },
 ];
 

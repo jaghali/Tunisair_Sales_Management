@@ -15,6 +15,7 @@ namespace TunisairSalesManagement.Models
         public string Nom { get; set; }
 
         public ICollection<PrixArticle> PrixArticles { get; set; } = new List<PrixArticle>();
+        public ICollection<TauxChange>? TauxChanges { get; set; }
     }
 
 }
