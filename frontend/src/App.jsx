@@ -26,6 +26,8 @@ import Confrontation from "./pages/ConfrontationPage";
 import ConfrotationOffrePage from "./pages/ConfrotationOffrePage";
 import Avion from "./pages/Avion";
 import Redevance from "./pages/Redevance";
+import Commission from "./pages/Commission"
+import TrouxCaisse from "./pages/TrouxCaisse"
 
 
 import "./App.css"
@@ -75,7 +77,9 @@ function MainLayout() {
   ];
   const FinancierPages = [
    "/direction-financiere-dashboard",
-   "/Redevance"
+   "/Redevance",
+    "/Commission",
+    "/TrouxCaisse"
   ];
   const hideSidebar =
     hideSidebarRoutes.includes(location.pathname) ||
@@ -133,7 +137,7 @@ function MainLayout() {
               <Route path="/enteteOffre" element={<EnteteOffres />} />
               <Route path="/enteteOffrearr" element={<EnteteOffresArr />} />
               <Route path="/ventePage/:id" element={<VentePage />} />
-              <Route path="/ventePagearr" element={<VentePageArr />} />
+              <Route path="/ventePagearr/:id" element={<VentePageArr />} />
               <Route path="/OffrePage" element={<OffrePage />} />
               <Route path="/OffrePagearr" element={<OffrePageArr />} />
               <Route path="/ArticlesPage" element={<ArticlesPage />} />
@@ -144,6 +148,10 @@ function MainLayout() {
               <Route path="/ConfrotationOffrePage" element={<ConfrotationOffrePage />} />
               <Route path="/Avion" element={<Avion />} />
               <Route path="/Redevance" element={<Redevance />} />
+              <Route path="/Commission" element={<Commission />} />
+              <Route path="/TrouxCaisse" element={<TrouxCaisse />} />
+
+
 
             </Routes>
           </div>

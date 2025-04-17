@@ -14,6 +14,8 @@ namespace TunisairSalesManagement.Models
         
         public string? DONNEES { get; set; }
         public string? DESTINATION { get; set; }
+        public string? Status { get; set; }
+
         
     }
 }

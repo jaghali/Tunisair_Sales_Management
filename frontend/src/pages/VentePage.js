@@ -18,32 +18,31 @@ const VentePage = () => {
   const [newItem, setNewItem] = useState({ pnc: "", matricule: "" });
   const [editedItem, setEditedItem] = useState(null);
   const [pncs, setPncs] = useState([]);
-  const [entete, setEntete] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchDetails = async () => {
+    const fetchData = async () => {
       try {
-        const [response, etatDepartResponse, pncResponse, enteteResponse] = await Promise.all([
+        const [equipageResponse, etatDepartResponse, pncResponse] = await Promise.all([
           axios.get("http://localhost:5000/api/ListeEquipageV"),
           axios.get("http://localhost:5000/api/EtatVentesDepart"),
           axios.get("http://localhost:5000/api/pn"),
-          axios.get("http://localhost:5000/api/EnteteVente"),
         ]);
-        setVenteDetails(response.data);
+
+        setVenteDetails(equipageResponse.data);
         setVenteEtatDepart(etatDepartResponse.data);
         setPncs(pncResponse.data);
-        setEntete(enteteResponse.data[0]); // Assuming first one is relevant
       } catch (err) {
         setError("Erreur lors du chargement des données.");
       }
     };
-    fetchDetails();
+
+    fetchData();
   }, []);
 
   const handleAddNew = async () => {
     try {
-      const response = await axios.post("http://localhost:5000/api/ListeEquipageV", newItem);
+      const response = await axios.post(`http://localhost:5000/api/ListeEquipageV`, newItem);
       setVenteDetails([...venteDetails, response.data]);
       setIsAdding(false);
       setNewItem({ pnc: "", matricule: "" });
@@ -87,14 +86,13 @@ const VentePage = () => {
         centered
         textColor="secondary"
         indicatorColor="secondary"
-        aria-label="secondary tabs example"
         sx={{
           "& .MuiTabs-indicator": { backgroundColor: "#B71C1C" },
           "& .MuiTab-root": { transition: "color 0.3s ease-in-out" },
           "& .Mui-selected": { color: "#B71C1C !important" },
         }}
       >
-        <Tab label="Liste Equipage" icon={<motion.div whileHover={{ scale: 1.2 }}><Users /></motion.div>} />
+        <Tab label="Liste Équipage" icon={<motion.div whileHover={{ scale: 1.2 }}><Users /></motion.div>} />
         <Tab label="État Ventes Tunisair" icon={<motion.div whileHover={{ scale: 1.2 }}><ShoppingBag /></motion.div>} />
       </Tabs>
 
@@ -106,7 +104,7 @@ const VentePage = () => {
 
       {tabValue === 0 && (
         <div>
-          <DetailsEtat data={entete} />
+          <DetailsEtat />
           <Button
             variant="contained"
             color="primary"
@@ -144,7 +142,7 @@ const VentePage = () => {
                   <td style={tableCellStyle}>
                     <TextField value={newItem.matricule} disabled />
                   </td>
-                  <td style={tableCellStyle}></td>
+                  <td style={tableCellStyle}>—</td>
                   <td style={tableCellStyle}>
                     <Save onClick={handleAddNew} style={{ color: "green", cursor: "pointer" }} />
                     <X onClick={() => setIsAdding(false)} style={{ color: "red", cursor: "pointer" }} />
@@ -153,7 +151,6 @@ const VentePage = () => {
               )}
               {venteDetails.map((item, index) => {
                 const isEditing = editedItem && editedItem.matricule === item.matricule;
-                const isApproved = item.matricule === entete?.pnC1;
 
                 return (
                   <tr key={index}>
@@ -178,18 +175,20 @@ const VentePage = () => {
                       )}
                     </td>
                     <td style={tableCellStyle}>
-                      <div
-                        style={{
-                          backgroundColor: isApproved ? "#D1FAE5" : "#ffcccb",
-                          color: isApproved ? "#0f543f" : "#C80505",
-                          fontWeight: "bold",
-                          borderRadius: "10px",
-                          padding: "5px 10px",
-                          textAlign: "center"
-                        }}
-                      >
-                        {isApproved ? "PNC Vendeur" : "PNC"}
-                      </div>
+                      <span style={{
+                        padding: "4px 10px",
+                        borderRadius: "999px",
+                        fontSize: "0.75rem",
+                        color: "#fff",
+                        backgroundColor:
+                          item.status === "PNC"
+                            ? "#e74c3c"
+                            : item.status === "PNC VENDEUR"
+                            ? "#2ecc71"
+                            : "#7f8c8d"
+                      }}>
+                        {item.status || "Non défini"}
+                      </span>
                     </td>
                     <td style={tableCellStyle}>
                       {isEditing ? (

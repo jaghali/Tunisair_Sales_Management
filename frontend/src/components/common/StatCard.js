@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 
 const StatCard = ({ name, icon: Icon, value, color }) => {
-  // Define the styles as JavaScript objects
   const cardStyle = {
     backgroundColor: '#E5E6EB', 
     backdropFilter: 'blur(10px)',  

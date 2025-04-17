@@ -1,43 +1,37 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle ,TextField} from "@mui/material";
-import { Edit, Trash, Save, X ,  Plus } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
+import { Edit, Trash, Save, X, Plus } from "lucide-react";
 import { motion } from 'framer-motion';
-import {Euro} from "lucide-react";
+import { Euro } from "lucide-react";
 
 const DetailsEtat = () => {
-  const [data, setData] = useState([]);
+  const { id } = useParams(); // Get the ID from the URL
+  const [data, setData] = useState(null); // We will now store only one item, not an array
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(null);
   const [editedItem, setEditedItem] = useState(null);
-  const [openForm, setOpenForm] = useState(false);
-    const [etatVenteArrivee, setEtatVenteArrivee] = useState([]);
-  
-  const [newItem, setNewItem] = useState({ avion: "", airoport: "", datE_EDITION: "", numerO_ETAT: "",fL01:"" ,fL02:"" , fL03:"",cC1:"", pnC1: "" , noM1:"" ,noM2:"" , cC2:""  , pnC2: "" ,agenT_SAISIE: "" });
+
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/EnteteVente");
-        const responseArrivee = await axios.get("http://localhost:5000/api/EtatVentesarrivee");
-
-        setData(response.data);
-        setEtatVenteArrivee(responseArrivee.data);
-
+        const response = await axios.get(`http://localhost:5000/api/EnteteVente/${id}`); // Fetch data based on ID
+        setData(response.data); // Set only the data for the selected ID
       } catch (err) {
         setError("Erreur lors du chargement des données.");
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
-  }, []);
-  const totalArrivee = etatVenteArrivee.reduce((acc, item) => acc + item.valeur, 0);
-  const totalEncaisse = 531.5;
 
+    if (id) {
+      fetchData(); // Fetch data when the component mounts and whenever the ID changes
+    }
+  }, [id]);
 
   const handleDetailClick = () => {
     navigate(`/ventePagearr`);
@@ -51,7 +45,7 @@ const DetailsEtat = () => {
   const handleSaveEdit = async (newData) => {
     try {
       await axios.put(`http://localhost:5000/api/EnteteVente/${newData.id}`, newData);
-      setData(data.map((row) => (row.id === newData.id ? newData : row)));
+      setData(newData); // Update the displayed data with the new data
       setIsEditing(null);
       setEditedItem(null);
     } catch (err) {
@@ -59,194 +53,110 @@ const DetailsEtat = () => {
     }
   };
 
-  const validateNewItem = (item) => {
-    const errors = [];
-  
-    if (typeof item.numerO_ETAT !== "string") errors.push("Numéro État doit être une chaîne.");
-    if (typeof item.avion !== "string") errors.push("Avion doit être une chaîne.");
-    if (typeof item.airoport !== "string") errors.push("Aéroport doit être une chaîne.");
-    if (isNaN(Date.parse(item.datE_EDITION))) errors.push("Date Edition doit être une date valide.");
-    if (typeof item.agenT_SAISIE !== "string") errors.push("Agent Saisie doit être une chaîne.");
-    if (isNaN(Number(item.fL01))) errors.push("FL 01 doit être un nombre.");
-    if (isNaN(Number(item.fL02))) errors.push("FL 02 doit être un nombre.");
-    if (isNaN(Number(item.fL03))) errors.push("FL 03 doit être un nombre.");
-  
-    if (errors.length > 0) {
-      console.error("Erreurs de validation :", errors);
-      alert(errors.join("\n"));
-      return false;
-    }
-    return true;
-  };
-  
-
-  const handleAddNew = async () => {
-    if (!validateNewItem(newItem)) return; // Vérification avant d'envoyer
-    
-    try {
-      const response = await axios.post("http://localhost:5000/api/EnteteVente", newItem);
-      setData([...data, response.data]);
-      setOpenForm(false);
-    } catch (err) {
-      console.error("Erreur lors de l'ajout :", err.response?.data || err.message);
-      alert("Erreur lors de l'ajout !");
-    }
-  };
-  
-  
-
   const handleCancelEdit = () => {
     setIsEditing(null);
     setEditedItem(null);
-    setOpenForm(false);
   };
 
   const handleDelete = async (id) => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cet élément ?")) {
       try {
         await axios.delete(`http://localhost:5000/api/EnteteVente/${id}`);
-        setData(data.filter((row) => row.id !== id));
+        navigate('/'); // Redirect to a different page after deletion (you can customize this)
       } catch (err) {
         alert("Erreur lors de la suppression !");
       }
     }
   };
 
+  const totalArrivee = data ? data.totalArrivee : 0; // Example value, update based on your data
+  const totalEncaisse = data ? data.totalEncaisse : 0; // Example value, update based on your data
+
   return (
     <div style={styles.container}>
       {loading && <div style={styles.loader}>Chargement...</div>}
       {error && <p style={styles.error}>{error}</p>}
 
-      {!loading && !error && (
+      {!loading && !error && data && (
         <div style={styles.tableContainer}>
           <table style={styles.table}>
             <thead>
               <tr style={styles.headerRow}>
-                {['AVION', 'AIROPORT', 'DATE_EDITION', 'NUMERO_ETAT', 'fL01' , 'fL02' ,'fL03', 'cC2','PNC_1' , 'noM1' ,'noM2', 'cC2', 'pnC2','totaleEncaisse','Status','Actions'].map(header => (
+                {['AVION', 'AIROPORT', 'DATE_EDITION', 'NUMERO_ETAT', 'fL01', 'fL02', 'fL03', 'cC2', 'PNC_1', 'noM1', 'noM2', 'cC2', 'pnC2', 'totaleEncaisse', 'Status', 'Actions'].map(header => (
                   <th key={header} style={styles.headerCell}>{header}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {data.length > 0 ? (
-                data.map((row) => (
-                  <tr key={row.id}>
-                    {['avion', 'airoport', 'datE_EDITION', 'numerO_ETAT',  'fL01' , 'fL02' ,'fL03','cC2', 'pnC1'  , 'noM1' ,'noM2', 'cC2', 'pnC2', 'totaleEncaisse'].map((field) => (
-  <td key={field} style={styles.cell}>
-    {isEditing === row.id ? (
-      <input
-        type="text"
-        value={editedItem[field]}
-        onChange={(e) => setEditedItem({ ...editedItem, [field]: e.target.value })}
-      />
-    ) : (
-      field === 'totaleEncaisse' ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          {row[field]} <Euro size={16} color="#4a4a4a" />
-        </div>
-      ) : (
-        row[field]
-      )
-    )}
-  </td>
-))}
-
-                
-                    <td style={styles.cell}>
-  {totalArrivee === totalEncaisse ? (
-    <div 
-      style={{
-        backgroundColor: "#D1FAE5",
-        borderRadius: "20px",
-        color: "#0f543f", 
-        padding: "10px",
-        textAlign: "center",
-        fontWeight:"bold"
-      }}
-    >
-      Approved
-    </div>
-  ) : (
-    <div 
-      style={{
-        backgroundColor: "#ffcccb", 
-        borderRadius: "20px", 
-        color: "#C80505", 
-        padding: "10px",
-        textAlign: "center",
-        fontWeight:"bold"
-
-      }}
-    >
-      Not Approved
-    </div>
-  )}
-</td>
-
-                    <td style={styles.cell}>
-                      {isEditing === row.id ? (
-                        <>
-                          <Save onClick={() => handleSaveEdit(editedItem)} style={{ ...styles.icon,  color: "#00a3f5", cursor:"pointer"}} />
-                          <X onClick={handleCancelEdit} style={{ ...styles.icon, color: "red" , cursor:"pointer"}} />
-                        </>
+              <tr key={data.id}>
+                {['avion', 'airoport', 'datE_EDITION', 'numerO_ETAT', 'fL01', 'fL02', 'fL03', 'cC2', 'pnC1', 'noM1', 'noM2', 'cC2', 'pnC2', 'totaleEncaisse'].map((field) => (
+                  <td key={field} style={styles.cell}>
+                    {isEditing === data.id ? (
+                      <input
+                        type="text"
+                        value={editedItem[field]}
+                        onChange={(e) => setEditedItem({ ...editedItem, [field]: e.target.value })}
+                      />
+                    ) : (
+                      field === 'totaleEncaisse' ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          {data[field]} <Euro size={16} color="#4a4a4a" />
+                        </div>
                       ) : (
-                        <>
-                          <Edit onClick={() => handleEdit(row)} style={{ ...styles.icon, color: "#00a3f5" , cursor:"pointer"}} />
-                          <Trash onClick={() => handleDelete(row.id)} style={{ ...styles.icon, color: "#e74c3c" , cursor:"pointer"}} />
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="7" style={styles.noData}>Aucune donnée trouvée.</td>
-                </tr>
-              )}
+                        data[field]
+                      )
+                    )}
+                  </td>
+                ))}
+
+                <td style={styles.cell}>
+                  {totalArrivee === totalEncaisse ? (
+                    <div
+                      style={{
+                        backgroundColor: "#D1FAE5",
+                        borderRadius: "20px",
+                        color: "#0f543f",
+                        padding: "10px",
+                        textAlign: "center",
+                        fontWeight: "bold"
+                      }}
+                    >
+                      Approved
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        backgroundColor: "#ffcccb",
+                        borderRadius: "20px",
+                        color: "#C80505",
+                        padding: "10px",
+                        textAlign: "center",
+                        fontWeight: "bold"
+                      }}
+                    >
+                      Not Approved
+                    </div>
+                  )}
+                </td>
+
+                <td style={styles.cell}>
+                  {isEditing === data.id ? (
+                    <>
+                      <Save onClick={() => handleSaveEdit(editedItem)} style={{ ...styles.icon, color: "#00a3f5", cursor: "pointer" }} />
+                      <X onClick={handleCancelEdit} style={{ ...styles.icon, color: "red", cursor: "pointer" }} />
+                    </>
+                  ) : (
+                    <>
+                      <Edit onClick={() => handleEdit(data)} style={{ ...styles.icon, color: "#00a3f5", cursor: "pointer" }} />
+                      <Trash onClick={() => handleDelete(data.id)} style={{ ...styles.icon, color: "#e74c3c", cursor: "pointer" }} />
+                    </>
+                  )}
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
       )}
-
-<Dialog open={openForm} onClose={() => setOpenForm(false)}>
-        <DialogTitle>Ajouter Etat De Vente</DialogTitle>
-        <DialogContent>
-          <div style={{ display: "flex", gap: "15px", marginBottom: "10px" }}>
-          <TextField label="Numéro Etat" value={newItem.numerO_ETAT} onChange={(e) => setNewItem({ ...newItem, numerO_ETAT: e.target.value })} fullWidth />
-
-            <TextField label="Fournisseur" value={newItem.avion} onChange={(e) => setNewItem({ ...newItem, avion: e.target.value })} fullWidth />
-          </div>
-          <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
-          <TextField label="Airoport" value={newItem.airoport} onChange={(e) => setNewItem({ ...newItem, airoport: e.target.value })} fullWidth />
-
-          <TextField label="Date Edition" type="date" InputLabelProps={{ shrink: true }} value={newItem.datE_EDITION} onChange={(e) => setNewItem({ ...newItem, datE_EDITION: e.target.value })} fullWidth />
-          <TextField label="Agent Saisie" value={newItem.agenT_SAISIE} onChange={(e) => setNewItem({ ...newItem, agenT_SAISIE: e.target.value })} fullWidth />
-          </div>
-          
-          
-          <div style={{ display: "flex", gap: "15px", marginBottom: "10px" }}>
-          <TextField label="fL 01" value={newItem.fL01} onChange={(e) => setNewItem({ ...newItem, fL01: e.target.value })} fullWidth />
-          <TextField label="fL 02" value={newItem.fL02} onChange={(e) => setNewItem({ ...newItem, fL02: e.target.value })} fullWidth />
-            <TextField label="fL 03" value={newItem.fL03} onChange={(e) => setNewItem({ ...newItem, fL03: e.target.value })} fullWidth />
-            
-          </div>
-          <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
-          <TextField label="cc 1" value={newItem.cC1} onChange={(e) => setNewItem({ ...newItem, cC1: e.target.value })} fullWidth />
-          <TextField label="PNC 1" value={newItem.pnC1} onChange={(e) => setNewItem({ ...newItem, pnC1: e.target.value })} fullWidth />
-            <TextField label="noM 1" value={newItem.noM1} onChange={(e) => setNewItem({ ...newItem, noM1: e.target.value })} fullWidth />
-            
-          </div>  
-          <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
-          <TextField label="noM 2" value={newItem.noM2} onChange={(e) => setNewItem({ ...newItem, noM2: e.target.value })} fullWidth />
-          <TextField label="cC 2" value={newItem.cC2} onChange={(e) => setNewItem({ ...newItem, cC2: e.target.value })} fullWidth />
-            <TextField label="PNC 2" value={newItem.pnC2} onChange={(e) => setNewItem({ ...newItem, pnC2: e.target.value })} fullWidth />
-          </div>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenForm(false)} color="secondary">Annuler</Button>
-          <Button onClick={handleAddNew} color="primary">Ajouter</Button>
-        </DialogActions>
-      </Dialog>
     </div>
   );
 };
@@ -262,7 +172,7 @@ const styles = {
     alignItems: 'center',
     cursor: 'pointer',
     fontSize: '16px',
-    marginLeft:"50%",
+    marginLeft: "50%",
   },
   container: {
     padding: "10px",
@@ -271,15 +181,14 @@ const styles = {
     alignItems: "center",
     borderRadius: "10px",
   },
-  
   heading: {
     flex: 1,
-    marginRight:"500px",
-    marginTop:"50px"
+    marginRight: "500px",
+    marginTop: "50px"
   },
   searchInput: {
     maxWidth: "400px",
-    marginRight: "10px", 
+    marginRight: "10px",
   },
   table: {
     borderCollapse: "collapse",
@@ -287,9 +196,9 @@ const styles = {
     backgroundColor: "#fff",
     boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.15)",
     width: "100%",
-    marginTop:"4%",
-    marginBottom:"5%",
-    marginLeft:"0",
+    marginTop: "4%",
+    marginBottom: "5%",
+    marginLeft: "0",
   },
   headerRow: {
     backgroundColor: "#f8f9fa",
