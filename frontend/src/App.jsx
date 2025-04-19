@@ -27,8 +27,10 @@ import Confrontation from "./pages/ConfrontationPage";
 import ConfrotationOffrePage from "./pages/ConfrotationOffrePage";
 import Avion from "./pages/Avion";
 import Redevance from "./pages/Redevance";
-import Commission from "./pages/Commission"
-import TrouxCaisse from "./pages/TrouxCaisse"
+import Commission from "./pages/Commission";
+import TrouxCaisse from "./pages/TrouxCaisse";
+import AgentSaisieDashboard from "./pages/AgentSaisieDashboard";
+
 
 
 import "./App.css"
@@ -66,6 +68,7 @@ function MainLayout() {
     "/settings",
     "/ConfrontationPage/:id",
     "/ConfrotationOffrePage",
+    "/agent-saisie-dashboard"
   ];
 
   const hideSidebarRoutes = [
@@ -138,7 +141,7 @@ function MainLayout() {
               <Route path="/enteteOffre" element={<EnteteOffres />} />
               <Route path="/enteteOffrearr" element={<EnteteOffresArr />} />
               <Route path="/ventePage/:id" element={<VentePage />} />
-              <Route path="/ventePagearr/:id" element={<VentePageArr />} />
+              <Route path="/ventePagearr" element={<VentePageArr />} />
               <Route path="/OffrePage" element={<OffrePage />} />
               <Route path="/OffrePagearr" element={<OffrePageArr />} />
               <Route path="/ArticlesPage" element={<ArticlesPage />} />
@@ -152,6 +155,8 @@ function MainLayout() {
               <Route path="/Redevance" element={<Redevance />} />
               <Route path="/Commission" element={<Commission />} />
               <Route path="/TrouxCaisse" element={<TrouxCaisse />} />
+              <Route path="/agent-saisie-dashboard" element={<AgentSaisieDashboard />} />
+
 
 
 

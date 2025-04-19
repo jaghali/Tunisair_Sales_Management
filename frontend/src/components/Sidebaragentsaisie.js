@@ -1,9 +1,11 @@
-import {  Settings   ,Plane , LogOut, PlaneLanding, GiftIcon } from "lucide-react";
+import {  Settings   ,Plane , Home, LogOut, PlaneLanding, GiftIcon } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
 
 const SIDEBAR_ITEMS = [
+    { name: "Home", icon: Home, color: "#6366f1", href: "/agent-saisie-dashboard" },
+
     { name: "Ventes Tunisair", icon: Plane, color: "#6366f1", href: "/enteteVente" },
     { name: "Ventes Fournisseur", icon: PlaneLanding, color: "#6366f1", href: "/enteteVentearr" },
     { name: "Offres Tunisair", icon:GiftIcon , color: "#8B5CF6", href: "/enteteOffre" },

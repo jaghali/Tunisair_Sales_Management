@@ -82,14 +82,14 @@ const DetailsEtat = () => {
           <table style={styles.table}>
             <thead>
               <tr style={styles.headerRow}>
-                {['AVION', 'AIROPORT', 'DATE_EDITION', 'NUMERO_ETAT', 'fL01', 'fL02', 'fL03', 'cC2', 'PNC_1', 'noM1', 'noM2', 'cC2', 'pnC2', 'totaleEncaisse', 'Status', 'Actions'].map(header => (
+                {['ID','FOURNISSEUR', 'AIROPORT', 'DATE_EDITION', 'NUMERO_ETAT', 'fL01', 'fL02', 'fL03', 'cC2', 'PNC_1', 'noM1', 'noM2', 'cC2', 'pnC2', 'totaleEncaisse', 'Status', 'Actions'].map(header => (
                   <th key={header} style={styles.headerCell}>{header}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               <tr key={data.id}>
-                {['avion', 'airoport', 'datE_EDITION', 'numerO_ETAT', 'fL01', 'fL02', 'fL03', 'cC2', 'pnC1', 'noM1', 'noM2', 'cC2', 'pnC2', 'totaleEncaisse'].map((field) => (
+                {['id','fournisseur', 'airoport', 'datE_EDITION', 'numerO_ETAT', 'fL01', 'fL02', 'fL03', 'cC2', 'pnC1', 'noM1', 'noM2', 'cC2', 'pnC2', 'totaleEncaisse'].map((field) => (
                   <td key={field} style={styles.cell}>
                     {isEditing === data.id ? (
                       <input

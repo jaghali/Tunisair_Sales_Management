@@ -48,6 +48,11 @@ const Redevance = () => {
     (item) => item.annee === selectedYear && item.mois === selectedMonthNumber
   );
 
+  // Calculate the totalValeur sum for the selected month
+  const totalValeurForSelectedMonth = groupedData
+    .filter((item) => item.annee === selectedYear && item.mois === selectedMonthNumber)
+    .reduce((acc, item) => acc + item.totalValeur, 0);
+
   useEffect(() => {
     if (!chartRef.current) return;
 
@@ -103,7 +108,7 @@ const Redevance = () => {
           value={selectedMonth}
         />
       </div>
-
+  
       <div style={styles.cardContainer}>
         <div style={styles.card}>
           <h1 style={styles.title}>Redevance</h1>
@@ -113,26 +118,26 @@ const Redevance = () => {
             <p style={styles.error}>{error}</p>
           ) : (
             <>
-              {selectedData && (
+              {selectedMonth && (
                 <div style={styles.dataSection}>
                   <p style={styles.dataText}>
-                    <strong>Total Valeur :</strong>{" "}
-                    {selectedData.totalValeur.toFixed(2)} TND
+                    <strong>Total Valeur pour le mois sélectionné :</strong>{" "}
+                    {totalValeurForSelectedMonth.toFixed(2)} TND
                   </p>
                   <p style={styles.dataText}>
                     <strong>Redevance (85%) :</strong>{" "}
-                    {(selectedData.totalValeur * 0.85).toFixed(2)} TND
+                    {(totalValeurForSelectedMonth * 0.85).toFixed(2)} TND
                   </p>
                   <p style={styles.dataText}>
                     <strong>Retenue (15%) :</strong>{" "}
-                    {(selectedData.totalValeur * 0.15).toFixed(2)} TND
+                    {(totalValeurForSelectedMonth * 0.15).toFixed(2)} TND
                   </p>
                 </div>
               )}
             </>
           )}
         </div>
-
+  
         <div style={styles.card}>
           <h1 style={styles.title}>Graphique des Redevances Mensuelles</h1>
           <canvas ref={chartRef} />
@@ -140,6 +145,7 @@ const Redevance = () => {
       </div>
     </div>
   );
+  
 };
 
 const styles = {

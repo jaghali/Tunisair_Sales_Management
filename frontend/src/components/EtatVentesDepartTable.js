@@ -2,11 +2,19 @@ import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Edit, Trash, Save, X, Plus } from "lucide-react";
 import { useParams, useNavigate } from 'react-router-dom';
-import { TablePagination, Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField,Autocomplete, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
+import {
+  TablePagination,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Button,
+  TextField,
+  Autocomplete,
+} from "@mui/material";
 
 const EtatVentesDepartTable = () => {
   const [data, setData] = useState([]);
-  const [columns, setColumns] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [editedItem, setEditedItem] = useState(null);
@@ -23,14 +31,14 @@ const EtatVentesDepartTable = () => {
     quantiteOffre: "",
     quantiteVente: "",
     prixUnitaireHT: "",
-    valeur: "", 
-    restant: "", 
+    valeur: "",
+    restant: "",
+    enteteVenteID: id,
   });
   const [articles, setArticles] = useState([]);
 
   const navigate = useNavigate();
 
-  // Fonction pour récupérer les articles
   const fetchArticles = useCallback(async () => {
     try {
       const response = await axios.get("http://localhost:5000/api/Articles");
@@ -40,8 +48,7 @@ const EtatVentesDepartTable = () => {
     }
   }, []);
 
-  // Fonction pour récupérer le prix d'un article en fonction de la description
-  const fetchPrixArticles = useCallback(async ()  => {
+  const fetchPrixArticles = useCallback(async () => {
     try {
       const response = await axios.get("http://localhost:5000/api/PrixArticles");
       setPrixArticles(response.data);
@@ -54,7 +61,6 @@ const EtatVentesDepartTable = () => {
     fetchPrixArticles();
   }, [fetchPrixArticles]);
 
-  // Fonction pour récupérer le code d'un article en fonction de la description
   const fetchCodeByDescription = useCallback(async (description) => {
     try {
       const response = await axios.get(`http://localhost:5000/api/Articles/code/${description}`);
@@ -69,29 +75,25 @@ const EtatVentesDepartTable = () => {
     }
   }, []);
 
-  // Fonction de récupération des données de vente
   const fetchData = useCallback(async () => {
     try {
       const response = await axios.get("http://localhost:5000/api/EtatVentesDepart");
-      if (response.data.length > 0) {
-        // Filter out 'dateVente' column from the list
-        const filteredColumns = Object.keys(response.data[0]).filter(col => col !== 'dateVente');
-        setColumns(filteredColumns);
-      }
-      setData(response.data);
+      const filteredData = response.data.filter(item => item.enteteVenteID === parseInt(id));
+      setData(filteredData);
+
+      console.log("Selected enteteVenteId:", id);
+
     } catch (error) {
       console.error("Erreur lors de la récupération des données :", error);
     }
-  }, []);
-  
+  }, [id]);
 
   useEffect(() => {
     fetchData();
-    fetchArticles(); // Récupérer les articles au démarrage
+    fetchArticles();
   }, [fetchData, fetchArticles]);
 
   const handleDelete = async (code) => {
-    console.log("Suppression du code :", code);
     try {
       await axios.delete(`http://localhost:5000/api/EtatVentesDepart/${code}`);
       fetchData();
@@ -135,7 +137,7 @@ const EtatVentesDepartTable = () => {
     const value = e.target.value;
     const updatedItem = { ...newItem, [key]: value };
 
-    if (key === "quantiteVente" || key === "qtDotation" || key === "prixUnitaireHT") {
+    if (["quantiteVente", "qtDotation", "prixUnitaireHT"].includes(key)) {
       updatedItem.valeur = parseFloat(updatedItem.quantiteVente || 0) * parseFloat(updatedItem.prixUnitaireHT || 0);
       updatedItem.restant = parseFloat(updatedItem.qtDotation || 0) - parseFloat(updatedItem.quantiteVente || 0);
     }
@@ -144,20 +146,19 @@ const EtatVentesDepartTable = () => {
   };
 
   const handleAddItem = async () => {
-    console.log("Données envoyées :", newItem);
     const formattedItem = {
-      code: newItem.code, 
+      code: newItem.code,
       description: newItem.description,
-      prixUnitaireHT:parseFloat(newItem.prixUnitaireHT),
-      qtCompJ:parseInt(newItem.qtCompJ, 10),
-      qtDotation:parseInt(newItem.qtDotation, 10),
-      quantiteCasse:parseInt(newItem.quantiteCasse, 10),
-      quantiteOffre:parseInt(newItem.quantiteOffre, 10),
-      quantiteVente:parseInt(newItem.quantiteVente, 10),
+      prixUnitaireHT: parseFloat(newItem.prixUnitaireHT),
+      qtCompJ: parseInt(newItem.qtCompJ, 10),
+      qtDotation: parseInt(newItem.qtDotation, 10),
+      quantiteCasse: parseInt(newItem.quantiteCasse, 10),
+      quantiteOffre: parseInt(newItem.quantiteOffre, 10),
+      quantiteVente: parseInt(newItem.quantiteVente, 10),
       restant: newItem.restant,
-      totEm:parseInt(newItem.totEm, 10),
-      valeur:parseFloat(newItem.valeur), 
-       
+      totEm: parseInt(newItem.totEm, 10),
+      valeur: parseFloat(newItem.valeur),
+      enteteVenteID: newItem.enteteVenteID,
     };
     try {
       await axios.post("http://localhost:5000/api/EtatVentesDepart", formattedItem);
@@ -173,13 +174,15 @@ const EtatVentesDepartTable = () => {
         quantiteOffre: "",
         quantiteVente: "",
         prixUnitaireHT: "",
-        valeur: "", 
-        restant: "", 
+        valeur: "",
+        restant: "",
+        enteteVenteID:"",
       });
     } catch (error) {
       console.error("Erreur lors de l'ajout :", error);
     }
   };
+
   const handleDetailClick = () => {
     navigate(`/ConfrontationPage/${id}`);
   };
@@ -203,34 +206,27 @@ const EtatVentesDepartTable = () => {
       <Dialog open={showDialog} onClose={() => setShowDialog(false)}>
         <DialogTitle>Ajouter un nouvel élément</DialogTitle>
         <DialogContent>
-         <Autocomplete
-                     options={articles} 
-                     getOptionLabel={(option) => option.description || ''} 
-                     onChange={(event, value) => {
-                       if (value) {
-                         const prix = prixArticles.find((p) => p.code === value.articleCode)?.prix || 0; 
-                         setNewItem({
-                           ...newItem,
-                           code: value.code,
-                           description: value.description,
-                           prixUnitaireHT: prix, // Assigne le prix récupéré
-                         });
-                       }
-                     }}
-                     
-                     renderInput={(params) => (
-                       
-                       <TextField
-                         {...params}
-                         label="Description"
-                         fullWidth
-                         style={style.inputField}
-                       />
-           
-                     )}
-                   />
+          <Autocomplete
+            options={articles}
+            getOptionLabel={(option) => option.description || ""}
+            onChange={(event, value) => {
+              if (value) {
+                const prix = prixArticles.find((p) => p.code === value.articleCode)?.prix || 0;
+                setNewItem({
+                  ...newItem,
+                  code: value.code,
+                  description: value.description,
+                  prixUnitaireHT: prix,
+                });
+              }
+            }}
+            renderInput={(params) => (
+              <TextField {...params} label="Description" fullWidth style={style.inputField} />
+            )}
+          />
 
           {["code", "description", "qtDotation", "qtCompJ", "totEm", "quantiteCasse", "quantiteOffre", "quantiteVente"].map((col) => (
+            
             <TextField
               key={col}
               label={col}
@@ -239,16 +235,25 @@ const EtatVentesDepartTable = () => {
               fullWidth
               margin="dense"
               style={style.input}
-              disabled={col === "code" || col === "description" } 
+              disabled={col === "code" || col === "description"}
             />
           ))}
           <TextField
-                      label="Prix Unitaire HT"
-                      value={newItem.prixUnitaireHT}
-                      onChange={(e) => handleAddChange(e, "prixUnitaireHT")}
-                      fullWidth
-                      style={style.inputField}
-                    />
+              label="EnteteVenteID"
+              value={newItem.enteteVenteID || ""}
+              fullWidth
+              margin="dense"
+              style={style.input}
+              disabled
+            />
+
+          <TextField
+            label="Prix Unitaire HT"
+            value={newItem.prixUnitaireHT}
+            onChange={(e) => handleAddChange(e, "prixUnitaireHT")}
+            fullWidth
+            style={style.inputField}
+          />
           <TextField
             label="Valeur"
             value={newItem.valeur || ""}
@@ -267,23 +272,25 @@ const EtatVentesDepartTable = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleAddItem} color="primary">
-            Enregistrer
-          </Button>
-          <Button onClick={() => setShowDialog(false)} color="secondary">
-            Annuler
-          </Button>
+          <Button onClick={handleAddItem} color="primary">Enregistrer</Button>
+          <Button onClick={() => setShowDialog(false)} color="secondary">Annuler</Button>
         </DialogActions>
       </Dialog>
 
       <table className="table">
-        <thead >
+        <thead>
           <tr style={style.headerRow}>
-            {columns.map((col) => (
-              <th key={col} style={style.headerCell}>
-                {col}
-              </th>
-            ))}
+            <th style={style.headerCell}>Code</th>
+            <th style={style.headerCell}>Description</th>
+            <th style={style.headerCell}>QtCompJ</th>
+            <th style={style.headerCell}>QtDotation</th>
+            <th style={style.headerCell}>TotEm</th>
+            <th style={style.headerCell}>QuantiteCasse</th>
+            <th style={style.headerCell}>QuantiteOffre</th>
+            <th style={style.headerCell}>QuantiteVente</th>
+            <th style={style.headerCell}>PrixUnitaireHT</th>
+            <th style={style.headerCell}>Valeur</th>
+            <th style={style.headerCell}>Restant</th>
             <th style={style.headerCell}>Actions</th>
           </tr>
         </thead>
@@ -292,32 +299,116 @@ const EtatVentesDepartTable = () => {
             const isEditing = editedItem && editedItem.code === item.code;
             return (
               <tr key={index} style={style.row}>
-                {columns.map((col) => (
-                  col !== 'dateVente' && (
-                  <td key={col} style={style.cell}>
-                    {isEditing ? (
-                      <TextField
-                        value={editedItem[col]}
-                        onChange={(e) => handleChange(e, col)}
-                        style={style.input}
-                      />
-                    ) : (
-                      item[col]
-                    )}
-                  </td>
-                )
-                ))}
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                    value={editedItem.code}
+                    onChange={(e) => handleChange(e, "code")}
+                    style={style.input}
+                  />
+                ) : (
+                  item.code
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                    value={editedItem.description}
+                    onChange={(e) => handleChange(e, "description")}
+                    style={style.input}
+                  />
+                ) : (
+                  item.description
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                    value={editedItem.qtCompJ}
+                    onChange={(e) => handleChange(e, "qtCompJ")}
+                    style={style.input}
+                  />
+                ) : (
+                  item.qtCompJ
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                    value={editedItem.qtDotation}
+                    onChange={(e) => handleChange(e, "qtDotation")}
+                    style={style.input}
+                  />
+                ) : (
+                  item.qtDotation
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                    value={editedItem.totEm}
+                    onChange={(e) => handleChange(e, "totEm")}
+                    style={style.input}
+                  />
+                ) : (
+                  item.totEm
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                    value={editedItem.quantiteCasse}
+                    onChange={(e) => handleChange(e, "quantiteCasse")}
+                    style={style.input}
+                  />
+                ) : (
+                  item.quantiteCasse
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                    value={editedItem.quantiteOffre}
+                    onChange={(e) => handleChange(e, "quantiteOffre")}
+                    style={style.input}
+                  />
+                ) : (
+                  item.quantiteOffre
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                    value={editedItem.quantiteVente}
+                    onChange={(e) => handleChange(e, "quantiteVente")}
+                    style={style.input}
+                  />
+                ) : (
+                  item.quantiteVente
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                    value={editedItem.prixUnitaireHT}
+                    onChange={(e) => handleChange(e, "prixUnitaireHT")}
+                    style={style.input}
+                  />
+                ) : (
+                  item.prixUnitaireHT
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                    value={editedItem.valeur}
+                    onChange={(e) => handleChange(e, "valeur")}
+                    style={style.input}
+                  />
+                ) : (
+                  item.valeur
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                    value={editedItem.restant}
+                    onChange={(e) => handleChange(e, "restant")}
+                    style={style.input}
+                  />
+                ) : (
+                  item.restant
+                )}</td>
                 <td style={style.cell}>
                   {isEditing ? (
-                    <>
-                      <Save onClick={handleSaveEdit} style={{ ...style.icon, color: "green" }} />
-                      <X onClick={handleCancelEdit} style={{ ...style.icon, color: "red" }} />
-                    </>
+                    <div>
+                      <Button onClick={handleSaveEdit} style={style.saveButton}><Save /></Button>
+                      <Button onClick={handleCancelEdit} style={style.cancelButton}><X /></Button>
+                    </div>
                   ) : (
-                    <>
-                      <Edit onClick={() => handleEdit(item)} style={{...style.icon, color: "#00a3f5"}} />
-                      <Trash onClick={() => handleDelete(item.code)} style={{...style.icon, color: "#e74c3c"}} />
-                    </>
+                    <div>
+                      <Button onClick={() => handleEdit(item)}><Edit /></Button>
+                      <Button onClick={() => handleDelete(item.code)}><Trash /></Button>
+                    </div>
                   )}
                 </td>
               </tr>
@@ -338,8 +429,6 @@ const EtatVentesDepartTable = () => {
     </div>
   );
 };
-
-
 const style = {
   heading: {
     textAlign: "center",
@@ -368,16 +457,27 @@ const style = {
     padding: "10px",
     borderBottom: "2px solid #ddd",
     textAlign: "left",
-    color:"black",
+    color: "black",
   },
-  row: { transition: "background 0.3s" },
-  cell: { padding: "10px", borderBottom: "1px solid #ddd", textAlign: "left",color: "#000", },
-  icon: { cursor: "pointer", marginLeft: "5px" },
+  row: {
+    transition: "background 0.3s",
+  },
+  cell: {
+    padding: "10px",
+    borderBottom: "1px solid #ddd",
+    textAlign: "left",
+    color: "#000",
+  },
+  icon: {
+    cursor: "pointer",
+    marginLeft: "5px",
+  },
   input: {
     width: "100%",
-    padding: "5px",
-    border: "1px solid #ddd",
-    borderRadius: "4px",
+    marginBottom: "10px",
   },
+  inputField: {
+    marginBottom: "10px",
+  }
 };
 export default EtatVentesDepartTable;

@@ -7,7 +7,7 @@ import Tab from "@mui/material/Tab";
 import { Button, TextField, Autocomplete } from "@mui/material";
 import { motion } from "framer-motion";
 import DetailsEtat from "../components/DetailsEtat";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const VentePage = () => {
   const [venteDetails, setVenteDetails] = useState([]);
@@ -19,6 +19,7 @@ const VentePage = () => {
   const [editedItem, setEditedItem] = useState(null);
   const [pncs, setPncs] = useState([]);
   const navigate = useNavigate();
+  const { id } = useParams();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,10 +27,15 @@ const VentePage = () => {
         const [equipageResponse, etatDepartResponse, pncResponse] = await Promise.all([
           axios.get("http://localhost:5000/api/ListeEquipageV"),
           axios.get("http://localhost:5000/api/EtatVentesDepart"),
-          axios.get("http://localhost:5000/api/pn"),
+          axios.get("http://localhost:5000/api/pn")
         ]);
 
-        setVenteDetails(equipageResponse.data);
+        const filteredEquipage = equipageResponse.data.filter(item => item.enteteVenteID === parseInt(id));
+        const filteredVente = equipageResponse.data.filter(item => item.enteteVenteID === parseInt(id));
+
+        setVenteDetails(filteredEquipage);
+        setVenteDetails(filteredVente);
+
         setVenteEtatDepart(etatDepartResponse.data);
         setPncs(pncResponse.data);
       } catch (err) {
@@ -37,12 +43,15 @@ const VentePage = () => {
       }
     };
 
-    fetchData();
-  }, []);
+    if (id) fetchData();
+  }, [id]);
 
   const handleAddNew = async () => {
     try {
-      const response = await axios.post(`http://localhost:5000/api/ListeEquipageV`, newItem);
+      const response = await axios.post(`http://localhost:5000/api/ListeEquipageV`, {
+        ...newItem,
+        enteteVenteID: parseInt(id)
+      });
       setVenteDetails([...venteDetails, response.data]);
       setIsAdding(false);
       setNewItem({ pnc: "", matricule: "" });
@@ -119,6 +128,7 @@ const VentePage = () => {
               <tr style={headerRowStyle}>
                 <th style={tableHeaderStyle}>PNC</th>
                 <th style={tableHeaderStyle}>Matricule</th>
+                <th style={tableHeaderStyle}>EnteteVenteID</th>
                 <th style={tableHeaderStyle}>Status</th>
                 <th style={tableHeaderStyle}>Actions</th>
               </tr>
@@ -142,7 +152,7 @@ const VentePage = () => {
                   <td style={tableCellStyle}>
                     <TextField value={newItem.matricule} disabled />
                   </td>
-                  <td style={tableCellStyle}>—</td>
+                  <td style={tableCellStyle}>{id}</td>
                   <td style={tableCellStyle}>
                     <Save onClick={handleAddNew} style={{ color: "green", cursor: "pointer" }} />
                     <X onClick={() => setIsAdding(false)} style={{ color: "red", cursor: "pointer" }} />
@@ -174,6 +184,7 @@ const VentePage = () => {
                         item.matricule
                       )}
                     </td>
+                    <td style={tableCellStyle}>{item.enteteVenteID}</td>
                     <td style={tableCellStyle}>
                       <span style={{
                         padding: "4px 10px",
@@ -211,7 +222,9 @@ const VentePage = () => {
         </div>
       )}
 
-      {tabValue === 1 && <EtatVentesDepartTable data={venteEtatDepart} />}
+{tabValue === 1 && venteEtatDepart && venteEtatDepart.length > 0 && (
+  <EtatVentesDepartTable data={venteEtatDepart} />
+)}
     </div>
   );
 };

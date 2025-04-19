@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -7,11 +8,11 @@ namespace TunisairSalesManagement.Models
     [Table("EnteteVente")]
     public class EnteteVente
     {
-         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]  // Auto-incrémentation
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
 
-        public string AVION { get; set; }
+        public string FOURNISSEUR { get; set; }
         public string AIROPORT { get; set; }
         public DateTime DATE_EDITION { get; set; }
         public string AGENT_SAISIE { get; set; }
@@ -28,6 +29,10 @@ namespace TunisairSalesManagement.Models
         public string Statut { get; set; } = "Not Approved";
         public double? TotaleEncaisse { get; set; }
         public double? TotaleValeur { get; set; }
+
+        // Optional: reverse navigation if you want to access all equipages for this Entete
+        public ICollection<ListeEquipageV>? Equipages { get; set; }
+        public ICollection<EtatVentesDepart>? EtatVentesDepart { get; set; }
 
     }
 }

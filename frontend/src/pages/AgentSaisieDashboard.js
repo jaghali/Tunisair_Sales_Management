@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import * as echarts from "echarts";
-import { Wallet, Percent, User, Users, GridIcon, LineChartIcon } from "lucide-react";  
+import { Wallet, Users, LineChartIcon } from "lucide-react";  
 import StatCard from "../components/common/StatCard";
-import { motion } from "framer-motion"; // Import motion
+import { motion } from "framer-motion";
 
-const DirectionFinanciereDashboard = () => {
+const AgentSaisieDashboard = () => {
   const [groupedData, setGroupedData] = useState([]);
   const [equipageData, setEquipageData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [view, setView] = useState("gallery");  // State for toggle
+  const [view, setView] = useState("line"); // Only line chart now
   const chartRef = useRef(null);
   const pieChartRef = useRef(null);
 
@@ -34,9 +34,6 @@ const DirectionFinanciereDashboard = () => {
   const sumEtatVentesDepart = groupedData.reduce((acc, curr) => acc + curr.totalValeur, 0);
   const numberOfEquipage = equipageData.length;
 
-  const commission14 = sumEtatVentesDepart * 0.14;
-  const commission1 = (sumEtatVentesDepart * 0.01) + (commission14 / (numberOfEquipage || 1));
-
   useEffect(() => {
     if (!chartRef.current || !pieChartRef.current || groupedData.length === 0) return;
 
@@ -44,12 +41,11 @@ const DirectionFinanciereDashboard = () => {
     const pieChart = echarts.init(pieChartRef.current);
 
     const labels = groupedData.map((item) => `${item.mois}-${item.annee}`);
-    const commission14Data = groupedData.map((item) => item.totalValeur * 0.14);
-    const commission1Data = groupedData.map((item) => item.totalValeur * 0.01);
+    const dataValues = groupedData.map((item) => item.totalValeur);
 
     const mainChartOptions = {
       title: {
-        text: "Commissions Mensuelles par Mois",
+        text: "",
         left: "center",
       },
       tooltip: {
@@ -57,7 +53,7 @@ const DirectionFinanciereDashboard = () => {
       },
       legend: {
         bottom: 0,
-        data: ["Commission PNC", "Commission PNC Vendeur"],
+        data: ["Totale valeur de l'etat"],
       },
       xAxis: {
         type: "category",
@@ -68,27 +64,18 @@ const DirectionFinanciereDashboard = () => {
       },
       series: [
         {
-          name: "Commission PNC",
-          type: view === "gallery" ? "bar" : "line",  // Switch between chart types based on view
-          data: commission14Data,
+          name: "Totale valeur de l'etat",
+          type: "line", // Only line chart now
+          data: dataValues,
           itemStyle: { color: "#3498db" },
         },
-        {
-          name: "Commission PNC Vendeur",
-          type: view === "gallery" ? "bar" : "line",  // Switch between chart types based on view
-          data: commission1Data,
-          itemStyle: { color: "#e74c3c" },
-        }
       ],
     };
 
     chart.setOption(mainChartOptions);
 
     const pieOptions = {
-      title: {
-        text: "Répartition des Commissions",
-        left: "center",
-      },
+     
       tooltip: {
         trigger: "item",
       },
@@ -97,13 +84,12 @@ const DirectionFinanciereDashboard = () => {
       },
       series: [
         {
-          name: "Commissions",
+          name: "Totale valeur de l'etat",
           type: "pie",
           radius: ["30%", "70%"],
           roseType: "area",
           data: [
-            { value: commission14, name: "Commission PNC" },
-            { value: commission1, name: "Commission PNC Vendeur" },
+            { value: sumEtatVentesDepart, name: "Totale valeur de l'etat" },
           ],
           emphasis: {
             itemStyle: {
@@ -114,7 +100,7 @@ const DirectionFinanciereDashboard = () => {
           },
           itemStyle: {
             color: (params) => {
-              return params.name === "Commission PNC" ? "#3498db" : "#e74c3c";
+              return params.name === "Totale valeur de l'etat" ? "#3498db" : "#e74c3c";
             },
           },
         },
@@ -135,7 +121,7 @@ const DirectionFinanciereDashboard = () => {
       pieChart.dispose();
       window.removeEventListener("resize", handleResize);
     };
-  }, [groupedData, view, commission14, commission1]);
+  }, [groupedData]);
 
   return (
     <div style={styles.pageContainer}>
@@ -151,7 +137,7 @@ const DirectionFinanciereDashboard = () => {
           animate={{ scale: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 style={styles.title}>Overview Page</h1>
+          <h1 style={styles.title}>Overview</h1>
           {loading ? (
             <p style={styles.loading}>Chargement...</p>
           ) : error ? (
@@ -165,18 +151,6 @@ const DirectionFinanciereDashboard = () => {
                 color="#2ecc71"
               />
               <StatCard
-                name="Commission Totale (14%)"
-                icon={Percent}
-                value={`${commission14.toFixed(2)} TND`}
-                color="#3498db"
-              />
-              <StatCard
-                name="Commission PNC Vendeur (1%)"
-                icon={User}
-                value={`${commission1.toFixed(2)} TND`}
-                color="#e67e22"
-              />
-              <StatCard
                 name="Nombre d'Équipage"
                 icon={Users}
                 value={numberOfEquipage}
@@ -186,8 +160,6 @@ const DirectionFinanciereDashboard = () => {
           )}
         </motion.div>
 
-        {/* View toggle switch */}
-        
         <motion.div 
           style={styles.chartRow}
           initial={{ x: -100 }}
@@ -195,75 +167,12 @@ const DirectionFinanciereDashboard = () => {
           transition={{ duration: 0.5 }}
         >
           <div style={styles.cardchart}>
-          <div style={styles.toggle}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end", // Align to the right
-            borderRadius: "100px",
-            backgroundColor: "#ff4d4d", // Default background red
-            position: "relative",
-            width: "140px",
-            height: "32px",
-            marginTop: "20px",  // Add some space from the stats
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "50%",
-              height: "100%",
-              backgroundColor: "#ff0000", // Active state red
-              borderRadius: "40px",
-              transition: "transform 0.3s ease",
-              transform: view === "gallery" ? "translateX(0)" : "translateX(100%)",
-            }}
-          />
-          <div
-            style={{
-              flex: 1,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              zIndex: 1,
-              cursor: "pointer",
-            }}
-            onClick={() => setView("gallery")}
-          >
-            <GridIcon
-              style={{
-                color: view === "gallery" ? "white" : "#FFFFFF80",
-              }}
-            />
-          </div>
-
-          <div
-            style={{
-              flex: 1,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              zIndex: 1,
-              cursor: "pointer",
-            }}
-            onClick={() => setView("line")}
-          >
-            <LineChartIcon
-              style={{
-                color: view === "line" ? "white" : "#FFFFFF80",
-              }}
-            />
-          </div>
-        </div>
-        </div>
-            <h1 style={styles.title}>Graphique des Commissions Mensuelles</h1>
+            <h1 style={styles.title}>Graphique des toteaux de valeurs</h1>
             <div ref={chartRef} style={{ height: "400px", width: "100%" }} />
           </div>
 
           <div style={styles.cardPie}>
-            <h1 style={styles.title}>Répartition des Commissions</h1>
+            <h1 style={styles.title}>Répartition des toteaux de valeurs</h1>
             <div ref={pieChartRef} style={{ height: "400px", width: "100%" }} />
           </div>
         </motion.div>
@@ -347,9 +256,6 @@ const styles = {
     justifyContent: "center",
     gap: "20px",
   },
-  toggle:{
-    marginLeft:"75%",
-  }
 };
 
-export default DirectionFinanciereDashboard;
+export default AgentSaisieDashboard;

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { StaticDatePicker } from '@mui/x-date-pickers/StaticDatePicker';
+
 import {
     Box,
     Button,
@@ -78,6 +80,8 @@ const Tauxdechange = () => {
                             <TextField
                                 label="Valeur"
                                 fullWidth
+                                variant="standard"
+                                
                                 value={formData.Valeur}
                                 onChange={(e) => setFormData({ ...formData, Valeur: e.target.value })}
                                 required
@@ -145,6 +149,7 @@ const Tauxdechange = () => {
                 </TableContainer>
             </Container>
         </Box>
+        
     );
 };
 

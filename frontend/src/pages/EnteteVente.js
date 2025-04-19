@@ -24,7 +24,7 @@ const EnteteVente = () => {
   const [etatVenteArrivee, setEtatVenteArrivee] = useState([]);
 
   const [newItem, setNewItem] = useState({
-    avion: "",
+    fournisseur: "",
     airoport: "",
     datE_EDITION: "",
     numerO_ETAT: "",
@@ -91,7 +91,7 @@ const EnteteVente = () => {
   const validateNewItem = (item) => {
     const errors = [];
     if (typeof item.numerO_ETAT !== "string") errors.push("Numéro État doit être une chaîne.");
-    if (typeof item.avion !== "string") errors.push("Avion doit être une chaîne.");
+    if (typeof item.fournisseur !== "string") errors.push("fournisseur doit être une chaîne.");
     if (typeof item.airoport !== "string") errors.push("Aéroport doit être une chaîne.");
     if (isNaN(Date.parse(item.datE_EDITION))) errors.push("Date Edition doit être une date valide.");
     if (typeof item.agenT_SAISIE !== "string") errors.push("Agent Saisie doit être une chaîne.");
@@ -157,7 +157,7 @@ const EnteteVente = () => {
           <table style={styles.table}>
             <thead>
               <tr style={styles.headerRow}>
-                {["AVION", "AIROPORT", "DATE_EDITION", "NUMERO_ETAT", "PNC_1", 'TotaleValeur', 'TotaleEncaisse', "Status", "Actions", "Details"].map((header) => (
+                {["FOURNISSEUR", "AIROPORT", "DATE_EDITION", "NUMERO_ETAT", "PNC_1", 'TotaleValeur', 'TotaleEncaisse', "Status", "Actions", "Details"].map((header) => (
                   <th key={header} style={styles.headerCell}>{header}</th>
                 ))}
               </tr>
@@ -166,7 +166,7 @@ const EnteteVente = () => {
               {data.length > 0 ? (
                 data.map((row) => (
                   <tr key={row.id}>
-                    <td style={styles.cell}>{row.avion}</td>
+                    <td style={styles.cell}>{row.fournisseur}</td>
                     <td style={styles.cell}>{row.airoport}</td>
                     <td style={styles.cell}>{row.datE_EDITION}</td>
                     <td style={styles.cell}>{row.numerO_ETAT}</td>
