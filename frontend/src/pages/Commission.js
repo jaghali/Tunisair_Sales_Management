@@ -1,27 +1,51 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import * as echarts from "echarts";
-import { Wallet, Percent, User, Users, GridIcon, LineChartIcon } from "lucide-react";  
-import StatCard from "../components/common/StatCard";
-import { motion } from "framer-motion"; // Import motion
 
 const Commission = () => {
   const [groupedData, setGroupedData] = useState([]);
   const [equipageData, setEquipageData] = useState([]);
+  const [etatVentes, setEtatVentes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [view, setView] = useState("gallery");  // State for toggle
+  const [selectedMonth, setSelectedMonth] = useState("");
+  const [activeDetails, setActiveDetails] = useState(null);
+  const [entetes, setEntetes] = useState([]);
+
   const chartRef = useRef(null);
   const pieChartRef = useRef(null);
+
+  const filteredGroupedData = selectedMonth
+  ? groupedData.filter(item => {
+      const monthString = `${item.mois}-${item.annee}`;
+      return monthString === selectedMonth;
+    })
+  : groupedData;
+
+const filteredEtatVentes = selectedMonth
+  ? etatVentes.filter(item => {
+      const date = new Date(item.dateVente);
+      const month = `${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getFullYear()}`;
+      return month === selectedMonth;
+    })
+  : etatVentes;
+
+const sumFilteredEtatVentes = filteredEtatVentes.reduce((acc, curr) => acc + curr.valeur, 0);
+
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/EtatVentesDepart/GroupByMonth");
-        setGroupedData(res.data);
+        const [res1, res2, res3, res4] = await Promise.all([
+          axios.get("http://localhost:5000/api/EtatVentesDepart/GroupByMonth"),
+          axios.get("http://localhost:5000/api/ListeEquipageV"),
+          axios.get("http://localhost:5000/api/EtatVentesDepart"),
+          axios.get("http://localhost:5000/api/EnteteVente"),
+        ]);
 
-        const equipageRes = await axios.get("http://localhost:5000/api/ListeEquipageV");
-        setEquipageData(equipageRes.data);
+        setGroupedData(res1.data);
+        setEquipageData(res2.data);
+        setEtatVentes(res3.data);
+        setEntetes(res4.data);
       } catch (err) {
         setError("Erreur lors du chargement des données.");
       } finally {
@@ -31,243 +55,135 @@ const Commission = () => {
     fetchData();
   }, []);
 
+  const getEtatVentesForMatricule = (matricule) => {
+    return entetes.filter(entete => entete.pnC1 === matricule || entete.pnC2 === matricule);
+  };  
+
+  const filteredEquipage = selectedMonth
+  ? equipageData.filter(equipage => {
+      const matchingEntete = entetes.find(entete =>
+        entete.pnC1 === equipage.matricule || entete.pnC2 === equipage.matricule
+      );
+
+      if (!matchingEntete || !matchingEntete.datE_EDITION) return false;
+
+      const date = new Date(matchingEntete.datE_EDITION);
+      const month = `${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getFullYear()}`;
+
+      return month === selectedMonth;
+    })
+  : equipageData;
+  
   const sumEtatVentesDepart = groupedData.reduce((acc, curr) => acc + curr.totalValeur, 0);
   const numberOfEquipage = equipageData.length;
-
-  const commission14 = sumEtatVentesDepart * 0.14;
-  const commission1 = (sumEtatVentesDepart * 0.01) + (commission14 / (numberOfEquipage || 1));
-
-  useEffect(() => {
-    if (!chartRef.current || !pieChartRef.current || groupedData.length === 0) return;
-
-    const chart = echarts.init(chartRef.current);
-    const pieChart = echarts.init(pieChartRef.current);
-
-    const labels = groupedData.map((item) => `${item.mois}-${item.annee}`);
-    const commission14Data = groupedData.map((item) => item.totalValeur * 0.14);
-    const commission1Data = groupedData.map((item) => item.totalValeur * 0.01);
-
-    const mainChartOptions = {
-      title: {
-        text: "Commissions Mensuelles par Mois",
-        left: "center",
-      },
-      tooltip: {
-        trigger: "axis",
-      },
-      legend: {
-        bottom: 0,
-        data: ["Commission PNC", "Commission PNC Vendeur"],
-      },
-      xAxis: {
-        type: "category",
-        data: labels,
-      },
-      yAxis: {
-        type: "value",
-      },
-      series: [
-        {
-          name: "Commission PNC",
-          type: view === "gallery" ? "bar" : "line",  // Switch between chart types based on view
-          data: commission14Data,
-          itemStyle: { color: "#3498db" },
-        },
-        {
-          name: "Commission PNC Vendeur",
-          type: view === "gallery" ? "bar" : "line",  // Switch between chart types based on view
-          data: commission1Data,
-          itemStyle: { color: "#e74c3c" },
-        }
-      ],
-    };
-
-    chart.setOption(mainChartOptions);
-
-    const pieOptions = {
-      title: {
-        text: "Répartition des Commissions",
-        left: "center",
-      },
-      tooltip: {
-        trigger: "item",
-      },
-      legend: {
-        bottom: 0,
-      },
-      series: [
-        {
-          name: "Commissions",
-          type: "pie",
-          radius: ["30%", "70%"],
-          roseType: "area",
-          data: [
-            { value: commission14, name: "Commission PNC" },
-            { value: commission1, name: "Commission PNC Vendeur" },
-          ],
-          emphasis: {
-            itemStyle: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: "rgba(0, 0, 0, 0.5)",
-            },
-          },
-          itemStyle: {
-            color: (params) => {
-              return params.name === "Commission PNC" ? "#3498db" : "#e74c3c";
-            },
-          },
-        },
-      ],
-    };
-
-    pieChart.setOption(pieOptions);
-
-    const handleResize = () => {
-      chart.resize();
-      pieChart.resize();
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      chart.dispose();
-      pieChart.dispose();
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [groupedData, view, commission14, commission1]);
+  const numberOfFilteredEquipage = filteredEquipage.length;
+  const commission14 = sumFilteredEtatVentes * 0.14;
 
   return (
     <div style={styles.pageContainer}>
-      <motion.div 
-        style={styles.cardContainer}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
+      <h2 style={styles.title}>Filtrage par Mois</h2>
+      <select
+        style={{ padding: "10px", marginBottom: "20px" }}
+        value={selectedMonth}
+        onChange={(e) => setSelectedMonth(e.target.value)}
       >
-        <motion.div 
-          style={{ ...styles.card, background: "transparent", boxShadow: "none" }}
-          initial={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h1 style={styles.title}>Commission Globale</h1>
-          {loading ? (
-            <p style={styles.loading}>Chargement...</p>
-          ) : error ? (
-            <p style={styles.error}>{error}</p>
-          ) : (
-            <div style={styles.statRow}>
-              <StatCard
-                name="Total Valeur"
-                icon={Wallet}
-                value={`${sumEtatVentesDepart.toFixed(2)} TND`}
-                color="#2ecc71"
-              />
-              <StatCard
-                name="Commission Totale (14%)"
-                icon={Percent}
-                value={`${commission14.toFixed(2)} TND`}
-                color="#3498db"
-              />
-              <StatCard
-                name="Commission PNC Vendeur (1%)"
-                icon={User}
-                value={`${commission1.toFixed(2)} TND`}
-                color="#e67e22"
-              />
-              <StatCard
-                name="Nombre d'Équipage"
-                icon={Users}
-                value={numberOfEquipage}
-                color="#9b59b6"
-              />
-            </div>
-          )}
-        </motion.div>
+        <option value="">-- Tous les mois --</option>
+        {groupedData.map((item, index) => {
+          const value = `${item.mois}-${item.annee}`;
+          return (
+            <option key={index} value={value}>
+              {value}
+            </option>
+          );
+        })}
+      </select>
 
-        {/* View toggle switch */}
-        
-        <motion.div 
-          style={styles.chartRow}
-          initial={{ x: -100 }}
-          animate={{ x: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div style={styles.cardchart}>
-          <div style={styles.toggle}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end", // Align to the right
-            borderRadius: "100px",
-            backgroundColor: "#ff4d4d", // Default background red
-            position: "relative",
-            width: "140px",
-            height: "32px",
-            marginTop: "20px",  // Add some space from the stats
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "50%",
-              height: "100%",
-              backgroundColor: "#ff0000", // Active state red
-              borderRadius: "40px",
-              transition: "transform 0.3s ease",
-              transform: view === "gallery" ? "translateX(0)" : "translateX(100%)",
-            }}
-          />
-          <div
-            style={{
-              flex: 1,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              zIndex: 1,
-              cursor: "pointer",
-            }}
-            onClick={() => setView("gallery")}
-          >
-            <GridIcon
-              style={{
-                color: view === "gallery" ? "white" : "#FFFFFF80",
-              }}
-            />
-          </div>
+      <div style={styles.card}>
+        <h3 style={styles.title}>Détails des PNC et leurs Commissions ({selectedMonth || "tous les mois"})</h3>
+        {filteredEquipage.length > 0 ? (
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ backgroundColor: "#ecf0f1" }}>
+                <th style={styles.th}>Matricule</th>
+                <th style={styles.th}>PNC</th>
+                <th style={styles.th}>Statut</th>
+                <th style={styles.th}>Commission (€)</th>
+                <th style={styles.th}>Détails</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredEquipage.map((e, i) => {
+                const isVendeu = entetes.some(entete => entete.pnC1 === e.matricule);
+                const status = isVendeu ? "PNC VENDEUR" : "PNC";
+                
+                const isVendeur = status === "PNC VENDEUR";
+                const commission = isVendeur
+                  ? (sumEtatVentesDepart * 0.01 + commission14 / numberOfEquipage).toFixed(2)
+                  : (commission14 / numberOfEquipage).toFixed(2);
+                const isOpen = activeDetails === i;
 
-          <div
-            style={{
-              flex: 1,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              zIndex: 1,
-              cursor: "pointer",
-            }}
-            onClick={() => setView("line")}
-          >
-            <LineChartIcon
-              style={{
-                color: view === "line" ? "white" : "#FFFFFF80",
-              }}
-            />
-          </div>
-        </div>
-        </div>
-            <h1 style={styles.title}>Graphique des Commissions Mensuelles</h1>
-            <div ref={chartRef} style={{ height: "400px", width: "100%" }} />
-          </div>
+                return (
+                  <React.Fragment key={i}>
+                    <tr style={{ borderBottom: "1px solid #ddd" }}>
+                      <td style={styles.td}>{e.matricule}</td>
+                      <td style={styles.td}>{e.pnc}</td>
+                      <td style={styles.td}>{status}</td>
+                      <td style={styles.td}>{commission}</td>
+                      <td style={styles.td}>
+                     <button
+                     style={{ padding: "5px 10px", cursor: "pointer" }}
+                     onClick={() => setActiveDetails(activeDetails === i ? null : i)}
+                    >
+                    {isOpen ? "Masquer" : "Détails"}
+                    </button>
+                    </td>
 
-          <div style={styles.cardPie}>
-            <h1 style={styles.title}>Répartition des Commissions</h1>
-            <div ref={pieChartRef} style={{ height: "400px", width: "100%" }} />
-          </div>
-        </motion.div>
-      </motion.div>
+                    </tr>
+                    {isOpen && (
+  <tr>
+    <td colSpan="5" style={{ padding: "10px", backgroundColor: "#f9f9f9" }}>
+      <h4>États travaillés :</h4>
+      {getEtatVentesForMatricule(e.matricule).length > 0 ? (
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr style={{ backgroundColor: "#ddd" }}>
+              <th style={styles.th}>Numéro État</th>
+              <th style={styles.th}>Date</th>
+              <th style={styles.th}>Commission (14%)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {getEtatVentesForMatricule(e.matricule).map((entete, j) => (
+              <tr key={j}>
+                <td style={styles.td}>{entete.numerO_ETAT}</td>
+                <td style={styles.td}>{entete.datE_EDITION}</td>
+                <td style={styles.td}>{(entete.totaleEncaisse * 0.14 / (numberOfFilteredEquipage || 1)).toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p>Aucun état trouvé pour cet équipage.</p>
+      )}
+    </td>
+  </tr>
+)}
+
+
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+        ) : (
+          <p>Aucun équipage trouvé pour ce mois.</p>
+        )}
+      </div>
+
+      <div style={styles.chartRow}>
+        <div ref={chartRef} style={{ width: "65%", height: "400px" }} />
+        <div ref={pieChartRef} style={{ width: "30%", height: "400px" }} />
+      </div>
     </div>
   );
 };
@@ -281,75 +197,44 @@ const styles = {
     alignItems: "center",
     marginLeft: "15%",
     fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    padding: "20px",
   },
-  cardContainer: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: "20px",
-    width: "90%",
-    maxWidth: "1400px",
+  title: {
+    margin: "20px 0",
+    color: "#2c3e50",
   },
   card: {
-    backgroundColor: "#ffffff",
-    padding: "30px",
-    borderRadius: "12px",
-    boxShadow: "0 6px 20px rgba(0, 0, 0, 0.1)",
-    width: "100%",
-    textAlign: "center",
-    border: "1px solid #e0e0e0",
-    boxSizing: "border-box",
+    width: "85%",
+    backgroundColor: "#fff",
+    padding: "20px",
+    borderRadius: "8px",
+    marginBottom: "30px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  },
+  th: {
+    textAlign: "left",
+    padding: "10px",
+    backgroundColor: "rgba(22, 21, 21, 0.1)",
+    color: "black",
+  },
+  td: {
+    padding: "10px",
+    color: "black",
+  },
+  detailButton: {
+    padding: "5px 10px",
+    backgroundColor: "#2980b9",
+    color: "#fff",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
   },
   chartRow: {
     display: "flex",
-    justifyContent: "center",
+    justifyContent: "space-between",
     gap: "20px",
-    width: "100%",
-    flexWrap: "wrap",
+    width: "85%",
+    marginTop: "30px",
   },
-  cardchart: {
-    backgroundColor: "#ffffff",
-    padding: "30px",
-    borderRadius: "12px",
-    boxShadow: "0 6px 20px rgba(0, 0, 0, 0.1)",
-    width: "65%",
-    textAlign: "center",
-    border: "1px solid #e0e0e0",
-    boxSizing: "border-box",
-  },
-  cardPie: {
-    backgroundColor: "#ffffff",
-    padding: "30px",
-    borderRadius: "12px",
-    boxShadow: "0 6px 20px rgba(0, 0, 0, 0.1)",
-    width: "30%",
-    textAlign: "center",
-    border: "1px solid #e0e0e0",
-    boxSizing: "border-box",
-  },
-  title: {
-    color: "#2c3e50",
-    fontSize: "22px",
-    marginBottom: "20px",
-    fontWeight: "600",
-  },
-  loading: {
-    color: "#2980b9",
-  },
-  error: {
-    color: "#c0392b",
-    fontWeight: "bold",
-  },
-  statRow: {
-    display: "flex",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    gap: "20px",
-  },
-  toggle:{
-    marginLeft:"75%",
-  }
 };
 
 export default Commission;

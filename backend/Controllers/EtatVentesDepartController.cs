@@ -36,6 +36,7 @@ namespace TunisairSalesManagement.Controllers
 
             return CreatedAtAction(nameof(GetEtatVentesDepart), new { code = etatVentesDepart.Code }, etatVentesDepart);
         }
+        
 
         // GET: api/EtatVentesDepart/GroupByMonth
 [HttpGet("GroupByMonth")]

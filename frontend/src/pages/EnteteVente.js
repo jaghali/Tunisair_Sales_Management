@@ -171,7 +171,7 @@ const EnteteVente = () => {
                     <td style={styles.cell}>{row.datE_EDITION}</td>
                     <td style={styles.cell}>{row.numerO_ETAT}</td>
                     <td style={styles.cell}>{row.pnC1}</td>
-                    <td style={styles.cell}>{row.totaleValeur}{totalArrivee}<Euro size={15}/></td>
+                    <td style={styles.cell}>{totalArrivee}<Euro size={15}/></td>
                     <td style={styles.cell}>
                       {isEditing === row.id ? (
                         <TextField

@@ -41,15 +41,27 @@ namespace TunisairSalesManagement.Controllers
         }
 
 
-        // 🔹 POST: api/ListeEquipageV (Ajouter un équipage)
-        [HttpPost]
-        public async Task<ActionResult<ListeEquipageV>> PostListeEquipageV(ListeEquipageV equipage)
-        {
-            _context.ListeEquipageV.Add(equipage);
-            await _context.SaveChangesAsync();
+[HttpPost]
+public async Task<ActionResult<ListeEquipageV>> PostListeEquipageV(ListeEquipageV equipage)
+{
+    // Vérifie seulement s'il est déjà dans CET état spécifique
+    var existingInSameVente = await _context.ListeEquipageV
+        .AnyAsync(e => e.MATRICULE == equipage.MATRICULE && 
+                     e.EnteteVenteID == equipage.EnteteVenteID);
 
-            return CreatedAtAction(nameof(GetListeEquipageVByMatricule), new { matricule = equipage.MATRICULE }, equipage);  // Utilisez MATRICULE en majuscule
-        }
+    if (existingInSameVente)
+    {
+        return BadRequest("Cet équipage a déjà été ajouté à cet état de vente.");
+    }
+
+    // Autorise l'ajout si c'est un nouvel état pour ce PNC
+    _context.ListeEquipageV.Add(equipage);
+    await _context.SaveChangesAsync();
+
+    return CreatedAtAction(nameof(GetListeEquipageVByMatricule), 
+        new { matricule = equipage.MATRICULE }, equipage);
+}
+
 
         // 🔹 PUT: api/ListeEquipageV/{matricule} (Modifier un équipage)
         [HttpPut("{matricule}")]
@@ -95,3 +107,5 @@ namespace TunisairSalesManagement.Controllers
         }
     }
 }
+
+

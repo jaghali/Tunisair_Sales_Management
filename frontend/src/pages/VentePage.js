@@ -24,20 +24,20 @@ const VentePage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [equipageResponse, etatDepartResponse, pncResponse] = await Promise.all([
+        const [equipageResponse, etatDepartResponse, pncResponse, enteteVenteResponse ] = await Promise.all([
           axios.get("http://localhost:5000/api/ListeEquipageV"),
           axios.get("http://localhost:5000/api/EtatVentesDepart"),
-          axios.get("http://localhost:5000/api/pn")
+          axios.get("http://localhost:5000/api/pn"),
+          axios.get(`http://localhost:5000/api/entetevente/${id}`),
         ]);
 
         const filteredEquipage = equipageResponse.data.filter(item => item.enteteVenteID === parseInt(id));
-        const filteredVente = equipageResponse.data.filter(item => item.enteteVenteID === parseInt(id));
 
         setVenteDetails(filteredEquipage);
-        setVenteDetails(filteredVente);
 
         setVenteEtatDepart(etatDepartResponse.data);
         setPncs(pncResponse.data);
+        setEnteteVente(enteteVenteResponse.data);
       } catch (err) {
         setError("Erreur lors du chargement des données.");
       }
@@ -46,19 +46,38 @@ const VentePage = () => {
     if (id) fetchData();
   }, [id]);
 
+  const [enteteVente, setEnteteVente] = useState(null);
+
   const handleAddNew = async () => {
     try {
+      const currentId = parseInt(id);
+      
+      // Vérifie seulement s'il est déjà dans CET état
+      const isAlreadyAdded = venteDetails.some(
+        item => item.matricule === newItem.matricule && item.enteteVenteID === currentId
+      );
+  
+      if (isAlreadyAdded) {
+        setError("Cet équipage a déjà été ajouté à cet état.");
+        return;
+      }
+  
+      // Envoie la requête avec le BON EnteteVenteID
       const response = await axios.post(`http://localhost:5000/api/ListeEquipageV`, {
         ...newItem,
-        enteteVenteID: parseInt(id)
+        enteteVenteID: currentId // Utilise l'ID courant de l'URL
       });
+  
+      // Met à jour l'affichage avec le nouvel équipage
       setVenteDetails([...venteDetails, response.data]);
       setIsAdding(false);
       setNewItem({ pnc: "", matricule: "" });
+      setError(null);
     } catch (error) {
-      setError("Erreur lors de l'ajout.");
+      setError(error.response?.data || "Erreur lors de l'ajout.");
     }
   };
+  
 
   const handleEdit = (item) => {
     setEditedItem(item);
@@ -80,7 +99,7 @@ const VentePage = () => {
 
   const handleDelete = async (matricule) => {
     try {
-      await axios.delete(`http://localhost:5000/api/ListeEquipageV/${matricule}`);
+      await axios.delete(`http://localhost:5000/api/ListeEquipageV/${matricule}`)
       setVenteDetails(venteDetails.filter(item => item.matricule !== matricule));
     } catch (error) {
       setError("Erreur lors de la suppression.");
@@ -140,10 +159,12 @@ const VentePage = () => {
                     <Autocomplete
                       options={pncs}
                       getOptionLabel={(option) => option?.nom || ""}
-                      onChange={(e, newValue) => {
+                      onChange={(event, newValue) => {
                         setNewItem({
                           pnc: newValue?.nom || "",
-                          matricule: newValue?.matricule || ""
+                          matricule: newValue?.matricule || "",
+                          enteteVenteID: parseInt(id),
+                          
                         });
                       }}
                       renderInput={(params) => <TextField {...params} label="PNC" />}
@@ -186,20 +207,23 @@ const VentePage = () => {
                     </td>
                     <td style={tableCellStyle}>{item.enteteVenteID}</td>
                     <td style={tableCellStyle}>
-                      <span style={{
-                        padding: "4px 10px",
-                        borderRadius: "999px",
-                        fontSize: "0.75rem",
-                        color: "#fff",
-                        backgroundColor:
-                          item.status === "PNC"
-                            ? "#e74c3c"
-                            : item.status === "PNC VENDEUR"
-                            ? "#2ecc71"
-                            : "#7f8c8d"
-                      }}>
-                        {item.status || "Non défini"}
-                      </span>
+                    <span style={{
+  padding: "4px 10px",
+  borderRadius: "999px",
+  fontSize: "0.75rem",
+  color: "#fff",
+  backgroundColor:
+    item.status === "PNC"
+      ? "#e74c3c"
+      : item.status === "PNC VENDEUR" || (enteteVente && item.matricule === enteteVente.pnC1)
+      ? "#2ecc71"
+      : "#e74c3c"
+}}>
+  {(item.status === "PNC VENDEUR" || (enteteVente && item.matricule === enteteVente.pnC1))
+    ? "PNC VENDEUR"
+    : item.status || "PNC"}
+</span>
+
                     </td>
                     <td style={tableCellStyle}>
                       {isEditing ? (
