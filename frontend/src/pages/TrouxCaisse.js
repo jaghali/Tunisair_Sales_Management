@@ -49,7 +49,7 @@ const TrouxCaisse = () => {
               </thead>
               <tbody>
                 {entetesAvecTrouDeCaisse.map((entete, index) => {
-                  const ecart = entete.totaleEncaisse - entete.totaleValeur;
+                  const ecart = entete.totaleValeur - entete.totaleEncaisse ;
                   return (
                     <tr key={index} style={styles.tr}>
                       <td style={styles.td}>{entete.numerO_ETAT}</td>
