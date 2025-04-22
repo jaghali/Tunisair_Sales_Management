@@ -30,6 +30,8 @@ import Redevance from "./pages/Redevance";
 import Commission from "./pages/Commission";
 import TrouxCaisse from "./pages/TrouxCaisse";
 import AgentSaisieDashboard from "./pages/AgentSaisieDashboard";
+import Devances from "./pages/Devances";
+
 
 
 
@@ -83,7 +85,8 @@ function MainLayout() {
    "/direction-financiere-dashboard",
    "/Redevance",
     "/Commission",
-    "/TrouxCaisse"
+    "/TrouxCaisse",
+    "/Devances"
   ];
   const hideSidebar =
     hideSidebarRoutes.includes(location.pathname) ||
@@ -156,6 +159,8 @@ function MainLayout() {
               <Route path="/Commission" element={<Commission />} />
               <Route path="/TrouxCaisse" element={<TrouxCaisse />} />
               <Route path="/agent-saisie-dashboard" element={<AgentSaisieDashboard />} />
+              <Route path="/Devances" element={<Devances />} />
+
 
 
 

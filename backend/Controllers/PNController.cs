@@ -139,6 +139,7 @@ namespace TunisairSalesManagement.Controllers
                                 COLLEGE = worksheet.Cells[row, 5].Text,
                                 SECTEUR = worksheet.Cells[row, 6].Text,
                                 Password = BCrypt.Net.BCrypt.HashPassword(password) // Hachage du mot de passe (maintenant non vide)
+                                
                             };
 
                             pnList.Add(pn);

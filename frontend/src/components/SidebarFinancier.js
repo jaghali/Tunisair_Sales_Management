@@ -8,6 +8,8 @@ const SIDEBAR_ITEMS = [
     { name: "Troux de Caisse", icon: Plane, color: "#6366f1", href: "/TrouxCaisse" },
     { name: "Redevance", icon: PlaneLanding, color: "#6366f1", href: "/Redevance" },
     { name: "Commission", icon:GiftIcon , color: "#8B5CF6", href: "/Commission" },
+    { name: "Devances", icon:GiftIcon , color: "#8B5CF6", href: "/Devances" },
+
     { name: "Logout", icon: LogOut, color: "#6EE7B7", href: "/" },
 ];
 
