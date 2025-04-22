@@ -42,7 +42,7 @@ const Devances = () => {
   return (
     <div style={styles.pageContainer}>
       <div style={styles.contentWrapper}>
-        <h2 style={styles.title}> les salaires et devances </h2>
+        <h2 style={styles.title}> Les Salaires Et Devances </h2>
 
         {loading ? (
           <p>Chargement...</p>
@@ -57,17 +57,17 @@ const Devances = () => {
                   <th style={styles.th}>Date</th>
                   <th style={styles.th}>PNC</th>
                   <th style={styles.th}>Salaire Net</th>
-                  <th style={styles.th}>Salaire Avec Écart</th>
-                  <th style={styles.th}>Devance Déduite (x5)</th>
-                  <th style={styles.th}>Lb9eya</th>
+                  <th style={styles.th}>Salaire Aprés Réduction</th>
+                  <th style={styles.th}>Devance Aprés Réduction (x5)</th>
+                  <th style={styles.th}>Reste De L'Ecart</th>
                 </tr>
               </thead>
               <tbody>
                 {entetesAvecTrouDeCaisse.map((entete, index) => {
-                  const ecart = entete.totaleEncaisse - entete.totaleValeur;
+                  const ecart = entete.totaleValeur - entete.totaleEncaisse ;
                   const salaire = getSalaireForPN(entete.pnC1);
-                  const salaireMoinsEcart =
-                    salaire !== null ? (salaire - ecart).toFixed(2) : "N/A";
+                  const salaireMoinsEcart =salaire - ecart;
+                    
 
                   const multipleDeCinq = Math.floor(ecart / 5) * 5;
                   const devance = getDevanceForPN(entete.pnC1);
@@ -87,11 +87,12 @@ const Devances = () => {
                       <td style={styles.td}>
                         {salaire !== null ? `${salaireMoinsEcart} TND` : "N/A"}
                       </td>
-                      <td style={styles.td}>
-                        {multipleDeCinq} TND
-                      </td>
+              
                       <td style={styles.td}>
                         {devance !== null ? `${devanceRestante} TND` : "N/A"}
+                      </td>
+                      <td style={styles.td}>
+                        {ecart-multipleDeCinq}
                       </td>
                     </tr>
                   );
