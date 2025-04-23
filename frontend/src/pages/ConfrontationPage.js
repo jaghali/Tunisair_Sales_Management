@@ -142,6 +142,8 @@ const Confrontation = () => {
               <TableCell>Valeur Arrivée</TableCell>
               <TableCell>Restant Départ</TableCell>
               <TableCell>Restant Arrivée</TableCell>
+              <TableCell>EnteteVenteID</TableCell>
+
             </TableRow>
           </TableHead>
           <TableBody>
@@ -161,6 +163,8 @@ const Confrontation = () => {
                   <TableCell>{item.valeurArrivee}</TableCell>
                   <TableCell>{item.restantDepart}</TableCell>
                   <TableCell>{item.restantArrivee}</TableCell>
+                  <TableCell>{item.enteteVente}</TableCell>
+
                 </TableRow>
               ))}
           </TableBody>

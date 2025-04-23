@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using TunisairSalesManagement.Data;
 using TunisairSalesManagement.Models;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace TunisairSalesManagement.Controllers
@@ -33,14 +34,15 @@ namespace TunisairSalesManagement.Controllers
             _context.EtatVentesArrivee.Add(etatVentesArrivee);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetEtatVentesArrivee), new { code = etatVentesArrivee.Code }, etatVentesArrivee);
+            // Return the created entity with the new ID.
+            return CreatedAtAction(nameof(GetEtatVentesArrivee), new { id = etatVentesArrivee.ID }, etatVentesArrivee);
         }
 
         // PUT: api/EtatVentesArrivee/5
-        [HttpPut("{code}")]
-        public async Task<IActionResult> PutEtatVentesArrivee(string code, EtatVentesArrivee etatVentesArrivee)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutEtatVentesArrivee(int id, EtatVentesArrivee etatVentesArrivee)
         {
-            if (code != etatVentesArrivee.Code)
+            if (id != etatVentesArrivee.ID)
             {
                 return BadRequest();
             }
@@ -53,7 +55,7 @@ namespace TunisairSalesManagement.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!EtatVentesArriveeExists(code))
+                if (!EtatVentesArriveeExists(id))
                 {
                     return NotFound();
                 }
@@ -67,10 +69,10 @@ namespace TunisairSalesManagement.Controllers
         }
 
         // DELETE: api/EtatVentesArrivee/5
-        [HttpDelete("{code}")]
-        public async Task<IActionResult> DeleteEtatVentesArrivee(string code)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteEtatVentesArrivee(int id)
         {
-            var etatVentesArrivee = await _context.EtatVentesArrivee.FindAsync(code);
+            var etatVentesArrivee = await _context.EtatVentesArrivee.FindAsync(id);
             if (etatVentesArrivee == null)
             {
                 return NotFound();
@@ -82,10 +84,9 @@ namespace TunisairSalesManagement.Controllers
             return NoContent();
         }
 
-        private bool EtatVentesArriveeExists(string code)
+        private bool EtatVentesArriveeExists(int id)
         {
-            return _context.EtatVentesArrivee.Any(e => e.Code == code);
+            return _context.EtatVentesArrivee.Any(e => e.ID == id);
         }
-        
     }
 }

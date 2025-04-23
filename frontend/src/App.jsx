@@ -144,7 +144,7 @@ function MainLayout() {
               <Route path="/enteteOffre" element={<EnteteOffres />} />
               <Route path="/enteteOffrearr" element={<EnteteOffresArr />} />
               <Route path="/ventePage/:id" element={<VentePage />} />
-              <Route path="/ventePagearr" element={<VentePageArr />} />
+              <Route path="/ventePagearr/:id" element={<VentePageArr />} />
               <Route path="/OffrePage" element={<OffrePage />} />
               <Route path="/OffrePagearr" element={<OffrePageArr />} />
               <Route path="/ArticlesPage" element={<ArticlesPage />} />

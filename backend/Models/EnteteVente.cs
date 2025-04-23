@@ -33,6 +33,8 @@ namespace TunisairSalesManagement.Models
         // Optional: reverse navigation if you want to access all equipages for this Entete
         public ICollection<ListeEquipageV>? Equipages { get; set; }
         public ICollection<EtatVentesDepart>? EtatVentesDepart { get; set; }
+        public ICollection<EtatVentesArrivee>? EtatVentesArrivee { get; set; }
+
 
     }
 }

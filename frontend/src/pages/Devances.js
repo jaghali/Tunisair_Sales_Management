@@ -4,17 +4,25 @@ import axios from "axios";
 const Devances = () => {
   const [enteteVentes, setEnteteVentes] = useState([]);
   const [pnList, setPnList] = useState([]);
+  const [tauxChange, setTauxChange] = useState([]);
+  const [devises, setDevises] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const enteteRes = await axios.get("http://localhost:5000/api/entetevente");
-        const pnRes = await axios.get("http://localhost:5000/api/PN");
+        const [enteteRes, pnRes, tauxRes, deviseRes] = await Promise.all([
+          axios.get("http://localhost:5000/api/entetevente"),
+          axios.get("http://localhost:5000/api/PN"),
+          axios.get("http://localhost:5000/api/tauxchange"),
+          axios.get("http://localhost:5000/api/Devise"),
+        ]);
 
         setEnteteVentes(enteteRes.data);
         setPnList(pnRes.data);
+        setTauxChange(tauxRes.data);
+        setDevises(deviseRes.data);
       } catch (err) {
         setError("Erreur lors du chargement des données.");
       } finally {
@@ -29,20 +37,37 @@ const Devances = () => {
     (entete) => entete.totaleEncaisse !== entete.totaleValeur
   );
 
+  const getTauxEtDeviseCode = (deviseId, dateEtat) => {
+    const dateRef = new Date(dateEtat);
+
+    const tauxDisponible = tauxChange
+      .filter((t) => t.deviseId === deviseId)
+      .sort((a, b) => {
+        const diffA = Math.abs(new Date(a.date) - dateRef);
+        const diffB = Math.abs(new Date(b.date) - dateRef);
+        return diffA - diffB;
+      })[0];
+
+    const devise = devises.find((d) => d.id === deviseId);
+
+    return {
+      taux: tauxDisponible?.valeur ?? 1,
+      code: devise?.code ?? "???",
+    };
+  };
+
   const getSalaireForPN = (matricule) => {
-    const matchedPN = pnList.find((pn) => pn.matricule === matricule);
-    return matchedPN?.salaire ?? null;
+    return pnList.find((pn) => pn.matricule === matricule)?.salaire ?? null;
   };
 
   const getDevanceForPN = (matricule) => {
-    const matchedPN = pnList.find((pn) => pn.matricule === matricule);
-    return matchedPN?.devance ?? null;
+    return pnList.find((pn) => pn.matricule === matricule)?.devance ?? null;
   };
 
   return (
     <div style={styles.pageContainer}>
       <div style={styles.contentWrapper}>
-        <h2 style={styles.title}> Les Salaires Et Devances </h2>
+        <h2 style={styles.title}>Les Salaires Et Devances</h2>
 
         {loading ? (
           <p>Chargement...</p>
@@ -56,6 +81,7 @@ const Devances = () => {
                   <th style={styles.th}>État N°</th>
                   <th style={styles.th}>Date</th>
                   <th style={styles.th}>PNC</th>
+                  <th style={styles.th}>Devise</th>
                   <th style={styles.th}>Salaire Net</th>
                   <th style={styles.th}>Salaire Aprés Réduction</th>
                   <th style={styles.th}>Devance Aprés Réduction (x5)</th>
@@ -64,15 +90,14 @@ const Devances = () => {
               </thead>
               <tbody>
                 {entetesAvecTrouDeCaisse.map((entete, index) => {
-                  const ecart = entete.totaleValeur - entete.totaleEncaisse ;
+                  const ecart = entete.totaleValeur - entete.totaleEncaisse;
                   const salaire = getSalaireForPN(entete.pnC1);
-                  const salaireMoinsEcart =salaire - ecart;
-                    
-
+                  const salaireMoinsEcart = salaire - ecart;
                   const multipleDeCinq = Math.floor(ecart / 5) * 5;
                   const devance = getDevanceForPN(entete.pnC1);
-                  const devanceRestante =
-                    devance !== null ? (devance - multipleDeCinq).toFixed(2) : "N/A";
+                  const devanceRestante = devance !== null ? devance - multipleDeCinq : null;
+
+                  const { taux, code } = getTauxEtDeviseCode(entete.deviseId, entete.datE_EDITION);
 
                   return (
                     <tr key={index} style={styles.tr}>
@@ -81,19 +106,21 @@ const Devances = () => {
                         {new Date(entete.datE_EDITION).toLocaleDateString("fr-FR")}
                       </td>
                       <td style={styles.td}>{entete.pnC1}</td>
+                      <td style={styles.td}>{code}</td>
                       <td style={styles.td}>
-                        {salaire !== null ? `${salaire} TND` : "N/A"}
+                        {salaire !== null ? `${(salaire * taux).toFixed(2)} ${code}` : "N/A"}
                       </td>
                       <td style={styles.td}>
-                        {salaire !== null ? `${salaireMoinsEcart} TND` : "N/A"}
-                      </td>
-              
-                      <td style={styles.td}>
-                        {devance !== null ? `${devanceRestante} TND` : "N/A"}
+                        {salaire !== null
+                          ? `${(salaireMoinsEcart * taux).toFixed(2)} ${code}`
+                          : "N/A"}
                       </td>
                       <td style={styles.td}>
-                        {ecart-multipleDeCinq}
+                        {devance !== null
+                          ? `${(devanceRestante * taux).toFixed(2)} ${code}`
+                          : "N/A"}
                       </td>
+                      <td style={styles.td}>{(ecart - multipleDeCinq).toFixed(2)}</td>
                     </tr>
                   );
                 })}
@@ -117,7 +144,7 @@ const styles = {
     padding: "20px",
   },
   contentWrapper: {
-    marginLeft: "260px", // espace pour la sidebar
+    marginLeft: "260px",
     width: "100%",
     maxWidth: "1000px",
   },

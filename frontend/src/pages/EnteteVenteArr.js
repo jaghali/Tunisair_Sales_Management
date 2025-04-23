@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle ,TextField} from "@mui/material";
 import { Edit, Trash, Save, X ,  Plus } from "lucide-react";
 import { motion } from 'framer-motion';
 import {Euro} from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
 
 const EnteteVenteArr = () => {
   const [data, setData] = useState([]);
@@ -37,10 +37,6 @@ const EnteteVenteArr = () => {
   }, []);
 
 
-
-  const handleDetailClick = () => {
-    navigate(`/ventePagearr`);
-  };
 
   const handleEdit = (item) => {
     setIsEditing(item.id);
@@ -134,51 +130,48 @@ const EnteteVenteArr = () => {
           <table style={styles.table}>
             <thead>
               <tr style={styles.headerRow}>
-                {['AVION', 'AIROPORT', 'DATE_EDITION', 'NUMERO_ETAT', 'PNC_1' , 'Actions', 'Details'].map(header => (
+                {['FOURNISSEUR', 'AIROPORT', 'DATE_EDITION', 'NUMERO_ETAT', 'PNC_1' , 'Actions', 'Details'].map(header => (
                   <th key={header} style={styles.headerCell}>{header}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {data.length > 0 ? (
-                data.map((row) => (
-                  <tr key={row.id}>
-                    {['avion', 'airoport', 'datE_EDITION', 'numerO_ETAT',  'pnC1'  ].map((field) => (
-                      <td key={field} style={styles.cell}>
-                        {isEditing === row.id ? (
-                          <input type="text" value={editedItem[field]} onChange={(e) => setEditedItem({ ...editedItem, [field]: e.target.value })} />
-                        ) : (
-                          row[field]
-                        )}
-                      </td>
-                    ))}
+                          {data.length > 0 ? (
+                            data.map((row) => (
+                              <tr key={row.id}>
+                                <td style={styles.cell}>{row.id}</td>
 
-
-
-                   
-
-                    <td style={styles.cell}>
-                      {isEditing === row.id ? (
-                        <>
-                          <Save onClick={() => handleSaveEdit(editedItem)} style={{ ...styles.icon,  color: "#00a3f5", cursor:"pointer"}} />
-                          <X onClick={handleCancelEdit} style={{ ...styles.icon, color: "red" , cursor:"pointer"}} />
-                        </>
-                      ) : (
-                        <>
-                          <Edit onClick={() => handleEdit(row)} style={{ ...styles.icon, color: "#00a3f5" , cursor:"pointer"}} />
-                          <Trash onClick={() => handleDelete(row.id)} style={{ ...styles.icon, color: "#e74c3c" , cursor:"pointer"}} />
-                        </>
-                      )}
-                    </td>
-                    <td style={styles.cell}><Button onClick={handleDetailClick}>View More ...</Button></td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="7" style={styles.noData}>Aucune donnée trouvée.</td>
-                </tr>
-              )}
-            </tbody>
+                                <td style={styles.cell}>{row.fournisseur}</td>
+                                <td style={styles.cell}>{row.airoport}</td>
+                                <td style={styles.cell}>{row.datE_EDITION}</td>
+                                <td style={styles.cell}>{row.numerO_ETAT}</td>
+                                <td style={styles.cell}>{row.pnC1}</td>
+                                <td style={styles.cell}>
+                                  {isEditing === row.id ? (
+                                    <>
+                                      <Save onClick={() => handleSaveEdit(editedItem)} style={{ ...styles.icon, color: "#00a3f5", cursor: "pointer" }} />
+                                      <X onClick={handleCancelEdit} style={{ ...styles.icon, color: "red", cursor: "pointer" }} />
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Edit onClick={() => handleEdit(row)} style={{ ...styles.icon, color: "#00a3f5", cursor: "pointer" }} />
+                                      <Trash onClick={() => handleDelete(row.id)} style={{ ...styles.icon, color: "#e74c3c", cursor: "pointer" }} />
+                                    </>
+                                  )}
+                                </td>
+                                <td style={styles.cell}>
+                                  <Link to={`/ventePageArr/${row.id}`}>
+                                    <Button>View More ...</Button>
+                                  </Link>
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan="8" style={styles.noData}>Aucune donnée trouvée.</td>
+                            </tr>
+                          )}
+                        </tbody>
           </table>
         </div>
       )}

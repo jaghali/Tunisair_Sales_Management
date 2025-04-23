@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { StaticDatePicker } from '@mui/x-date-pickers/StaticDatePicker';
-
 import {
     Box,
     Button,
     Container,
     Grid,
-    MenuItem,
     Paper,
     Table,
     TableBody,
@@ -16,63 +13,120 @@ import {
     TableHead,
     TableRow,
     TextField,
-    Typography
+    Typography,
+    MenuItem,
+    Select,
+    InputLabel,
+    FormControl,
+    CircularProgress,
+    Alert
 } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 
 const Tauxdechange = () => {
     const [tauxChanges, setTauxChanges] = useState([]);
-    const [formData, setFormData] = useState({ Valeur: '', Date: '', DeviseId: '' });
+    const [devises, setDevises] = useState([]);
+    const [formData, setFormData] = useState({ valeur: '', date: '', deviseId: '' });
     const [editingId, setEditingId] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
     const apiUrl = 'http://localhost:5000/api/tauxchange';
+    const deviseUrl = 'http://localhost:5000/api/Devise';
 
     useEffect(() => {
+        setLoading(true);
         axios.get(apiUrl)
-            .then(response => setTauxChanges(response.data))
-            .catch(error => console.error('Erreur lors du chargement des taux de change:', error));
+            .then(response => {
+                setTauxChanges(response.data);
+                setLoading(false);
+            })
+            .catch(error => {
+                setError('Erreur lors du chargement des taux de change.');
+                setLoading(false);
+                console.error('Erreur lors du chargement des taux de change:', error);
+            });
+
+        axios.get(deviseUrl)
+            .then(response => setDevises(response.data))
+            .catch(error => {
+                setError('Erreur lors du chargement des devises.');
+                setLoading(false);
+                console.error('Erreur lors du chargement des devises:', error);
+            });
     }, []);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (editingId) {
-            axios.put(`${apiUrl}/${editingId}`, formData)
-                .then(() => {
-                    setTauxChanges(tauxChanges.map(t => t.id === editingId ? formData : t));
-                    setEditingId(null);
-                    setFormData({ Valeur: '', Date: '', DeviseId: '' });
-                })
-                .catch(error => console.error('Erreur lors de la mise à jour:', error));
-        } else {
-            axios.post(apiUrl, formData)
-                .then(response => {
-                    setTauxChanges([...tauxChanges, response.data]);
-                    setFormData({ Valeur: '', Date: '', DeviseId: '' });
-                })
-                .catch(error => console.error('Erreur lors de l\'ajout:', error));
-        }
+        setLoading(true);
+        const dataToSubmit = { 
+            ...formData, 
+            date: formData.date ? new Date(formData.date).toISOString() : '' 
+        };
+    
+        const request = editingId 
+            ? axios.put(`${apiUrl}/${editingId}`, dataToSubmit) 
+            : axios.post(apiUrl, dataToSubmit);
+    
+        request
+            .then(response => {
+                const updatedTauxChanges = editingId
+                    ? tauxChanges.map(t =>
+                        t.id === editingId ? { ...dataToSubmit, id: editingId } : t
+                    )
+                    : [...tauxChanges, response.data];
+                    
+                setTauxChanges(updatedTauxChanges);
+                setFormData({ valeur: '', date: '', deviseId: '' });
+                setEditingId(null);
+            })
+            .catch(error => {
+                const errorMessage = error.response ? error.response.data : 'Erreur lors de la requête';
+                setError(`Erreur: ${errorMessage}`);
+                console.error('Erreur lors de l\'ajout/édition:', error);
+            })
+            .finally(() => setLoading(false));
     };
 
     const handleDelete = (id) => {
+        setLoading(true);
         axios.delete(`${apiUrl}/${id}`)
-            .then(() => setTauxChanges(tauxChanges.filter(t => t.id !== id)))
-            .catch(error => console.error('Erreur lors de la suppression:', error));
+            .then(() => {
+                setTauxChanges(tauxChanges.filter(t => t.id !== id));
+                setLoading(false);
+            })
+            .catch(error => {
+                setError('Erreur lors de la suppression.');
+                setLoading(false);
+                console.error('Erreur lors de la suppression:', error);
+            });
     };
 
     const handleEdit = (taux) => {
-        setFormData({ Valeur: taux.valeur, Date: taux.date, DeviseId: taux.deviseId });
+        setFormData({
+            valeur: taux.valeur,
+            date: taux.date.split('T')[0], // Only get the date part of the string
+            deviseId: taux.deviseId
+        });
         setEditingId(taux.id);
+    };
+
+    const getDeviseNom = (id) => {
+        const devise = devises.find(d => d.id === id);
+        return devise ? devise.nom : 'Inconnu';
     };
 
     return (
         <Box display="flex">
-            <Box width="250px">{/* Sidebar à gauche */}</Box>
+            <Box width="250px">{/* Sidebar placeholder */}</Box>
 
             <Container maxWidth="lg" sx={{ mt: 4 }}>
                 <Typography variant="h4" gutterBottom>
                     Gestion des Taux de Change
                 </Typography>
 
+                {error && <Alert severity="error">{error}</Alert>} {/* Error message */}
+                
                 {/* Formulaire */}
                 <Box component="form" onSubmit={handleSubmit} sx={{ mb: 4 }}>
                     <Grid container spacing={2}>
@@ -81,9 +135,8 @@ const Tauxdechange = () => {
                                 label="Valeur"
                                 fullWidth
                                 variant="standard"
-                                
-                                value={formData.Valeur}
-                                onChange={(e) => setFormData({ ...formData, Valeur: e.target.value })}
+                                value={formData.valeur}
+                                onChange={(e) => setFormData({ ...formData, valeur: e.target.value })}
                                 required
                             />
                         </Grid>
@@ -93,15 +146,38 @@ const Tauxdechange = () => {
                                 label="Date"
                                 InputLabelProps={{ shrink: true }}
                                 fullWidth
-                                value={formData.Date}
-                                onChange={(e) => setFormData({ ...formData, Date: e.target.value })}
+                                value={formData.date}
+                                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                                 required
                             />
                         </Grid>
-                        
                         <Grid item xs={12} md={3}>
-                            <Button type="submit" variant="contained" color="primary" fullWidth sx={{ height: '100%' }}>
-                                {editingId ? 'Mettre à jour' : 'Ajouter'}
+                            <FormControl fullWidth variant="standard">
+                                <InputLabel id="devise-label">Devise</InputLabel>
+                                <Select
+                                    labelId="devise-label"
+                                    value={formData.deviseId}
+                                    onChange={(e) => setFormData({ ...formData, deviseId: e.target.value })}
+                                    required
+                                >
+                                    {devises.map((devise) => (
+                                        <MenuItem key={devise.id} value={devise.id}>
+                                            {devise.nom}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12} md={3}>
+                            <Button 
+                                type="submit" 
+                                variant="contained" 
+                                color="primary" 
+                                fullWidth 
+                                sx={{ height: '100%' }}
+                                disabled={loading} // Disable button when loading
+                            >
+                                {loading ? <CircularProgress size={24} /> : (editingId ? 'Mettre à jour' : 'Ajouter')}
                             </Button>
                         </Grid>
                     </Grid>
@@ -114,7 +190,7 @@ const Tauxdechange = () => {
                             <TableRow>
                                 <TableCell><strong>Valeur</strong></TableCell>
                                 <TableCell><strong>Date</strong></TableCell>
-                
+                                <TableCell><strong>Devise</strong></TableCell>
                                 <TableCell align="right"><strong>Actions</strong></TableCell>
                             </TableRow>
                         </TableHead>
@@ -123,7 +199,7 @@ const Tauxdechange = () => {
                                 <TableRow key={taux.id}>
                                     <TableCell>{taux.valeur}</TableCell>
                                     <TableCell>{taux.date}</TableCell>
-                                    
+                                    <TableCell>{getDeviseNom(taux.deviseId)}</TableCell>
                                     <TableCell align="right">
                                         <Button
                                             variant="outlined"
@@ -149,7 +225,6 @@ const Tauxdechange = () => {
                 </TableContainer>
             </Container>
         </Box>
-        
     );
 };
 

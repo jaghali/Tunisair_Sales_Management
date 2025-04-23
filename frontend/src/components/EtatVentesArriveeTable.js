@@ -1,414 +1,464 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { Edit, Trash, Save, X, Plus, Search } from "lucide-react";
-import { TablePagination, Button, TextField, Autocomplete, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
-import {Euro} from "lucide-react";
-import { color } from "framer-motion";
+import { Edit, Trash, Save, X, Plus } from "lucide-react";
+import { useParams, useNavigate } from 'react-router-dom';
+import {
+  TablePagination,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Button,
+  TextField,
+  Autocomplete,
+} from "@mui/material";
 
-const EtatVentesArriveeTable = () => {
+const EtatVentesArrivee = () => {
   const [data, setData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
-  const [columns, setColumns] = useState([]);
-  const [articles, setArticles] = useState([]); 
   const [page, setPage] = useState(0);
-  const [isEditing, setIsEditing] = useState(null);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [animatedTotal, setAnimatedTotal] = useState(0); 
-  const [totalArrivee, setTotalArrivee] = useState(0);
-
+  const [editedItem, setEditedItem] = useState(null);
+  const [showDialog, setShowDialog] = useState(false);
+  const [prixArticles, setPrixArticles] = useState([]);
+  const { id } = useParams();
   const [newItem, setNewItem] = useState({
     code: "",
     description: "",
-    quantiteDotation: "",
+    qtDotation: "",
+    qtCompJ: "",
     totEm: "",
-    quantiteVendue: "",
+    quantiteCasse: "",
+    quantiteOffre: "",
+    quantiteVente: "",
     prixUnitaireHT: "",
     valeur: "",
     restant: "",
+    enteteVenteID: id,
   });
-  const [searchQuery, setSearchQuery] = useState("");
-  const [editedItem, setEditedItem] = useState(null);
-  const [isAdding, setIsAdding] = useState(false);
-  const [prixArticles, setPrixArticles] = useState([]);
-      const [etatVenteArrivee, setEtatVenteArrivee] = useState([]);
-  
+  const [articles, setArticles] = useState([]);
 
-const fetchPrixArticles = useCallback(async ()  => {
-  try {
-    const response = await axios.get("http://localhost:5000/api/PrixArticles");
-        const responseArrivee = await axios.get("http://localhost:5000/api/EtatVentesarrivee");
-    setEtatVenteArrivee(responseArrivee.data);
-    
-    setPrixArticles(response.data);
-  } catch (error) {
-    console.error("Erreur lors de la récupération des prix :", error);
-  }
-}, []);
+  const navigate = useNavigate();
 
-useEffect(() => {
-  fetchPrixArticles();
-}, [fetchPrixArticles]);
-
-const handleClose = () => {
-  setIsAdding(false); 
-};
-const animateTotal = (finalValue) => {
-  let currentValue = 0;
-  const step = (finalValue - currentValue) / 50; // Change steps for speed
-  const interval = setInterval(() => {
-    currentValue += step;
-    if (currentValue >= finalValue) {
-      currentValue = finalValue;
-      clearInterval(interval);
+  const fetchArticles = useCallback(async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/Articles");
+      setArticles(response.data);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des articles :", error);
     }
-    setAnimatedTotal(currentValue);
-  }, 20); // Adjust interval time for smoother animation
-};
+  }, []);
 
-useEffect(() => {
-  // Assuming etatVenteArrivee is fetched and set here
-  const total = etatVenteArrivee.reduce((acc, item) => acc + item.valeur, 0);
-  setTotalArrivee(total);
-  animateTotal(total); // Trigger animation when totalArrivee changes
-}, [etatVenteArrivee]);
+  const fetchPrixArticles = useCallback(async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/PrixArticles");
+      setPrixArticles(response.data);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des prix :", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPrixArticles();
+  }, [fetchPrixArticles]);
+
+  const fetchCodeByDescription = useCallback(async (description) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/Articles/code/${description}`);
+      if (response.data) {
+        setNewItem((prevItem) => ({
+          ...prevItem,
+          code: response.data.code,
+        }));
+      }
+    } catch (error) {
+      console.error("Erreur lors de la récupération du code :", error);
+    }
+  }, []);
 
   const fetchData = useCallback(async () => {
     try {
       const response = await axios.get("http://localhost:5000/api/EtatVentesArrivee");
-      if (response.data && response.data.length > 0) {
-        setColumns(Object.keys(response.data[0]));
-        setData(response.data);
-      }
+      const filteredData = response.data.filter(item => item.enteteVenteID === parseInt(id));
+      setData(filteredData);
+
+      console.log("Selected enteteVenteId:", id);
+
     } catch (error) {
       console.error("Erreur lors de la récupération des données :", error);
     }
-  }, []);
-
-  const fetchEnteteVenteArrivee = useCallback(async () => {
-    try {
-      const response = await axios.get("http://localhost:5000/api/Articles"); // Updated endpoint
-      setArticles(response.data);
-    } catch (error) {
-      console.error("Erreur lors de la récupération des entetes de ventes :", error);
-    }
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     fetchData();
-    fetchEnteteVenteArrivee();
-  }, [fetchData, fetchEnteteVenteArrivee]);
-
-  useEffect(() => {
-    if (searchQuery === "") {
-      setFilteredData(data);
-    } else {
-      const filtered = data.filter((item) =>
-        Object.keys(item).some((key) => {
-          if (key === "code" || key === "description") {
-            return item[key].toString().toLowerCase().includes(searchQuery.toLowerCase());
-          }
-          return false;
-        })
-      );
-      setFilteredData(filtered);
-    }
-  }, [searchQuery, data]);
+    fetchArticles();
+  }, [fetchData, fetchArticles]);
 
   const handleDelete = async (code) => {
     try {
       await axios.delete(`http://localhost:5000/api/EtatVentesArrivee/${code}`);
       fetchData();
     } catch (error) {
-      console.error("Erreur lors de la suppression :", error);
+      console.error("Erreur lors de la suppression :", error.response?.data || error.message);
     }
   };
 
   const handleEdit = (item) => {
-    setEditedItem({ ...item });
-    setIsEditing(item.code);
+    setEditedItem(item);
   };
 
   const handleCancelEdit = () => {
     setEditedItem(null);
-    setIsEditing(null);
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      await axios.put(`http://localhost:5000/api/EtatVentesArrivee/${editedItem.code}`, editedItem);
+      fetchData();
+      setEditedItem(null);
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour :", error);
+    }
   };
 
   const handleChange = (e, key) => {
     setEditedItem({ ...editedItem, [key]: e.target.value });
   };
 
-  const handleAddNew = async () => {
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const handleAddChange = (e, key) => {
+    const value = e.target.value;
+    const updatedItem = { ...newItem, [key]: value };
+
+    if (["quantiteVente", "qtDotation", "prixUnitaireHT"].includes(key)) {
+      updatedItem.valeur = parseFloat(updatedItem.quantiteVente || 0) * parseFloat(updatedItem.prixUnitaireHT || 0);
+      updatedItem.restant = parseFloat(updatedItem.qtDotation || 0) - parseFloat(updatedItem.quantiteVente || 0);
+    }
+
+    setNewItem(updatedItem);
+  };
+
+  const handleAddItem = async () => {
     const formattedItem = {
-      code: newItem.code,  
-      description: newItem.description, 
-      quantiteDotation: parseInt(newItem.quantiteDotation, 10),  
-      totEm: parseFloat(newItem.totEm),  
-      quantiteVendue: parseInt(newItem.quantiteVendue, 10),  
-      prixUnitaireHT: parseFloat(newItem.prixUnitaireHT),  
-      valeur: parseFloat(newItem.valeur), 
-      restant: parseInt(newItem.restant, 10),  
+      code: newItem.code,
+      description: newItem.description,
+      prixUnitaireHT: parseFloat(newItem.prixUnitaireHT),
+      qtCompJ: parseInt(newItem.qtCompJ, 10),
+      qtDotation: parseInt(newItem.qtDotation, 10),
+      quantiteCasse: parseInt(newItem.quantiteCasse, 10),
+      quantiteOffre: parseInt(newItem.quantiteOffre, 10),
+      quantiteVente: parseInt(newItem.quantiteVente, 10),
+      restant: newItem.restant,
+      totEm: parseInt(newItem.totEm, 10),
+      valeur: parseFloat(newItem.valeur),
+      enteteVenteID: newItem.enteteVenteID,
     };
-  
     try {
       await axios.post("http://localhost:5000/api/EtatVentesArrivee", formattedItem);
-      fetchData(); 
-      setIsAdding(false); 
-    } catch (error) {
-      console.error("Erreur lors de l'ajout :", error.response?.data || error.message);
-    }
-  };
-  
-
-  const handleSaveEdit = async () => {
-    if (editedItem.restant > editedItem.quantiteDotation) {
-      alert("Le restant ne peut pas être supérieur à la Quantité de Dotation");
-      return;
-    }
-
-    try {
-      await axios.put(`http://localhost:5000/api/EtatVentesArrivee/${editedItem.code}`, editedItem);
       fetchData();
-      setEditedItem(null);
-      setIsEditing(null);
+      setShowDialog(false);
+      setNewItem({
+        code: "",
+        description: "",
+        qtDotation: "",
+        qtCompJ: "",
+        totEm: "",
+        quantiteCasse: "",
+        quantiteOffre: "",
+        quantiteVente: "",
+        prixUnitaireHT: "",
+        valeur: "",
+        restant: "",
+        enteteVenteID:"",
+      });
     } catch (error) {
-      console.error("Erreur lors de la mise à jour :", error);
+      console.error("Erreur lors de l'ajout :", error);
     }
   };
 
-  const handleNewItemChange = (e, key) => {
-    const value = e.target.value;
-    setNewItem((prev) => {
-      const updatedItem = { ...prev, [key]: value };
-
-      // calcul automatique de Valeur et Restant
-      if (key === "quantiteVendue" || key === "prixUnitaireHT") {
-        const quantiteVendue = parseFloat(updatedItem.quantiteVendue) || 0;
-        const prixUnitaireHT = parseFloat(updatedItem.prixUnitaireHT) || 0;
-        updatedItem.valeur = (prixUnitaireHT * quantiteVendue).toFixed(2);
-      }
-      if (key === "quantiteVendue" || key === "quantiteDotation") {
-        const quantiteDotation = parseFloat(updatedItem.quantiteDotation) || 0;
-        const quantiteVendue = parseFloat(updatedItem.quantiteVendue) || 0;
-        updatedItem.restant = (quantiteDotation - quantiteVendue).toFixed(2);
-      }
-      return updatedItem;
-    });
+  const handleDetailClick = () => {
+    navigate(`/ConfrontationPage/${id}`);
   };
 
-  const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-
+  const paginatedData = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
     <div>
-      <h2 style={styles.heading}>État des Ventes Fournisseur</h2>
-      {/* Search Input */}
-    
-        <TextField 
-          variant="outlined"
-          style={styles.searchBar}
-          label="Rechercher"
-          fullWidth
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-
+      <h2 style={style.heading}>Etat des Ventes Tunisair</h2>
       <Button
         variant="contained"
         color="primary"
         startIcon={<Plus />}
-        onClick={() => setIsAdding(true)}
-        style={styles.addButton}
+        onClick={() => setShowDialog(true)}
+        style={style.addButton}
       >
         Ajouter
       </Button>
-      <h3 style={styles.price}>
-        Totale Vendue : {animatedTotal.toFixed(2)}
-        <Euro size={14} style={{ marginLeft: "2px" }} />
-      </h3>
-      {/* Add Item Form */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth maxWidth="sm">
-        <DialogTitle>Ajouter un nouvel élément</DialogTitle></Dialog>
-      {isAdding && (
-        <div>
-          <DialogContent>
+      <Button onClick={handleDetailClick}>Confronter</Button>
+
+      <Dialog open={showDialog} onClose={() => setShowDialog(false)}>
+        <DialogTitle>Ajouter un nouvel élément</DialogTitle>
+        <DialogContent>
           <Autocomplete
-            options={articles} 
-            getOptionLabel={(option) => option.description || ''} 
+            options={articles}
+            getOptionLabel={(option) => option.description || ""}
             onChange={(event, value) => {
               if (value) {
-                const prix = prixArticles.find((p) => p.code === value.articleCode)?.prix || 0; 
+                const prix = prixArticles.find((p) => p.code === value.articleCode)?.prix || 0;
                 setNewItem({
                   ...newItem,
                   code: value.code,
                   description: value.description,
-                  prixUnitaireHT: prix, // Assigne le prix récupéré
+                  prixUnitaireHT: prix,
                 });
               }
             }}
-            
             renderInput={(params) => (
-              
-              <TextField
-                {...params}
-                label="Description"
-                fullWidth
-                style={styles.inputField}
-              />
-  
+              <TextField {...params} label="Description" fullWidth style={style.inputField} />
             )}
           />
+
+          {["code", "description", "qtDotation", "qtCompJ", "totEm", "quantiteCasse", "quantiteOffre", "quantiteVente"].map((col) => (
+            
+            <TextField
+              key={col}
+              label={col}
+              value={newItem[col] || ""}
+              onChange={(e) => handleAddChange(e, col)}
+              fullWidth
+              margin="dense"
+              style={style.input}
+              disabled={col === "code" || col === "description"}
+            />
+          ))}
           <TextField
-            label="Code"
-            value={newItem.code}
-            onChange={(e) => setNewItem({ ...newItem, code: e.target.value })}
-            fullWidth
-            style={styles.inputField}
-            disabled = "True"
-          />
-          <TextField
-            label="Quantité de Dotation"
-            value={newItem.quantiteDotation}
-            onChange={(e) => handleNewItemChange(e, "quantiteDotation")}
-            fullWidth
-            style={styles.inputField}
-          />
-          <TextField
-            label="TotEm"
-            value={newItem.totEm}
-            onChange={(e) => setNewItem({ ...newItem, totEm: e.target.value })}
-            fullWidth
-            style={styles.inputField}
-          />
-          <TextField
-            label="Quantité Vendue"
-            value={newItem.quantiteVendue}
-            onChange={(e) => handleNewItemChange(e, "quantiteVendue")}
-            fullWidth
-            style={styles.inputField}
-          />
+              label="EnteteVenteID"
+              value={newItem.enteteVenteID || ""}
+              fullWidth
+              margin="dense"
+              style={style.input}
+              disabled
+            />
+
           <TextField
             label="Prix Unitaire HT"
             value={newItem.prixUnitaireHT}
-            onChange={(e) => handleNewItemChange(e, "prixUnitaireHT")}
+            onChange={(e) => handleAddChange(e, "prixUnitaireHT")}
             fullWidth
-            style={styles.inputField}
+            style={style.inputField}
           />
           <TextField
             label="Valeur"
-            value={newItem.valeur}
+            value={newItem.valeur || ""}
             fullWidth
-            style={styles.inputField}
+            margin="dense"
+            style={style.input}
             disabled
           />
-
           <TextField
             label="Restant"
-            value={newItem.restant}
+            value={newItem.restant || ""}
             fullWidth
-            style={styles.inputField}
+            margin="dense"
+            style={style.input}
             disabled
           />
-           </DialogContent>
-          <DialogActions>
-          <Button onClick={handleAddNew}>Save</Button>
-          <Button onClick={handleClose} color="secondary">Annuler</Button>
-          </DialogActions>
-        </div>
-      )}
-      
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleAddItem} color="primary">Enregistrer</Button>
+          <Button onClick={() => setShowDialog(false)} color="secondary">Annuler</Button>
+        </DialogActions>
+      </Dialog>
 
-      {/* Table */}
-      <div>
-        <table className="table">
-          <thead>
-            <tr style={styles.headerRow}>
-              <th style={styles.headerCell}>Code</th>
-              <th style={styles.headerCell}>Description</th>
-              <th style={styles.headerCell}>Quantité de Dotation</th>
-              <th style={styles.headerCell}>TotEm</th>
-              <th style={styles.headerCell}>Quantité Vendue</th>
-              <th style={styles.headerCell}>Prix Unitaire HT</th>
-              <th style={styles.headerCell}>Valeur</th>
-              <th style={styles.headerCell}>Restant</th>
-              <th style={styles.headerCell}>Action</th>
-            </tr>
-          </thead>
-          <tbody>
+      <table className="table">
+        <thead>
+          <tr style={style.headerRow}>
+            <th style={style.headerCell}>Code</th>
+            <th style={style.headerCell}>Description</th>
+            <th style={style.headerCell}>QtCompJ</th>
+            <th style={style.headerCell}>QtDotation</th>
+            <th style={style.headerCell}>TotEm</th>
+            <th style={style.headerCell}>QuantiteCasse</th>
+            <th style={style.headerCell}>QuantiteOffre</th>
+            <th style={style.headerCell}>QuantiteVente</th>
+            <th style={style.headerCell}>PrixUnitaireHT</th>
+            <th style={style.headerCell}>Valeur</th>
+            <th style={style.headerCell}>Restant</th>
+            <th style={style.headerCell}>EnteteventeID</th>
+
+            <th style={style.headerCell}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
           {paginatedData.map((item, index) => {
-                        const isEditing = editedItem && editedItem.code === item.code;
-                        return (
-                          <tr key={index} style={styles.row}>
-                            {columns.map((col) => (
-                              <td key={col} style={styles.cell}>
-                                {isEditing ? (
-                                  <TextField
-                                    value={editedItem[col]}
-                                    onChange={(e) => handleChange(e, col)}
-                                    style={styles.input}
-                                  />
-                                ) : (
-                                  item[col]
-                                )}
-                              </td>
-                            ))}
-                            <td style={styles.cell}>
-                              {isEditing ? (
-                                <>
-                                  <Save onClick={handleSaveEdit} style={{ ...styles.icon, color: "green" }} />
-                                  <X onClick={handleCancelEdit} style={{ ...styles.icon, color: "red" }} />
-                                </>
-                              ) : (
-                                <>
-                                  <Edit onClick={() => handleEdit(item)} style={{ ...styles.icon, color: "#00a3f5" }} />
-                                  <Trash onClick={() => handleDelete(item.code)} style={{ ...styles.icon, color: "#e74c3c" }} />
-                                </>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-</tbody>
-
-        </table>
-      </div>
+            const isEditing = editedItem && editedItem.code === item.code;
+            return (
+              <tr key={index} style={style.row}>
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                    value={editedItem.code}
+                    onChange={(e) => handleChange(e, "code")}
+                    style={style.input}
+                  />
+                ) : (
+                  item.code
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                    value={editedItem.description}
+                    onChange={(e) => handleChange(e, "description")}
+                    style={style.input}
+                  />
+                ) : (
+                  item.description
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                    value={editedItem.qtCompJ}
+                    onChange={(e) => handleChange(e, "qtCompJ")}
+                    style={style.input}
+                  />
+                ) : (
+                  item.qtCompJ
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                    value={editedItem.qtDotation}
+                    onChange={(e) => handleChange(e, "qtDotation")}
+                    style={style.input}
+                  />
+                ) : (
+                  item.qtDotation
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                    value={editedItem.totEm}
+                    onChange={(e) => handleChange(e, "totEm")}
+                    style={style.input}
+                  />
+                ) : (
+                  item.totEm
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                    value={editedItem.quantiteCasse}
+                    onChange={(e) => handleChange(e, "quantiteCasse")}
+                    style={style.input}
+                  />
+                ) : (
+                  item.quantiteCasse
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                    value={editedItem.quantiteOffre}
+                    onChange={(e) => handleChange(e, "quantiteOffre")}
+                    style={style.input}
+                  />
+                ) : (
+                  item.quantiteOffre
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                    value={editedItem.quantiteVente}
+                    onChange={(e) => handleChange(e, "quantiteVente")}
+                    style={style.input}
+                  />
+                ) : (
+                  item.quantiteVente
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                    value={editedItem.prixUnitaireHT}
+                    onChange={(e) => handleChange(e, "prixUnitaireHT")}
+                    style={style.input}
+                  />
+                ) : (
+                  item.prixUnitaireHT
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                    value={editedItem.valeur}
+                    onChange={(e) => handleChange(e, "valeur")}
+                    style={style.input}
+                  />
+                ) : (
+                  item.valeur
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                    value={editedItem.restant}
+                    onChange={(e) => handleChange(e, "restant")}
+                    style={style.input}
+                  />
+                ) : (
+                  item.restant
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                    value={editedItem.enteteVenteID}
+                    onChange={(e) => handleChange(e, "enteteVenteID")}
+                    style={style.input}
+                  />
+                ) : (
+                  item.enteteVenteID
+                )}</td>
+                <td style={style.cell}>
+                  {isEditing ? (
+                    <div>
+                      <Button onClick={handleSaveEdit} style={style.saveButton}><Save /></Button>
+                      <Button onClick={handleCancelEdit} style={style.cancelButton}><X /></Button>
+                    </div>
+                  ) : (
+                    <div>
+                      <Button onClick={() => handleEdit(item)}><Edit /></Button>
+                      <Button onClick={() => handleDelete(item.code)}><Trash /></Button>
+                    </div>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
 
       <TablePagination
+        rowsPerPageOptions={[5, 10, 25]}
         component="div"
-        count={filteredData.length}
-        page={page}
-        onPageChange={(event, newPage) => setPage(newPage)}
+        count={data.length}
         rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={(event) => setRowsPerPage(parseInt(event.target.value, 5))}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
       />
     </div>
   );
 };
-
-const styles = {
-  price:{
-    color:"black" , 
-    marginLeft:"78%"
-
-  },
-  heading: { textAlign: "center",
+const style = {
+  heading: {
+    textAlign: "center",
     fontSize: "20px",
     fontWeight: "bold",
     color: "#c80505",
-    marginBottom: "15px", },
+    marginBottom: "15px",
+  },
   addButton: {
     display: "flex",
+    alignItems: "center",
     backgroundColor: "#28a745",
     color: "#fff",
     border: "none",
-    padding: "5px 10px",
+    padding: "10px 15px",
     borderRadius: "5px",
     cursor: "pointer",
-    fontSize: "14px",
+    fontSize: "16px",
     marginBottom: "10px",
-  },  
-  searchBar: { 
-    width: "300px", marginBottom: "50px", 
   },
   headerRow: {
     backgroundColor: "#f2f2f2",
@@ -418,12 +468,27 @@ const styles = {
     padding: "10px",
     borderBottom: "2px solid #ddd",
     textAlign: "left",
-    color:"black",
+    color: "black",
   },
-  row: { transition: "background 0.3s" },
-  cell: { padding: "10px", borderBottom: "1px solid #ddd", textAlign: "left",color: "#000", },
-  icon: { cursor: "pointer", marginLeft: "5px" },
-  input: { width: "100%", padding: "5px", borderRadius: "4px" },
+  row: {
+    transition: "background 0.3s",
+  },
+  cell: {
+    padding: "10px",
+    borderBottom: "1px solid #ddd",
+    textAlign: "left",
+    color: "#000",
+  },
+  icon: {
+    cursor: "pointer",
+    marginLeft: "5px",
+  },
+  input: {
+    width: "100%",
+    marginBottom: "10px",
+  },
+  inputField: {
+    marginBottom: "10px",
+  }
 };
-
-export default EtatVentesArriveeTable;
+export default EtatVentesArrivee;
