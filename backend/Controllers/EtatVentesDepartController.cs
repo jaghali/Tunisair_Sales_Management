@@ -23,19 +23,32 @@ namespace TunisairSalesManagement.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<EtatVentesDepart>>> GetEtatVentesDepart()
         {
-            var etatVentesDepart = await _context.EtatVentesDepart.ToListAsync();
+            var etatVentesDepart = await _context.EtatVentesDepart
+            .AsNoTracking()
+            .OrderBy(e => e.EnteteVenteID)
+            .ThenBy(e => e.Code)
+            .ToListAsync();
             return Ok(etatVentesDepart);
         }
 
         // POST: api/EtatVentesDepart
         [HttpPost]
-        public async Task<ActionResult<EtatVentesDepart>> PostEtatVentesDepart(EtatVentesDepart etatVentesDepart)
-        {
-            _context.EtatVentesDepart.Add(etatVentesDepart);
-            await _context.SaveChangesAsync();
+public async Task<ActionResult<EtatVentesDepart>> PostEtatVentesDepart(EtatVentesDepart item)
+{
+    // Vérifie si le produit est déjà présent dans CET état de vente (même code + même enteteVenteID)
+    var alreadyExists = await _context.EtatVentesDepart
+        .AnyAsync(e => e.Code == item.Code && e.EnteteVenteID == item.EnteteVenteID);
 
-            return CreatedAtAction(nameof(GetEtatVentesDepart), new { code = etatVentesDepart.Code }, etatVentesDepart);
-        }
+    if (alreadyExists)
+    {
+        return BadRequest("Ce produit est déjà ajouté à cet état de vente.");
+    }
+
+    _context.EtatVentesDepart.Add(item);
+    await _context.SaveChangesAsync();
+
+    return CreatedAtAction(nameof(GetEtatVentesDepartByCode), new { code = item.Code }, item);
+}
         
 
         // GET: api/EtatVentesDepart/GroupByMonth
@@ -56,6 +69,20 @@ public async Task<ActionResult> GetVentesGroupéesParMois()
         .ToListAsync();
 
     return Ok(grouped);
+}
+
+        // GET: api/EtatVentesDepart/code/XYZ123
+[HttpGet("code/{code}")]
+public async Task<ActionResult<EtatVentesDepart>> GetEtatVentesDepartByCode(string code)
+{
+    var item = await _context.EtatVentesDepart.FirstOrDefaultAsync(e => e.Code == code);
+
+    if (item == null)
+    {
+        return NotFound();
+    }
+
+    return Ok(item);
 }
 
 

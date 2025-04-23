@@ -24,12 +24,9 @@ const EtatVentesArrivee = () => {
   const [newItem, setNewItem] = useState({
     code: "",
     description: "",
-    qtDotation: "",
-    qtCompJ: "",
+    quantiteDotation: "",
     totEm: "",
-    quantiteCasse: "",
-    quantiteOffre: "",
-    quantiteVente: "",
+    quantiteVendue: "",
     prixUnitaireHT: "",
     valeur: "",
     restant: "",
@@ -137,9 +134,9 @@ const EtatVentesArrivee = () => {
     const value = e.target.value;
     const updatedItem = { ...newItem, [key]: value };
 
-    if (["quantiteVente", "qtDotation", "prixUnitaireHT"].includes(key)) {
-      updatedItem.valeur = parseFloat(updatedItem.quantiteVente || 0) * parseFloat(updatedItem.prixUnitaireHT || 0);
-      updatedItem.restant = parseFloat(updatedItem.qtDotation || 0) - parseFloat(updatedItem.quantiteVente || 0);
+    if (["quantiteVendue", "quantiteDotation", "prixUnitaireHT"].includes(key)) {
+      updatedItem.valeur = parseFloat(updatedItem.quantiteVendue || 0) * parseFloat(updatedItem.prixUnitaireHT || 0);
+      updatedItem.restant = parseFloat(updatedItem.quantiteDotation || 0) - parseFloat(updatedItem.quantiteVendue || 0);
     }
 
     setNewItem(updatedItem);
@@ -150,16 +147,14 @@ const EtatVentesArrivee = () => {
       code: newItem.code,
       description: newItem.description,
       prixUnitaireHT: parseFloat(newItem.prixUnitaireHT),
-      qtCompJ: parseInt(newItem.qtCompJ, 10),
-      qtDotation: parseInt(newItem.qtDotation, 10),
-      quantiteCasse: parseInt(newItem.quantiteCasse, 10),
-      quantiteOffre: parseInt(newItem.quantiteOffre, 10),
-      quantiteVente: parseInt(newItem.quantiteVente, 10),
+      quantiteDotation: parseInt(newItem.quantiteDotation, 10),
+      quantiteVendue: parseInt(newItem.quantiteVendue, 10),
       restant: newItem.restant,
       totEm: parseInt(newItem.totEm, 10),
       valeur: parseFloat(newItem.valeur),
       enteteVenteID: newItem.enteteVenteID,
     };
+    console.log("Adding new item:", formattedItem);
     try {
       await axios.post("http://localhost:5000/api/EtatVentesArrivee", formattedItem);
       fetchData();
@@ -167,12 +162,9 @@ const EtatVentesArrivee = () => {
       setNewItem({
         code: "",
         description: "",
-        qtDotation: "",
-        qtCompJ: "",
+        quantiteDotation: "",
         totEm: "",
-        quantiteCasse: "",
-        quantiteOffre: "",
-        quantiteVente: "",
+        quantiteVendue: "",
         prixUnitaireHT: "",
         valeur: "",
         restant: "",
@@ -225,7 +217,7 @@ const EtatVentesArrivee = () => {
             )}
           />
 
-          {["code", "description", "qtDotation", "qtCompJ", "totEm", "quantiteCasse", "quantiteOffre", "quantiteVente"].map((col) => (
+          {["code", "description", "quantiteDotation", "totEm", "quantiteVendue"].map((col) => (
             
             <TextField
               key={col}
@@ -282,11 +274,8 @@ const EtatVentesArrivee = () => {
           <tr style={style.headerRow}>
             <th style={style.headerCell}>Code</th>
             <th style={style.headerCell}>Description</th>
-            <th style={style.headerCell}>QtCompJ</th>
             <th style={style.headerCell}>QtDotation</th>
             <th style={style.headerCell}>TotEm</th>
-            <th style={style.headerCell}>QuantiteCasse</th>
-            <th style={style.headerCell}>QuantiteOffre</th>
             <th style={style.headerCell}>QuantiteVente</th>
             <th style={style.headerCell}>PrixUnitaireHT</th>
             <th style={style.headerCell}>Valeur</th>
@@ -321,21 +310,12 @@ const EtatVentesArrivee = () => {
                 )}</td>
                 <td style={style.cell}>{isEditing ? (
                   <TextField
-                    value={editedItem.qtCompJ}
-                    onChange={(e) => handleChange(e, "qtCompJ")}
+                    value={editedItem.quantiteDotation}
+                    onChange={(e) => handleChange(e, "quantiteDotation")}
                     style={style.input}
                   />
                 ) : (
-                  item.qtCompJ
-                )}</td>
-                <td style={style.cell}>{isEditing ? (
-                  <TextField
-                    value={editedItem.qtDotation}
-                    onChange={(e) => handleChange(e, "qtDotation")}
-                    style={style.input}
-                  />
-                ) : (
-                  item.qtDotation
+                  item.quantiteDotation
                 )}</td>
                 <td style={style.cell}>{isEditing ? (
                   <TextField
@@ -346,32 +326,15 @@ const EtatVentesArrivee = () => {
                 ) : (
                   item.totEm
                 )}</td>
+                
                 <td style={style.cell}>{isEditing ? (
                   <TextField
-                    value={editedItem.quantiteCasse}
-                    onChange={(e) => handleChange(e, "quantiteCasse")}
+                    value={editedItem.quantiteVendue}
+                    onChange={(e) => handleChange(e, "quantiteVendue")}
                     style={style.input}
                   />
                 ) : (
-                  item.quantiteCasse
-                )}</td>
-                <td style={style.cell}>{isEditing ? (
-                  <TextField
-                    value={editedItem.quantiteOffre}
-                    onChange={(e) => handleChange(e, "quantiteOffre")}
-                    style={style.input}
-                  />
-                ) : (
-                  item.quantiteOffre
-                )}</td>
-                <td style={style.cell}>{isEditing ? (
-                  <TextField
-                    value={editedItem.quantiteVente}
-                    onChange={(e) => handleChange(e, "quantiteVente")}
-                    style={style.input}
-                  />
-                ) : (
-                  item.quantiteVente
+                  item.quantiteVendue
                 )}</td>
                 <td style={style.cell}>{isEditing ? (
                   <TextField

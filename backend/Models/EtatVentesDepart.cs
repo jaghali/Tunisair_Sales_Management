@@ -7,8 +7,10 @@ namespace TunisairSalesManagement.Models
     public class EtatVentesDepart
     {
         [Key]
-        public string Code { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int ID { get; set; } // Nouvelle clé primaire auto-incrémentée
 
+        public string Code { get; set; }
         public string Description { get; set; }
         public int QtDotation { get; set; }
         public int QtCompJ { get; set; }

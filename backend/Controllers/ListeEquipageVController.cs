@@ -23,8 +23,15 @@ namespace TunisairSalesManagement.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ListeEquipageV>>> GetListeEquipageV()
         {
-            return await _context.ListeEquipageV.ToListAsync();
+             var equipages = await _context.ListeEquipageV
+        .AsNoTracking()
+        .OrderBy(e => e.EnteteVenteID)
+        .ThenBy(e => e.MATRICULE)
+        .ToListAsync();
+
+         return Ok(equipages);
         }
+        
 
         // 🔹 GET: api/ListeEquipageV/{matricule} (Récupérer un équipage par matricule)
         [HttpGet("{matricule}")]
@@ -90,21 +97,24 @@ public async Task<ActionResult<ListeEquipageV>> PostListeEquipageV(ListeEquipage
             return NoContent();
         }
 
-        // 🔹 DELETE: api/ListeEquipageV/{matricule} (Supprimer un équipage)
-        [HttpDelete("{matricule}")]
-        public async Task<IActionResult> DeleteListeEquipageV(string matricule)
-        {
-            var equipage = await _context.ListeEquipageV.FindAsync(matricule);
-            if (equipage == null)
-            {
-                return NotFound();
-            }
+        // 🔹 api/ListeEquipageV/{matricule}/{enteteVenteId}
+        [HttpDelete("{matricule}/{enteteVenteID}")]
+public async Task<IActionResult> DeleteEquipage(string matricule, int enteteVenteID)
+{
+    var equipage = await _context.ListeEquipageV
+                                .FirstOrDefaultAsync(e => e.MATRICULE == matricule && e.EnteteVenteID == enteteVenteID);
 
-            _context.ListeEquipageV.Remove(equipage);
-            await _context.SaveChangesAsync();
+    if (equipage == null)
+    {
+        return NotFound("Équipage non trouvé dans cet état de vente.");
+    }
 
-            return NoContent();
-        }
+    _context.ListeEquipageV.Remove(equipage);
+    await _context.SaveChangesAsync();
+
+    return NoContent();  // Retourne un statut 204 pour la suppression réussie
+}
+
     }
 }
 

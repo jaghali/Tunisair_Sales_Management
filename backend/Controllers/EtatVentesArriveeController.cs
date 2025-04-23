@@ -23,20 +23,31 @@ namespace TunisairSalesManagement.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<EtatVentesArrivee>>> GetEtatVentesArrivee()
         {
-            var etatVentesArrivee = await _context.EtatVentesArrivee.ToListAsync();
+            var etatVentesArrivee = await _context.EtatVentesArrivee
+            .AsNoTracking()
+            .OrderBy(e => e.EnteteVenteID)
+            .ThenBy(e => e.Code)
+            .ToListAsync();
             return Ok(etatVentesArrivee);
         }
 
         // POST: api/EtatVentesArrivee
         [HttpPost]
-        public async Task<ActionResult<EtatVentesArrivee>> PostEtatVentesArrivee(EtatVentesArrivee etatVentesArrivee)
+        public async Task<ActionResult<EtatVentesArrivee>> PostEtatVentesArrivee(EtatVentesArrivee item)
         {
-            _context.EtatVentesArrivee.Add(etatVentesArrivee);
-            await _context.SaveChangesAsync();
+           // Vérifie si le produit est déjà présent dans CET état de vente (même code + même enteteVenteID)
+    var alreadyExists = await _context.EtatVentesArrivee
+        .AnyAsync(e => e.Code == item.Code && e.EnteteVenteID == item.EnteteVenteID);
 
-            // Return the created entity with the new ID.
-            return CreatedAtAction(nameof(GetEtatVentesArrivee), new { id = etatVentesArrivee.ID }, etatVentesArrivee);
-        }
+    if (alreadyExists)
+    {
+        return BadRequest("Ce produit est déjà ajouté à cet état de vente.");
+    }
+
+    _context.EtatVentesArrivee.Add(item);
+    await _context.SaveChangesAsync();
+
+    return CreatedAtAction(nameof(GetEtatVentesArriveeByCode), new { code = item.Code }, item);        }
 
         // PUT: api/EtatVentesArrivee/5
         [HttpPut("{id}")]
@@ -67,6 +78,20 @@ namespace TunisairSalesManagement.Controllers
 
             return NoContent();
         }
+
+                // GET: api/EtatVentesArrivee/code/XYZ123
+[HttpGet("code/{code}")]
+public async Task<ActionResult<EtatVentesArrivee>> GetEtatVentesArriveeByCode(string code)
+{
+    var item = await _context.EtatVentesArrivee.FirstOrDefaultAsync(e => e.Code == code);
+
+    if (item == null)
+    {
+        return NotFound();
+    }
+
+    return Ok(item);
+}
 
         // DELETE: api/EtatVentesArrivee/5
         [HttpDelete("{id}")]
