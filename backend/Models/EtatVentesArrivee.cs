@@ -22,7 +22,7 @@ namespace TunisairSalesManagement.Models
         public int EnteteVenteID { get; set; }
 
         [ForeignKey("EnteteVenteID")]
-        public EnteteVente EnteteVente { get; set; }
+        public EnteteVente? EnteteVente { get; set; }
 
         public bool IsRestantValid()
         {

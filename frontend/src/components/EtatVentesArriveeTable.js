@@ -152,9 +152,9 @@ const EtatVentesArrivee = () => {
       restant: newItem.restant,
       totEm: parseInt(newItem.totEm, 10),
       valeur: parseFloat(newItem.valeur),
-      enteteVenteID: newItem.enteteVenteID,
+      enteteVenteID: parseInt(newItem.enteteVenteID, 10),
     };
-    console.log("Adding new item:", formattedItem);
+    console.log("Données envoyées au backend :", formattedItem);
     try {
       await axios.post("http://localhost:5000/api/EtatVentesArrivee", formattedItem);
       fetchData();
@@ -168,10 +168,14 @@ const EtatVentesArrivee = () => {
         prixUnitaireHT: "",
         valeur: "",
         restant: "",
-        enteteVenteID:"",
+        enteteVenteID: "",
       });
     } catch (error) {
-      console.error("Erreur lors de l'ajout :", error);
+      if (error.response) {
+        console.error("Erreur détaillée :", JSON.stringify(error.response.data, null, 2));
+      } else {
+        console.error("Erreur inattendue :", error.message);
+      }
     }
   };
 
