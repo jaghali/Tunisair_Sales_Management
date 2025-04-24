@@ -15,7 +15,6 @@ import Tauxdechange from "./pages/Tauxdechange";
 import Sidebar from "./components/Sidebar";
 import SidebarAgentSaisie from "./components/Sidebaragentsaisie";
 import SidebarFinancier from "./components/SidebarFinancier";
-
 import VentePage from "./pages/VentePage";
 import VentePageArr from "./pages/VentePageArr";
 import OffrePage from "./pages/OffrePage";
@@ -31,11 +30,9 @@ import Commission from "./pages/Commission";
 import TrouxCaisse from "./pages/TrouxCaisse";
 import AgentSaisieDashboard from "./pages/AgentSaisieDashboard";
 import Devances from "./pages/Devances";
-
-
-
-
-import "./App.css"
+import UserInterface from "./pages/UserInterface";
+import UserSidebar from "./components/UserSidebar";
+import "./App.css";
 
 function App() {
   return (
@@ -69,40 +66,46 @@ function MainLayout() {
     "/OffrePagearr",
     "/settings",
     "/ConfrontationPage/:id",
-    "/ConfrotationOffrePage",
-    "/agent-saisie-dashboard"
+    "/ConfrotationOffrePage"
   ];
 
   const hideSidebarRoutes = [
-    "/", 
+    "/",
     "/ForgotPasswordPage",
     "/ventePagearr",
     "/OffrePage",
     "/OffrePagearr",
     "/ConfrotationOffrePage"
   ];
+
   const FinancierPages = [
-   "/direction-financiere-dashboard",
-   "/Redevance",
+    "/direction-financiere-dashboard",
+    "/Redevance",
     "/Commission",
     "/TrouxCaisse",
     "/Devances"
   ];
+
+  const isVentePage = matchPath("/ventePage/:id", location.pathname);
+  const isConfrontationPage = matchPath("/ConfrontationPage/:id", location.pathname);
+
   const hideSidebar =
     hideSidebarRoutes.includes(location.pathname) ||
-    matchPath("/ventePage/:id", location.pathname) ||
-    matchPath("/ConfrontationPage/:id", location.pathname);
+    Boolean(isVentePage) ||
+    Boolean(isConfrontationPage);
 
-    let sidebarComponent = null;
-    if (!hideSidebar) {
-      if (FinancierPages.includes(location.pathname)) {
-        sidebarComponent = <SidebarFinancier />;  
-      } else if (agentSaisiePages.includes(location.pathname)) {
-        sidebarComponent = <SidebarAgentSaisie />;
-      } else {
-        sidebarComponent = <Sidebar />;
-      }
+  let sidebarComponent = null;
+  if (!hideSidebar) {
+    if (FinancierPages.includes(location.pathname)) {
+      sidebarComponent = <SidebarFinancier />;
+    } else if (agentSaisiePages.includes(location.pathname)) {
+      sidebarComponent = <SidebarAgentSaisie />;
+    } else if (matchPath("/UserInterface/:matricule", location.pathname)) {
+      sidebarComponent = <UserSidebar />;
+    } else {
+      sidebarComponent = <Sidebar />;
     }
+  }
 
   return (
     <div style={styles.layout}>
@@ -131,8 +134,6 @@ function MainLayout() {
           {sidebarComponent && <div style={styles.sidebar}>{sidebarComponent}</div>}
           <div style={styles.content}>
             <Routes>
-            <Route path="/direction-financiere-dashboard" element={<DirectionFinanciereDashboard />} />
-
               <Route path="/" element={<LoginPage />} />
               <Route path="/overviewPage" element={<OverviewPage />} />
               <Route path="/admin-users" element={<AdminUsers />} />
@@ -160,11 +161,7 @@ function MainLayout() {
               <Route path="/TrouxCaisse" element={<TrouxCaisse />} />
               <Route path="/agent-saisie-dashboard" element={<AgentSaisieDashboard />} />
               <Route path="/Devances" element={<Devances />} />
-
-
-
-
-
+              <Route path="/UserInterface/:matricule" element={<UserInterface />} />
             </Routes>
           </div>
         </div>

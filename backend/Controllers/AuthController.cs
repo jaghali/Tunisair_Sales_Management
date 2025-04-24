@@ -12,85 +12,115 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using TunisairSalesManagement.Data;
 
-[Route("api/auth")]
-[ApiController]
-public class AuthController : ControllerBase
+namespace TunisairSalesManagement.Controllers
 {
-    private readonly UserManager<IdentityUser> _userManager;
-    private readonly IConfiguration _configuration;
-    private readonly ApplicationDbContext _context;
-
-    public AuthController(UserManager<IdentityUser> userManager, IConfiguration configuration, ApplicationDbContext context)
+    [Route("api/auth")]
+    [ApiController]
+    public class AuthController : ControllerBase
     {
-        _userManager = userManager;
-        _configuration = configuration;
-        _context = context;
-    }
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly IConfiguration _configuration;
+        private readonly ApplicationDbContext _context;
 
-    // POST api/auth/login
-    [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginModel loginModel)
-    {
-        // Vérifier d'abord dans la table Utilisateurs
-        var user = await _context.Utilisateurs.FirstOrDefaultAsync(u => u.Matricule == loginModel.Matricule);
-        if (user != null && user.Pwd == loginModel.Password) // Check plain password
+        public AuthController(
+            UserManager<IdentityUser> userManager,
+            IConfiguration configuration,
+            ApplicationDbContext context)
         {
-            var jwtToken = GenerateJwtToken(user.Matricule, user.Role);
-            return Ok(new { token = jwtToken, role = user.Role, redirect = GetRedirectUrl(user.Role) });
+            _userManager    = userManager;
+            _configuration  = configuration;
+            _context        = context;
         }
 
-
-        // Si non trouvé dans la table Utilisateurs, vérifier dans la table PN
-        var pnUser = await _context.PN.FirstOrDefaultAsync(p => p.MATRICULE == loginModel.Matricule && p.Password == loginModel.Password);
-        if (pnUser != null)
+        // POST api/auth/login
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginModel loginModel)
         {
-            // Définition du rôle en fonction du champ SECTEUR
-            string role = pnUser.SECTEUR;
-            var jwtToken = GenerateJwtToken(pnUser.MATRICULE, role);
-            return Ok(new { token = jwtToken, role = role, redirect = GetRedirectUrl(role) });
+            // 1) Try in Utilisateurs table
+            var user = await _context.Utilisateurs
+                .FirstOrDefaultAsync(u => u.Matricule == loginModel.Matricule);
+
+            if (user != null && user.Pwd == loginModel.Password)
+            {
+                var jwtToken = GenerateJwtToken(user.Matricule, user.Role);
+                var redirectUrl = GetRedirectUrl(user.Role);
+                return Ok(new
+                {
+                    token    = jwtToken,
+                    role     = user.Role,
+                    redirect = redirectUrl
+                });
+            }
+
+            // 2) If not found, try in PN table
+            var pnUser = await _context.PN
+                .FirstOrDefaultAsync(p =>
+                    p.MATRICULE == loginModel.Matricule &&
+                    p.Password  == loginModel.Password);
+
+            if (pnUser != null)
+            {
+                // Use SECTEUR as role
+                string role = pnUser.SECTEUR;
+                var jwtToken = GenerateJwtToken(pnUser.MATRICULE, role);
+
+                // Build redirect URL dynamically for PNC/PNT
+                string redirectUrl = (role == "PNC" || role == "PNT")
+                    ? $"/UserInterface/{pnUser.MATRICULE}"
+                    : GetRedirectUrl(role);
+
+                return Ok(new
+                {
+                    token    = jwtToken,
+                    role,
+                    redirect = redirectUrl
+                });
+            }
+
+            return Unauthorized(new { message = "Invalid credentials." });
         }
 
-        return Unauthorized(new { message = "Invalid credentials." });
-    }
-
-    private string GetRedirectUrl(string role)
-    {
-        return role switch
+        /// <summary>
+        /// Maps roles to their SPA route:
+        /// </summary>
+        private string GetRedirectUrl(string role) => role switch
         {
-            "Admin" => "/admin-users",
+            "Admin"               => "/OverviewPage",
             "DirectionFinanciere" => "/direction-financiere-dashboard",
-            "AgentSaisie" => "/agent-saisie-dashboard",
-            "PNC" => "/avances-consultation",
-            "PNT" => "/avances-consultation",
-            _ => "/default-dashboard"
+            "AgentSaisie"         => "/agent-saisie-dashboard",
+            _                     => "/default-dashboard"
         };
-    }
 
-    private string GenerateJwtToken(string matricule, string role)
-    {
-        var claims = new List<Claim>
+        /// <summary>
+        /// Generates a JWT including matricule and role claims.
+        /// </summary>
+        private string GenerateJwtToken(string matricule, string role)
         {
-            new Claim(JwtRegisteredClaimNames.Sub, matricule),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(ClaimTypes.Role, role)
-        };
+            var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, matricule),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Role, role)
+            };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"]));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var key   = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
-            claims: claims,
-            expires: DateTime.Now.AddDays(1),
-            signingCredentials: creds);
+            var token = new JwtSecurityToken(
+                issuer:             _configuration["Jwt:Issuer"],
+                audience:           _configuration["Jwt:Audience"],
+                claims:             claims,
+                expires:            DateTime.Now.AddDays(1),
+                signingCredentials: creds
+            );
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
     }
-}
 
-public class LoginModel
-{
-    public string Matricule { get; set; }
-    public string Password { get; set; }
+    public class LoginModel
+    {
+        public string Matricule { get; set; }
+        public string Password  { get; set; }
+    }
 }
