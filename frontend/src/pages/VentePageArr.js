@@ -18,7 +18,7 @@ const VentePageArr = () => {
   const [newItem, setNewItem] = useState({ pnc: "", matricule: "" });
   const [editedItem, setEditedItem] = useState(null);
   const [pncs, setPncs] = useState([]);
-  const [entete, setEntete] = useState(null);
+  const [enteteVente, setEntete] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -35,7 +35,9 @@ const VentePageArr = () => {
           axios.get("http://localhost:5000/api/pn"),
           axios.get("http://localhost:5000/api/EnteteVente"),
         ]);
-        setVenteDetails(response.data);
+        const filteredEquipage = response.data.filter(item => item.enteteVenteID === parseInt(id));
+
+        setVenteDetails(filteredEquipage);
         setVenteEtatArrivee(etatArriveeResponse.data);
         setPncs(pncResponse.data);
         setEntete(enteteResponse.data[0]); // Assuming the first entete is relevant
@@ -74,14 +76,21 @@ const VentePageArr = () => {
     }
   };
 
-  const handleDelete = async (matricule) => {
+  const handleDelete = async (matricule, id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/ListeEquipageV/${matricule}`);
-      setVenteDetails(venteDetails.filter(item => item.matricule !== matricule));
+      await axios.delete(`http://localhost:5000/api/ListeEquipageV/${matricule}/${id}`);
+      
+      //Mettre à jour la liste sans l'équipage supprimé
+      setVenteDetails(prev =>
+        prev.filter(item =>
+          !(item.matricule === matricule && item.enteteVenteID === parseInt(id))
+        )
+      );
     } catch (error) {
       setError("Erreur lors de la suppression.");
     }
   };
+  
 
   return (
     <div style={{ padding: "2%", maxWidth: "1000px", margin: "0 auto" }}>
@@ -116,104 +125,106 @@ const VentePageArr = () => {
                 Ajouter
               </Button>
               <table style={tableStyle}>
-                <thead>
-                  <tr >
-                    <th style={tableHeaderStyle}>PNC</th>
-                    <th style={tableHeaderStyle}>Matricule</th>
-                    <th style={tableHeaderStyle}>EnteteVenteID</th>
-                    <th style={tableHeaderStyle}>Status</th>
-                    <th style={tableHeaderStyle}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {isAdding && (
-                    <tr>
-                      <td style={tableCellStyle}>
-                        <Autocomplete
-                          options={pncs}
-                          getOptionLabel={(option) => option?.nom || ""}
-                          onChange={(event, newValue) => {
-                            setNewItem({
-                              pnc: newValue?.nom || "",
-                              matricule: newValue?.matricule || "",
-                              enteteVenteID: parseInt(id),
-                            });
-                          }}
-                          renderInput={(params) => <TextField {...params} label="PNC" />}
-                        />
-                      </td>
-                      <td style={tableCellStyle}>
-                        <TextField value={newItem.matricule} disabled />
-                      </td>
-                      <td style={tableCellStyle}>{id}</td>
-                      <td style={tableCellStyle}>
-                        <Save onClick={handleAddNew} style={{ color: "green", cursor: "pointer" }} disabled={isSaving} />
-                        <X onClick={() => setIsAdding(false)} style={{ color: "red", cursor: "pointer" }} />
-                      </td>
-                    </tr>
-                  )}
-                  {venteDetails.map((item, index) => {
-                    const isEditing = editedItem && editedItem.matricule === item.matricule;
-
-                    return (
-                      <tr key={index}>
-                        <td style={tableCellStyle}>
-                          {isEditing ? (
-                            <TextField
-                              value={editedItem.pnc}
-                              onChange={(e) => setEditedItem({ ...editedItem, pnc: e.target.value })}
-                            />
-                          ) : (
-                            item.pnc
-                          )}
-                        </td>
-                        <td style={tableCellStyle}>
-                          {isEditing ? (
-                            <TextField
-                              value={editedItem.matricule}
-                              onChange={(e) => setEditedItem({ ...editedItem, matricule: e.target.value })}
-                            />
-                          ) : (
-                            item.matricule
-                          )}
-                        </td>
-                        <td style={tableCellStyle}>{item.enteteVenteID}</td>
-                        <td style={tableCellStyle}>
-                          <span style={{
-                            padding: "4px 10px",
-                            borderRadius: "999px",
-                            fontSize: "0.75rem",
-                            color: "#fff",
-                            backgroundColor:
-                              item.status === "PNC"
-                                ? "#e74c3c"
-                                : item.status === "PNC VENDEUR" || (entete && item.matricule === entete.pnC1)
-                                ? "#2ecc71"
-                                : "#e74c3c"
-                          }}>
-                            {(item.status === "PNC VENDEUR" || (entete && item.matricule === entete.pnC1))
-                              ? "PNC VENDEUR"
-                              : item.status || "PNC"}
-                          </span>
-                        </td>
-                        <td style={tableCellStyle}>
-                          {isEditing ? (
-                            <>
-                              <Save onClick={handleSaveEdit} style={{ color: "green", cursor: "pointer" }} />
-                              <X onClick={() => setEditedItem(null)} style={{ color: "red", cursor: "pointer" }} />
-                            </>
-                          ) : (
-                            <>
-                              <Edit onClick={() => handleEdit(item)} style={{ color: "#00a3f5", cursor: "pointer" }} />
-                              <Trash onClick={() => handleDelete(item.matricule)} style={{ color: "#e74c3c", cursor: "pointer" }} />
-                            </>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                          <thead>
+                            <tr style={headerRowStyle}>
+                              <th style={tableHeaderStyle}>PNC</th>
+                              <th style={tableHeaderStyle}>Matricule</th>
+                              <th style={tableHeaderStyle}>EnteteVenteID</th>
+                              <th style={tableHeaderStyle}>Status</th>
+                              <th style={tableHeaderStyle}>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {isAdding && (
+                              <tr>
+                                <td style={tableCellStyle}>
+                                  <Autocomplete
+                                    options={pncs}
+                                    getOptionLabel={(option) => option?.nom || ""}
+                                    onChange={(event, newValue) => {
+                                      setNewItem({
+                                        pnc: newValue?.nom || "",
+                                        matricule: newValue?.matricule || "",
+                                        enteteVenteID: parseInt(id),
+                                        
+                                      });
+                                    }}
+                                    renderInput={(params) => <TextField {...params} label="PNC" />}
+                                  />
+                                </td>
+                                <td style={tableCellStyle}>
+                                  <TextField value={newItem.matricule} disabled />
+                                </td>
+                                <td style={tableCellStyle}>{id}</td>
+                                <td style={tableCellStyle}>
+                                  <Save onClick={handleAddNew} style={{ color: "green", cursor: "pointer" }} />
+                                  <X onClick={() => setIsAdding(false)} style={{ color: "red", cursor: "pointer" }} />
+                                </td>
+                              </tr>
+                            )}
+                            {venteDetails.map((item, index) => {
+                              const isEditing = editedItem && editedItem.matricule === item.matricule;
+              
+                              return (
+                                <tr key={index}>
+                                  <td style={tableCellStyle}>
+                                    {isEditing ? (
+                                      <TextField
+                                        value={editedItem.pnc}
+                                        onChange={(e) => setEditedItem({ ...editedItem, pnc: e.target.value })}
+                                      />
+                                    ) : (
+                                      item.pnc
+                                    )}
+                                  </td>
+                                  <td style={tableCellStyle}>
+                                    {isEditing ? (
+                                      <TextField
+                                        value={editedItem.matricule}
+                                        onChange={(e) => setEditedItem({ ...editedItem, matricule: e.target.value })}
+                                      />
+                                    ) : (
+                                      item.matricule
+                                    )}
+                                  </td>
+                                  <td style={tableCellStyle}>{item.enteteVenteID}</td>
+                                  <td style={tableCellStyle}>
+                                  <span style={{
+                padding: "4px 10px",
+                borderRadius: "999px",
+                fontSize: "0.75rem",
+                color: "#fff",
+                backgroundColor:
+                  item.status === "PNC"
+                    ? "#e74c3c"
+                    : item.status === "PNC VENDEUR" || (enteteVente && item.matricule === enteteVente.pnC1)
+                    ? "#2ecc71"
+                    : "#e74c3c"
+              }}>
+                {(item.status === "PNC VENDEUR" || (enteteVente && item.matricule === enteteVente.pnC1))
+                  ? "PNC VENDEUR"
+                  : item.status || "PNC"}
+              </span>
+              
+                                  </td>
+                                  <td style={tableCellStyle}>
+                                    {isEditing ? (
+                                      <>
+                                        <Save onClick={handleSaveEdit} style={{ color: "green", cursor: "pointer" }} />
+                                        <X onClick={() => setEditedItem(null)} style={{ color: "red", cursor: "pointer" }} />
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Edit onClick={() => handleEdit(item)} style={{ color: "#00a3f5", cursor: "pointer" }} />
+                                        <Trash onClick={() => handleDelete(item.matricule)} style={{ color: "#e74c3c", cursor: "pointer" }} />
+                                      </>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
             </div>
           )}
 
@@ -242,6 +253,10 @@ const tableStyle = {
   boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
   borderRadius: "8px",
   overflow: "hidden"
+};
+const headerRowStyle = {
+  backgroundColor: "#b71c1c",
+  color: "#ffffff"
 };
 
 const tableHeaderStyle = {

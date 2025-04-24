@@ -13,9 +13,9 @@ const EnteteVenteArr = () => {
   const [isEditing, setIsEditing] = useState(null);
   const [editedItem, setEditedItem] = useState(null);
   const [openForm, setOpenForm] = useState(false);
-    const [etatVenteArrivee, setEtatVenteArrivee] = useState([]);
+  const [etatVenteArrivee, setEtatVenteArrivee] = useState([]);
   
-  const [newItem, setNewItem] = useState({ avion: "", airoport: "", datE_EDITION: "", numerO_ETAT: "",fL01:"" ,fL02:"" , fL03:"",cC1:"", pnC1: "" , noM1:"" ,noM2:"" , cC2:""  , pnC2: "" ,agenT_SAISIE: "" });
+  const [newItem, setNewItem] = useState({ fournisseur: "", airoport: "", datE_EDITION: "", numerO_ETAT: "",fL01:"" ,fL02:"" , fL03:"",cC1:"", pnC1: "" , noM1:"" ,noM2:"" , cC2:""  , pnC2: "" ,agenT_SAISIE: "" });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -58,7 +58,7 @@ const EnteteVenteArr = () => {
     const errors = [];
   
     if (typeof item.numerO_ETAT !== "string") errors.push("Numéro État doit être une chaîne.");
-    if (typeof item.avion !== "string") errors.push("Avion doit être une chaîne.");
+    if (typeof item.fournisseur !== "string") errors.push("fournisseur doit être une chaîne.");
     if (typeof item.airoport !== "string") errors.push("Aéroport doit être une chaîne.");
     if (isNaN(Date.parse(item.datE_EDITION))) errors.push("Date Edition doit être une date valide.");
     if (typeof item.agenT_SAISIE !== "string") errors.push("Agent Saisie doit être une chaîne.");
@@ -139,8 +139,6 @@ const EnteteVenteArr = () => {
                           {data.length > 0 ? (
                             data.map((row) => (
                               <tr key={row.id}>
-                                <td style={styles.cell}>{row.id}</td>
-
                                 <td style={styles.cell}>{row.fournisseur}</td>
                                 <td style={styles.cell}>{row.airoport}</td>
                                 <td style={styles.cell}>{row.datE_EDITION}</td>
@@ -182,7 +180,7 @@ const EnteteVenteArr = () => {
           <div style={{ display: "flex", gap: "15px", marginBottom: "10px" }}>
           <TextField label="Numéro Etat" value={newItem.numerO_ETAT} onChange={(e) => setNewItem({ ...newItem, numerO_ETAT: e.target.value })} fullWidth />
 
-            <TextField label="Fournisseur" value={newItem.avion} onChange={(e) => setNewItem({ ...newItem, avion: e.target.value })} fullWidth />
+            <TextField label="Fournisseur" value={newItem.fournisseur} onChange={(e) => setNewItem({ ...newItem, fournisseur: e.target.value })} fullWidth />
           </div>
           <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
           <TextField label="Airoport" value={newItem.airoport} onChange={(e) => setNewItem({ ...newItem, airoport: e.target.value })} fullWidth />

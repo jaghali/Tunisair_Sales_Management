@@ -89,6 +89,7 @@ const EtatVentesDepartTable = () => {
   }, [id]);
 
   useEffect(() => {
+    console.log("Selected enteteVenteId:", id);
     fetchData();
     fetchArticles();
   }, [fetchData, fetchArticles]);

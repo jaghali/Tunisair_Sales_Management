@@ -97,10 +97,16 @@ const VentePage = () => {
     }
   };
 
-  const handleDelete = async (matricule) => {
+  const handleDelete = async (matricule, id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/ListeEquipageV/${matricule}`)
-      setVenteDetails(venteDetails.filter(item => item.matricule !== matricule));
+      await axios.delete(`http://localhost:5000/api/ListeEquipageV/${matricule}/${parseInt(id)}`);
+      
+      //Mettre à jour la liste sans l'équipage supprimé
+      setVenteDetails(prev =>
+        prev.filter(item =>
+          !(item.matricule === matricule && item.enteteVenteID === parseInt(id))
+        )
+      );
     } catch (error) {
       setError("Erreur lors de la suppression.");
     }
@@ -234,7 +240,7 @@ const VentePage = () => {
                       ) : (
                         <>
                           <Edit onClick={() => handleEdit(item)} style={{ color: "#00a3f5", cursor: "pointer" }} />
-                          <Trash onClick={() => handleDelete(item.matricule)} style={{ color: "#e74c3c", cursor: "pointer" }} />
+                          <Trash onClick={() => handleDelete(item.matricule,id)} style={{ color: "#e74c3c", cursor: "pointer" }} />
                         </>
                       )}
                     </td>

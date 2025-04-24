@@ -61,7 +61,7 @@ function MainLayout() {
     "/enteteVente",
     "/enteteVentearr",
     "/ventePage/:id",
-    "/ventePagearr",
+    "/ventePagearr/:id",
     "/OffrePage",
     "/OffrePagearr",
     "/settings",
@@ -72,7 +72,6 @@ function MainLayout() {
   const hideSidebarRoutes = [
     "/",
     "/ForgotPasswordPage",
-    "/ventePagearr",
     "/OffrePage",
     "/OffrePagearr",
     "/ConfrotationOffrePage"
@@ -91,8 +90,8 @@ function MainLayout() {
 
   const hideSidebar =
     hideSidebarRoutes.includes(location.pathname) ||
-    Boolean(isVentePage) ||
-    Boolean(isConfrontationPage);
+    matchPath("/ventePage/:id", location.pathname) ||
+    matchPath("/ConfrontationPage/:id", location.pathname);
 
   let sidebarComponent = null;
   if (!hideSidebar) {
