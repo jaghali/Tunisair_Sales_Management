@@ -1,15 +1,99 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import wavingemoji from "../components/Images/wavingemoji.png";
-import { Mic, ShoppingBag, Users, PackageSearch } from "lucide-react";
+import { Mic , MicOff , ShoppingBag, Users, PackageSearch } from "lucide-react";
 import StatCard from "../components/common/StatCard";
 import { motion } from "framer-motion";
+import * as echarts from "echarts";
+import EURFlag from "../components/Images/flags/Flag_of_Europe.svg.png";
+import USDFlag from "../components/Images/flags/Flag_of_the_United_States.png";
+import GBPFlag from "../components/Images/flags/Flag_of_the_United_Kingdom.png";
+import TNDFlag from "../components/Images/flags/Flag_of_Tunisia.png";
+import AIAssistantCard from "../components/AIAssistantCard";
 
 const UserInterface = () => {
   const { matricule } = useParams();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [query, setQuery] = useState("");
+  const [response, setResponse] = useState("");
+  const [selectedCurrency, setSelectedCurrency] = useState("EUR");
+  const [conversionRate, setConversionRate] = useState(1);
+  const [micEnabled, setMicEnabled] = useState(true); // State for mic enabled/disabled
+  const recognitionRef = useRef(null);
+  const chartRef = useRef(null);
+
+  const currencyChartData = [
+    { date: '2021-01', EUR: 1, USD: 1.07, GBP: 0.86, TND: 3.1 },
+    { date: '2021-02', EUR: 1, USD: 1.08, GBP: 0.85, TND: 3.2 },
+    { date: '2021-03', EUR: 1, USD: 1.09, GBP: 0.84, TND: 3.0 },
+    { date: '2021-04', EUR: 1, USD: 1.06, GBP: 0.87, TND: 3.1 },
+    { date: '2021-05', EUR: 1, USD: 1.05, GBP: 0.88, TND: 3.3 },
+    { date: '2021-06', EUR: 1, USD: 1.04, GBP: 0.89, TND: 3.2 },
+    { date: '2021-07', EUR: 1, USD: 1.03, GBP: 0.90, TND: 3.15 },
+    { date: '2021-08', EUR: 1, USD: 1.02, GBP: 0.91, TND: 3.10 },
+    { date: '2021-09', EUR: 1, USD: 1.01, GBP: 0.92, TND: 3.12 },
+    { date: '2021-10', EUR: 1, USD: 1.00, GBP: 0.93, TND: 3.08 },
+    { date: '2021-11', EUR: 1, USD: 0.99, GBP: 0.94, TND: 3.05 },
+    { date: '2021-12', EUR: 1, USD: 1.01, GBP: 0.95, TND: 3.00 },
+    { date: '2022-01', EUR: 1, USD: 1.02, GBP: 0.96, TND: 3.10 },
+    { date: '2022-02', EUR: 1, USD: 1.03, GBP: 0.97, TND: 3.20 },
+    { date: '2022-03', EUR: 1, USD: 1.04, GBP: 0.98, TND: 3.25 },
+    { date: '2022-04', EUR: 1, USD: 1.05, GBP: 0.99, TND: 3.30 },
+    { date: '2022-05', EUR: 1, USD: 1.06, GBP: 1.00, TND: 3.35 },
+    { date: '2022-06', EUR: 1, USD: 1.07, GBP: 1.01, TND: 3.40 },
+  ];
+
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.lang = "en-US";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setQuery(transcript);
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Speech recognition error:", event.error);
+      };
+
+      recognitionRef.current = recognition;
+    }
+  }, []);
+
+  const handleMicClick = () => {
+    if (micEnabled && recognitionRef.current) {
+      recognitionRef.current.start();
+    }
+  };
+
+  const handleToggleMic = () => {
+    setMicEnabled(!micEnabled); 
+  };
+
+  const handleKeyDown = async (e) => {
+    if (e.key === "Enter" && query.trim()) {
+      try {
+        const res = await fetch("http://localhost:8000/ask", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ message: query }),
+        });
+        const data = await res.json();
+        setResponse(data.response || "Erreur lors de la réponse.");
+      } catch (err) {
+        console.error("Erreur:", err);
+        setResponse("Impossible de se connecter à l'agent.");
+      }
+    }
+  };
 
   useEffect(() => {
     const fetchPNInfo = async () => {
@@ -21,7 +105,6 @@ const UserInterface = () => {
       } catch (err) {
         console.error("Failed to load PN info:", err);
         setError("Impossible de charger les infos utilisateur.");
-        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -30,31 +113,62 @@ const UserInterface = () => {
     fetchPNInfo();
   }, [matricule]);
 
-  if (loading) {
-    return (
-      <div style={styles.container}>
-        <p>Chargement...</p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    const rates = {
+      EUR: 1,
+      USD: 1.07,
+      GBP: 0.86,
+      NGN: 1300,
+      JPY: 164,
+      TND: 3.1,
+    };
+    setConversionRate(rates[selectedCurrency] || 1);
+  }, [selectedCurrency]);
+
+  useEffect(() => {
+    if (chartRef.current && !loading) {
+      const chartInstance = echarts.init(chartRef.current);
+
+      const options = {
+        title: { text: "Currency Conversion Over Time", left: "center" },
+        tooltip: { trigger: "axis" },
+        legend: { data: ["EUR", "USD", "GBP", "TND"], top: "10%" },
+        xAxis: { type: "category", data: currencyChartData.map((item) => item.date) },
+        yAxis: { type: "value" },
+        series: ["EUR", "USD", "GBP", "TND"].map((currency) => ({
+          name: currency,
+          type: "line",
+          data: currencyChartData.map((item) => item[currency]),
+          smooth: true,
+        })),
+      };
+
+      chartInstance.setOption(options);
+      return () => chartInstance.dispose();
+    }
+  }, [currencyChartData, selectedCurrency, loading]);
+
+  if (loading) return <div style={styles.container}><p>Chargement...</p></div>;
+
+  const currencyOptions = [
+    { code: "EUR", name: "EUR (€)", flag: EURFlag },
+    { code: "USD", name: "USD ($)", flag: USDFlag },
+    { code: "GBP", name: "GBP (£)", flag: GBPFlag },
+    { code: "TND", name: "TND (د.ت)", flag: TNDFlag },
+  ];
 
   return (
     <div style={styles.container}>
       <div style={styles.headerRow}>
-  <div style={styles.titleBlock}>
-    <h1 style={styles.h1}>Financial</h1>
-    <p style={styles.secteur}>Dashboard</p>
-  </div>
-  <div style={styles.nameBlock}>
-    <h1 style={styles.h1}>
-      {user ? `${user.prenom} ${user.nom}` : "Utilisateur"}
-    </h1>
-    <p style={styles.secteur}>
-      {user ? `${user.secteur}` : ""}
-    </p>
-  </div>
-</div>
-
+        <div style={styles.titleBlock}>
+          <h1 style={styles.h1}>Financial</h1>
+          <p style={styles.secteur}>Dashboard</p>
+        </div>
+        <div style={styles.nameBlock}>
+          <h1 style={styles.h1}>{user ? `${user.prenom} ${user.nom}` : "Utilisateur"}</h1>
+          <p style={styles.secteur}>{user?.secteur || ""}</p>
+        </div>
+      </div>
 
       {error && <p style={styles.errorText}>{error}</p>}
 
@@ -67,50 +181,73 @@ const UserInterface = () => {
             </div>
             <div style={styles.bottomRow}>
               <input
-                id="help"
                 type="text"
                 placeholder="Just ask me anything!"
                 style={styles.input}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
               />
             </div>
-            <div style={styles.micCircle}>
-              <Mic size={20} color="#333" />
-            </div>
+            <div style={styles.micCircle} onClick={handleToggleMic} aria-label="Voice Assistant">
+  {micEnabled ? (
+    <Mic size={20} color="#333" />
+  ) : (
+    <MicOff size={20} color="#ccc" />
+  )}
+</div>
+
+            
           </div>
 
-          <div>
-            {loading ? (
-              <p>Chargement des statistiques...</p>
-            ) : error ? (
-              <p style={styles.errorText}>{error}</p>
-            ) : (
+          <div style={styles.currencySelector}>
+            <select
+              id="currency"
+              value={selectedCurrency}
+              onChange={(e) => setSelectedCurrency(e.target.value)}
+              style={styles.select}
+            >
+              {currencyOptions.map((option) => (
+                <option key={option.code} value={option.code}>{option.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <motion.div
+            style={styles.statsGrid}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: -10 }}
+            transition={{ duration: 2, ease: "easeOut" }}
+          >
+            {[{
+              name: "Salaire",
+              icon: PackageSearch,
+              value: new Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: selectedCurrency,
+              }).format(user.salaire * conversionRate),
+              color: "#C80505",
+            },
+            {
+              name: "Devance", icon: Users, value: user.devance, color: "#C80505"
+            },
+            {
+              name: "Base", icon: ShoppingBag, value: user.base, color: "#C80505"
+            }].map((stat, index) => (
               <motion.div
-                style={styles.statsGrid}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: -10 }}
-                transition={{ duration: 2, ease: "easeOut" }}
+                key={stat.name}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: index * 0.1 }}
               >
-                {[
-                  { name: "Salaire", icon: PackageSearch, value: user.salaire, color: "#C80505" },
-                  { name: "Devance", icon: Users, value: user.devance, color: "#C80505" },
-                  { name: "base", icon: ShoppingBag, value: user.base, color: "#C80505" },
-                ].map((stat, index) => (
-                  <motion.div
-                    key={stat.name}
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: index * 0.1 }}
-                  >
-                    <StatCard
-                      name={stat.name}
-                      icon={stat.icon}
-                      value={stat.value}
-                      color={stat.color}
-                    />
-                  </motion.div>
-                ))}
+                <StatCard {...stat} />
               </motion.div>
-            )}
+            ))}
+            <AIAssistantCard />
+          </motion.div>
+
+          <div style={styles.chartWrapper}>
+            <div ref={chartRef} style={{ height: "400px" }} />
           </div>
         </>
       )}
@@ -119,39 +256,28 @@ const UserInterface = () => {
 };
 
 const styles = {
+  container: {
+    padding: "5rem",
+    marginLeft: "15%",
+    marginTop: "-4rem",
+    overflowX: "hidden",
+  },
+  chartWrapper: {
+    marginBottom: "2rem",
+    width:"70%"
+  },
   headerRow: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: "2rem",
   },
-  
-  titleBlock: {
-    textAlign: "left",
-  },
-
-  nameBlock:{
-    marginRight:"20%"
-  },
+  titleBlock: { textAlign: "left" },
+  nameBlock: { marginRight: "20%" },
   secteur: {
     fontSize: "0.875rem",
     color: "#666",
     marginTop: "-1rem",
-  },
-  statsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "20px",
-    marginTop: "2rem",
-  },
-  container: {
-    padding: "5rem",
-    marginLeft: "15%",
-    marginTop: "-4rem",
-    overflowX: "hidden", // Prevent horizontal scrolling
-  },
-  name: {
-    marginLeft: "60%",
   },
   h1: {
     fontSize: "1rem",
@@ -171,9 +297,7 @@ const styles = {
     gap: "0.5rem",
     marginBottom: "0.1rem",
   },
-  bottomRow: {
-    width: "100%",
-  },
+  bottomRow: { width: "100%" },
   label: {
     fontSize: "1.5rem",
     fontWeight: 500,
@@ -190,7 +314,6 @@ const styles = {
     border: "none",
     outline: "none",
     backgroundColor: "transparent",
-    borderBottom: "none",
   },
   micCircle: {
     position: "absolute",
@@ -206,6 +329,35 @@ const styles = {
     justifyContent: "center",
     boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
     cursor: "pointer",
+  },
+  toggleContainer: {
+    marginTop: "1rem",
+    textAlign: "center",
+  },
+  toggleButton: {
+    padding: "0.5rem 1rem",
+    backgroundColor: "#007bff",
+    color: "#fff",
+    border: "none",
+    borderRadius: "20px",
+    cursor: "pointer",
+  },
+  currencySelector: {
+    marginBottom: "1.5rem",
+    display: "flex",
+    alignItems: "center",
+  },
+  select: {
+    padding: "0.5rem 1rem",
+    border: "1px solid #ccc",
+    borderRadius: "20px",
+    fontSize: "1rem",
+  },
+  statsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+    gap: "20px",
+    marginTop: "2rem",
   },
   errorText: {
     color: "red",

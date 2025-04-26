@@ -91,7 +91,8 @@ function MainLayout() {
   const hideSidebar =
     hideSidebarRoutes.includes(location.pathname) ||
     matchPath("/ventePage/:id", location.pathname) ||
-    matchPath("/ConfrontationPage/:id", location.pathname);
+    matchPath("/ConfrontationPage/:id", location.pathname) ||
+    matchPath("/ventePagearr/:id", location.pathname);
 
   let sidebarComponent = null;
   if (!hideSidebar) {
