@@ -19,8 +19,7 @@ namespace TunisairSalesManagement.Models
 
         [Required]
         public string Password { get; set; } 
-        public double? Salaire { get; set; }
-        public double? Devance { get; set; }
+        public double? Avance { get; set; }
 
 
 

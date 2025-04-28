@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const Devances = () => {
+const Avances = () => {
   const [enteteVentes, setEnteteVentes] = useState([]);
   const [pnList, setPnList] = useState([]);
   const [tauxChange, setTauxChange] = useState([]);
   const [devises, setDevises] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState(""); // ex: "2025-04"
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,9 +35,15 @@ const Devances = () => {
     fetchData();
   }, []);
 
-  const entetesAvecTrouDeCaisse = enteteVentes.filter(
-    (entete) => entete.totaleEncaisse !== entete.totaleValeur
-  );
+  const entetesAvecTrouDeCaisse = enteteVentes
+  .filter((entete) => entete.totaleEncaisse !== entete.totaleValeur)
+  .filter((entete) => {
+    if (!selectedMonth) return true; // Aucun filtre si aucun mois sélectionné
+    const dateEdition = new Date(entete.datE_EDITION);
+    const yearMonth = `${dateEdition.getFullYear()}-${String(dateEdition.getMonth() + 1).padStart(2, "0")}`;
+    return yearMonth === selectedMonth;
+  });
+
 
   const getTauxEtDeviseCode = (deviseId, dateEtat) => {
     const dateRef = new Date(dateEtat);
@@ -56,19 +64,55 @@ const Devances = () => {
     };
   };
 
-  const getSalaireForPN = (matricule) => {
-    return pnList.find((pn) => pn.matricule === matricule)?.salaire ?? null;
+  const getAvanceForPN = (matricule) => {
+    return pnList.find((pn) => pn.matricule === matricule)?.avance ?? null;
   };
 
-  const getDevanceForPN = (matricule) => {
-    return pnList.find((pn) => pn.matricule === matricule)?.devance ?? null;
+  const exportToTxt = () => {
+    let content = "État N° | Date | PNC | Réduction (TND) | Avance Après Réduction (TND) | Reste De L'Ecart\n";
+    content += "-----------------------------------------------------------------------------------------\n";
+  
+    entetesAvecTrouDeCaisse.forEach((entete) => {
+      const ecart = entete.totaleValeur - entete.totaleEncaisse;
+      const multipleDeCinq = Math.floor(ecart / 5) * 5;
+      const avance = getAvanceForPN(entete.pnC1);
+      const avanceRestante = avance !== null ? avance - multipleDeCinq : null;
+      const ecartEnTND = ecart / 0.29;
+      const avanceRestanteEnTND = avanceRestante !== null ? avanceRestante : null;
+  
+      const line = `${entete.numerO_ETAT} | ${new Date(entete.datE_EDITION).toLocaleDateString("fr-FR")} | ${entete.pnC1} | ${ecartEnTND.toFixed(2)} | ${avanceRestanteEnTND !== null ? avanceRestanteEnTND.toFixed(2) : "N/A"} | ${(ecart - multipleDeCinq).toFixed(2)}\n`;
+      content += line;
+    });
+  
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Avances.txt";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
     <div style={styles.pageContainer}>
       <div style={styles.contentWrapper}>
-        <h2 style={styles.title}>Les Salaires Et Devances</h2>
+      <div style={{ marginBottom: "20px" }}>
+  <label style={{ marginRight: "10px", fontWeight: "500", fontSize: "16px",color:"black"  }}>Filtrer par mois:</label>
+  <input
+    type="month"
+    value={selectedMonth}
+    style={styles.calendarInput}
+    onChange={(e) => setSelectedMonth(e.target.value)}
+    onFocus={(e) => (e.target.style.borderColor = "#3498db")}
+    onBlur={(e) => (e.target.style.borderColor = "#ccc")}
+  />
+</div>
 
+        <h2 style={styles.title}>Avance en devise</h2>
+        <button onClick={exportToTxt} style={styles.exportButton}>
+        Exporter en TXT
+        </button>
         {loading ? (
           <p>Chargement...</p>
         ) : error ? (
@@ -81,50 +125,56 @@ const Devances = () => {
                   <th style={styles.th}>État N°</th>
                   <th style={styles.th}>Date</th>
                   <th style={styles.th}>PNC</th>
-                  <th style={styles.th}>Devise</th>
-                  <th style={styles.th}>Salaire Net</th>
-                  <th style={styles.th}>Salaire Aprés Réduction</th>
-                  <th style={styles.th}>Devance Aprés Réduction (x5)</th>
+                  <th style={styles.th}>Trous de caisse en Euro</th>
+                  <th style={styles.th}>Réduction</th>
+                  <th style={styles.th}>Avance Aprés Réduction (x5)</th>
                   <th style={styles.th}>Reste De L'Ecart</th>
                 </tr>
               </thead>
               <tbody>
-                {entetesAvecTrouDeCaisse.map((entete, index) => {
-                  const ecart = entete.totaleValeur - entete.totaleEncaisse;
-                  const salaire = getSalaireForPN(entete.pnC1);
-                  const salaireMoinsEcart = salaire - ecart;
-                  const multipleDeCinq = Math.floor(ecart / 5) * 5;
-                  const devance = getDevanceForPN(entete.pnC1);
-                  const devanceRestante = devance !== null ? devance - multipleDeCinq : null;
+  {entetesAvecTrouDeCaisse.map((entete, index) => {
+    const ecart = entete.totaleValeur - entete.totaleEncaisse;
+    const multipleDeCinq = Math.floor(ecart / 5) * 5;
+    const avance = getAvanceForPN(entete.pnC1);
+    const avanceRestante = avance !== null ? avance - multipleDeCinq : null;
 
-                  const { taux, code } = getTauxEtDeviseCode(entete.deviseId, entete.datE_EDITION);
+    const { taux } = getTauxEtDeviseCode(entete.deviseId, entete.datE_EDITION);
 
-                  return (
-                    <tr key={index} style={styles.tr}>
-                      <td style={styles.td}>{entete.numerO_ETAT}</td>
-                      <td style={styles.td}>
-                        {new Date(entete.datE_EDITION).toLocaleDateString("fr-FR")}
-                      </td>
-                      <td style={styles.td}>{entete.pnC1}</td>
-                      <td style={styles.td}>{code}</td>
-                      <td style={styles.td}>
-                        {salaire !== null ? `${(salaire * taux).toFixed(2)} ${code}` : "N/A"}
-                      </td>
-                      <td style={styles.td}>
-                        {salaire !== null
-                          ? `${(salaireMoinsEcart * taux).toFixed(2)} ${code}`
-                          : "N/A"}
-                      </td>
-                      <td style={styles.td}>
-                        {devance !== null
-                          ? `${(devanceRestante * taux).toFixed(2)} ${code}`
-                          : "N/A"}
-                      </td>
-                      <td style={styles.td}>{(ecart - multipleDeCinq).toFixed(2)}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
+    // Conversion en Dinar
+    const ecartEnTND = ecart / 0.29;
+    const avanceRestanteEnTND = avanceRestante !== null ? avanceRestante : null; // avance est déjà en TND
+
+    return (
+      <tr key={index} style={styles.tr}>
+        <td style={styles.td}>{entete.numerO_ETAT}</td>
+        <td style={styles.td}>
+          {new Date(entete.datE_EDITION).toLocaleDateString("fr-FR")}
+        </td>
+        <td style={styles.td}>{entete.pnC1}</td>
+        <td style={styles.td}>
+          {ecart} EUR
+        </td>
+        {/* Réduction toujours en Dinar */}
+        <td style={styles.td}>
+          {ecartEnTND.toFixed(2)} TND
+        </td>
+
+        {/* Avance restante aussi en Dinar */}
+        <td style={styles.td}>
+          {avanceRestanteEnTND !== null
+            ? `${avanceRestanteEnTND.toFixed(2)} TND`
+            : "N/A"}
+        </td>
+
+        {/* Le reste (trou) affiché brut */}
+        <td style={styles.td}>
+          {(ecart - multipleDeCinq).toFixed(2)}
+        </td>
+      </tr>
+    );
+  })}
+</tbody>
+
             </table>
           </div>
         ) : (
@@ -143,6 +193,32 @@ const styles = {
     minHeight: "100vh",
     padding: "20px",
   },
+  calendarInput: {
+    padding: "8px 12px",
+    borderRadius: "8px",
+    border: "1px solid #ccc",
+    backgroundColor: "#fff",
+    fontSize: "14px",
+    outline: "none",
+    boxShadow: "0 2px 5px rgba(0, 0, 0, 0.05)",
+    transition: "border-color 0.3s, box-shadow 0.3s",
+  },
+  calendarInputFocus: {
+    borderColor: "#3498db",
+    boxShadow: "0 0 5px rgba(52, 152, 219, 0.5)",
+  },
+  
+  exportButton: {
+    marginBottom: "15px",
+    padding: "8px 16px",
+    backgroundColor: "#3498db",
+    color: "white",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    fontSize: "14px",
+  },
+  
   contentWrapper: {
     marginLeft: "260px",
     width: "100%",
@@ -182,4 +258,4 @@ const styles = {
   },
 };
 
-export default Devances;
+export default Avances;

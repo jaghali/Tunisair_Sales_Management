@@ -28,19 +28,25 @@ const Confrontation = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [id]);
 
-  // Calculer les totaux globaux
-  const totalDepart = etatVenteDepart.reduce((acc, item) => acc + item.valeur, 0);
-  const totalArrivee = etatVenteArrivee.reduce((acc, item) => acc + item.valeur, 0);
-  const difference = totalDepart - totalArrivee;
+ // Filtrer les données selon l'ID de EnteteVente
+ const filteredEtatVenteDepart = etatVenteDepart.filter(item => item.enteteVenteID === parseInt(id));
+ const filteredEtatVenteArrivee = etatVenteArrivee.filter(item => item.enteteVenteID === parseInt(id));
+
+ // Calculer les totaux globaux filtrés par ID
+ const totalDepart = filteredEtatVenteDepart.reduce((acc, item) => acc + item.valeur, 0);
+ const totalArrivee = filteredEtatVenteArrivee.reduce((acc, item) => acc + item.valeur, 0);
+ const difference = totalDepart - totalArrivee;
 
   // Indexer etatVenteDepart pour un accès rapide
   const departMap = Object.fromEntries(etatVenteDepart.map(item => [item.description, item]));
 
   // Construire la liste des comparaisons
   const generateConfrontationData = () => {
-    const data = etatVenteArrivee.map(arriveeItem => {
+    const data = etatVenteArrivee
+    .filter(arriveeItem => arriveeItem.enteteVenteID === parseInt(id))
+    .map(arriveeItem => {
       const departItem = departMap[arriveeItem.description] || {};
       return {
         code: arriveeItem.code,
@@ -55,7 +61,7 @@ const Confrontation = () => {
         valeurArrivee: arriveeItem.valeur,
         restantDepart: departItem.restant || 0,
         restantArrivee: arriveeItem.restant,
-        id: arriveeItem._id // Assuming each item has a unique _id
+        id: arriveeItem.enteteVenteID // Assuming each item has a unique _id
       };
     });
     setConfrontationData(data);
@@ -163,7 +169,7 @@ const Confrontation = () => {
                   <TableCell>{item.valeurArrivee}</TableCell>
                   <TableCell>{item.restantDepart}</TableCell>
                   <TableCell>{item.restantArrivee}</TableCell>
-                  <TableCell>{item.enteteVente}</TableCell>
+                  <TableCell>{item.id}</TableCell>
 
                 </TableRow>
               ))}

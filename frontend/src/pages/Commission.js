@@ -61,19 +61,20 @@ const sumFilteredEtatVentes = filteredEtatVentes.reduce((acc, curr) => acc + cur
 
   const filteredEquipage = selectedMonth
   ? equipageData.filter(equipage => {
-      const matchingEntete = entetes.find(entete =>
-        entete.pnC1 === equipage.matricule || entete.pnC2 === equipage.matricule
+      const matchingEntetes = entetes.filter(entete =>
+        (entete.pnC1 === equipage.matricule || entete.pnC2 === equipage.matricule)
+        && entete.datE_EDITION
       );
 
-      if (!matchingEntete || !matchingEntete.datE_EDITION) return false;
-
-      const date = new Date(matchingEntete.datE_EDITION);
-      const month = `${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getFullYear()}`;
-
-      return month === selectedMonth;
+      // Vérifier si AU MOINS UN entete correspond au mois sélectionné
+      return matchingEntetes.some(entete => {
+        const date = new Date(entete.datE_EDITION);
+        const month = `${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getFullYear()}`;
+        return month === selectedMonth;
+      });
     })
   : equipageData;
-  
+
   const sumEtatVentesDepart = groupedData.reduce((acc, curr) => acc + curr.totalValeur, 0);
   const numberOfEquipage = equipageData.length;
   const numberOfFilteredEquipage = filteredEquipage.length;
@@ -89,13 +90,15 @@ const sumFilteredEtatVentes = filteredEtatVentes.reduce((acc, curr) => acc + cur
       >
         <option value="">-- Tous les mois --</option>
         {groupedData.map((item, index) => {
-          const value = `${item.mois}-${item.annee}`;
-          return (
-            <option key={index} value={value}>
-              {value}
-            </option>
-          );
-        })}
+  const moisPadded = item.mois.toString().padStart(2, "0");
+  const value = `${moisPadded}-${item.annee}`;
+  return (
+    <option key={index} value={value}>
+      {value}
+    </option>
+  );
+})}
+
       </select>
 
       <div style={styles.card}>

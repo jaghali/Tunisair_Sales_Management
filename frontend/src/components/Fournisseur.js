@@ -11,7 +11,6 @@ const Fournisseurs = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [editedItem, setEditedItem] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
     
@@ -84,12 +83,8 @@ const Fournisseurs = () => {
     }
   };
 
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value.toLowerCase());
-  };
-
   const filteredData = data.filter((item) =>
-    item.nom.toLowerCase().includes(searchTerm)
+    item.nom.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (

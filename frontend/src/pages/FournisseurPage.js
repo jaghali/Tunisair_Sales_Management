@@ -28,10 +28,10 @@ const FournisseurPage = () => {
     navigate(`/Fournisseurs/${id}`); 
   };
 
+
   if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
-   
     <div  style={{ padding: "10%", marginLeft:"15%" , marginTop:"-8%"}}>
       <Fournisseurs data={venteDetails} onDetailClick={handleDetailClick} />
     </div>
