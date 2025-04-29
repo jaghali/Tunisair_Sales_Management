@@ -21,7 +21,7 @@ const EnteteVente = () => {
   const [isEditing, setIsEditing] = useState(null);
   const [editedItem, setEditedItem] = useState(null);
   const [openForm, setOpenForm] = useState(false);
-  const [etatVenteArrivee, setEtatVenteArrivee] = useState([]);
+  const [etatVenteArrivee, setEtatVenteDepart] = useState([]);
 
   const [newItem, setNewItem] = useState({
     fournisseur: "",
@@ -57,19 +57,41 @@ const EnteteVente = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/EnteteVente");
-        const responseArrivee = await axios.get("http://localhost:5000/api/EtatVentesarrivee");
-        setEtatVenteArrivee(responseArrivee.data);
-        setData(response.data);
-        
+        const enteteRes = await axios.get("http://localhost:5000/api/EnteteVente");
+        const departRes = await axios.get("http://localhost:5000/api/EtatVentesDepart");
+  
+        const entetes = enteteRes.data;
+        const lignesDepart = departRes.data;
+  
+        // Calcul pour chaque ligne EnteteVente
+        await Promise.all(entetes.map(async (entete) => {
+          // Filtrer les lignes de vente départ avec le même enteteVenteID
+          const lignesLiees = lignesDepart.filter(ld => ld.enteteVenteID === entete.id);
+          const totalValeur = lignesLiees.reduce((sum, ligne) => sum + ligne.valeur, 0);
+  
+          // Mettre à jour la ligne si nécessaire
+          if (entete.totaleValeur !== totalValeur) {
+            const updated = { ...entete, totaleValeur: totalValeur };
+            await axios.put(`http://localhost:5000/api/EnteteVente/${entete.id}`, updated);
+          }
+        }));
+  
+        // Mise à jour de l'état local après les modifications
+        const refreshed = await axios.get("http://localhost:5000/api/EnteteVente");
+        setData(refreshed.data);
+        setEtatVenteDepart(lignesDepart); // si tu les utilises aussi
+  
       } catch (err) {
-        setError("Erreur lors du chargement des données.");
+        console.error(err);
+        setError("Erreur lors du chargement ou de la mise à jour.");
       } finally {
         setLoading(false);
       }
     };
+  
     fetchData();
   }, []);
+  
 
   const handleEdit = (item) => {
     console.log("Editing item:", item);  // Check item data
@@ -171,7 +193,7 @@ const EnteteVente = () => {
                     <td style={styles.cell}>{row.datE_EDITION}</td>
                     <td style={styles.cell}>{row.numerO_ETAT}</td>
                     <td style={styles.cell}>{row.pnC1}</td>
-                    <td style={styles.cell}>{totalArrivee}<Euro size={15}/></td>
+                    <td style={styles.cell}>{row.totaleValeur}<Euro size={15}/></td>
                     <td style={styles.cell}>
                       {isEditing === row.id ? (
                         <TextField
@@ -232,10 +254,37 @@ const EnteteVente = () => {
 
       <Dialog open={openForm} onClose={() => setOpenForm(false)}>
         <DialogTitle>Ajouter Etat De Vente</DialogTitle>
-        <DialogContent>
-          {/* Form Fields */}
+<DialogContent>
+          <div style={{ display: "flex", gap: "15px", marginBottom: "10px" }}>
           <TextField label="Numéro Etat" value={newItem.numerO_ETAT} onChange={(e) => setNewItem({ ...newItem, numerO_ETAT: e.target.value })} fullWidth />
-          {/* Other form fields */}
+
+            <TextField label="Fournisseur" value={newItem.fournisseur} onChange={(e) => setNewItem({ ...newItem, fournisseur: e.target.value })} fullWidth />
+          </div>
+          <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
+          <TextField label="Airoport" value={newItem.airoport} onChange={(e) => setNewItem({ ...newItem, airoport: e.target.value })} fullWidth />
+
+          <TextField label="Date Edition" type="date" InputLabelProps={{ shrink: true }} value={newItem.datE_EDITION} onChange={(e) => setNewItem({ ...newItem, datE_EDITION: e.target.value })} fullWidth />
+          <TextField label="Agent Saisie" value={newItem.agenT_SAISIE} onChange={(e) => setNewItem({ ...newItem, agenT_SAISIE: e.target.value })} fullWidth />
+          </div>
+          
+          
+          <div style={{ display: "flex", gap: "15px", marginBottom: "10px" }}>
+          <TextField label="fL 01" value={newItem.fL01} onChange={(e) => setNewItem({ ...newItem, fL01: e.target.value })} fullWidth />
+          <TextField label="fL 02" value={newItem.fL02} onChange={(e) => setNewItem({ ...newItem, fL02: e.target.value })} fullWidth />
+            <TextField label="fL 03" value={newItem.fL03} onChange={(e) => setNewItem({ ...newItem, fL03: e.target.value })} fullWidth />
+            
+          </div>
+          <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
+          <TextField label="cc 1" value={newItem.cC1} onChange={(e) => setNewItem({ ...newItem, cC1: e.target.value })} fullWidth />
+          <TextField label="PNC 1" value={newItem.pnC1} onChange={(e) => setNewItem({ ...newItem, pnC1: e.target.value })} fullWidth />
+            <TextField label="noM 1" value={newItem.noM1} onChange={(e) => setNewItem({ ...newItem, noM1: e.target.value })} fullWidth />
+            
+          </div>  
+          <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
+          <TextField label="noM 2" value={newItem.noM2} onChange={(e) => setNewItem({ ...newItem, noM2: e.target.value })} fullWidth />
+          <TextField label="cC 2" value={newItem.cC2} onChange={(e) => setNewItem({ ...newItem, cC2: e.target.value })} fullWidth />
+            <TextField label="PNC 2" value={newItem.pnC2} onChange={(e) => setNewItem({ ...newItem, pnC2: e.target.value })} fullWidth />
+          </div>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenForm(false)} color="secondary">Annuler</Button>
