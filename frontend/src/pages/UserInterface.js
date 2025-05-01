@@ -195,7 +195,7 @@ const UserInterface = () => {
                 }).format(user.salaire * conversionRate)}
                 color="#2ecc71"
               />
-              <StatCard name="Devance" icon={Users} value={user.devance} color="#3498db" />
+              <StatCard name="Avance" icon={Users} value={user.avance} color="#3498db" />
               <StatCard name="Base" icon={ShoppingBag} value={user.base} color="#e67e22" />
               <AIAssistantCard/>
             </div>
