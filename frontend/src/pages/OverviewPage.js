@@ -1,4 +1,4 @@
-import { BarChart2, ShoppingBag, Users, PackageSearch } from "lucide-react";
+import { ShoppingBag, Users, PackageSearch } from "lucide-react";
 import { motion } from "framer-motion";
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
@@ -39,49 +39,41 @@ const OverviewPage = () => {
     if (!chartRef.current) return;
 
     const chart = echarts.init(chartRef.current);
-
     const option = {
-      legend: {
-        top: 'bottom'
-      },
+      legend: { top: "bottom" },
       toolbox: {
         show: true,
         feature: {
           mark: { show: true },
           dataView: { show: true, readOnly: false },
           restore: { show: true },
-          saveAsImage: { show: true }
-        }
+          saveAsImage: { show: true },
+        },
       },
       series: [
         {
-          name: 'Nightingale Chart',
-          type: 'pie',
+          name: "Nightingale Chart",
+          type: "pie",
           radius: [50, 250],
-          center: ['50%', '50%'],
-          roseType: 'area',
-          itemStyle: {
-            borderRadius: 8
-          },
+          center: ["50%", "50%"],
+          roseType: "area",
+          itemStyle: { borderRadius: 8 },
           data: [
-            { value: 40, name: 'rose 1' },
-            { value: 38, name: 'rose 2' },
-            { value: 32, name: 'rose 3' },
-            { value: 30, name: 'rose 4' },
-            { value: 28, name: 'rose 5' },
-            { value: 26, name: 'rose 6' },
-            { value: 22, name: 'rose 7' },
-            { value: 18, name: 'rose 8' }
-          ]
-        }
-      ]
+            { value: 40, name: "rose 1" },
+            { value: 38, name: "rose 2" },
+            { value: 32, name: "rose 3" },
+            { value: 30, name: "rose 4" },
+            { value: 28, name: "rose 5" },
+            { value: 26, name: "rose 6" },
+            { value: 22, name: "rose 7" },
+            { value: 18, name: "rose 8" },
+          ],
+        },
+      ],
     };
 
     chart.setOption(option);
-
-    return () => {
-      chart.dispose();
-    };
+    return () => chart.dispose();
   }, []);
 
   const animateCount = (setState, targetValue) => {
@@ -102,35 +94,35 @@ const OverviewPage = () => {
   return (
     <div style={styles.container}>
       <main style={styles.main}>
-        {loading ? (
-          <p>Chargement des statistiques...</p>
-        ) : error ? (
-          <p style={styles.errorText}>{error}</p>
-        ) : (
+        <motion.div
+          style={styles.cardContainer}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
           <motion.div
-            style={styles.statsGrid}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: -10 }}
-            transition={{ duration: 2, ease: "easeOut" }}
+            style={{ ...styles.card, background: "transparent", boxShadow: "none" }}
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.5 }}
           >
-            {[{ name: "Total Articles", icon: PackageSearch, value: articleCount, color: "#C80505" },
-              { name: "Total Fournisseurs", icon: Users, value: fournisseurCount, color: "#C80505" },
-              { name: "Total PN", icon: ShoppingBag, value: pnCount, color: "#C80505" }
-            ].map((stat, index) => (
-              <motion.div
-                key={stat.name}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: index * 0.1 }}
-              >
-                <StatCard name={stat.name} icon={stat.icon} value={stat.value} color={stat.color} />
-              </motion.div>
-            ))}
+            <h1 style={styles.title}>Overview Page</h1>
+            {loading ? (
+              <p style={styles.loading}>Chargement...</p>
+            ) : error ? (
+              <p style={styles.errorText}>{error}</p>
+            ) : (
+              <div style={styles.statRow}>
+                <StatCard name="Total Articles" icon={PackageSearch} value={articleCount}color="#2ecc71"/>
+                <StatCard name="Total Fournisseurs" icon={Users} value={fournisseurCount}color="#3498db"/>
+                <StatCard name="Total PN" icon={ShoppingBag} value={pnCount}color="#e67e22" />
+              </div>
+            )}
           </motion.div>
-        )}
+        </motion.div>
 
         {/* Nightingale Pie Chart */}
-        <div ref={chartRef} style={{ height: '500px', width: '100%', marginTop: '40px' }} />
+        <div ref={chartRef} style={{ height: "500px", width: "100%", marginTop: "40px" }} />
       </main>
     </div>
   );
@@ -143,20 +135,37 @@ const styles = {
     marginTop: "-8%",
   },
   main: {
-    maxWidth: "1280px",
     margin: "0 auto",
     padding: "24px 16px",
   },
-  statsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "20px",
-    marginBottom: "32px",
+  cardContainer: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  card: {
+    width: "120%",
+    textAlign: "center",
+  },
+  title: {
+    fontSize: "24px",
+    marginBottom: "16px",
+  },
+  statRow: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: "24px",
+    flexWrap: "nowrap",
   },
   errorText: {
     color: "red",
     textAlign: "center",
     fontSize: "18px",
+  },
+  loading: {
+    fontSize: "18px",
+    color: "#888",
   },
 };
 

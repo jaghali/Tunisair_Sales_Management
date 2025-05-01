@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import wavingemoji from "../components/Images/wavingemoji.png";
-import { Mic , MicOff , ShoppingBag, Users, PackageSearch } from "lucide-react";
+import { User, Mic, MicOff, ShoppingBag, Users, PackageSearch } from "lucide-react";
 import StatCard from "../components/common/StatCard";
 import { motion } from "framer-motion";
 import * as echarts from "echarts";
@@ -13,6 +13,8 @@ import AIAssistantCard from "../components/AIAssistantCard";
 
 const UserInterface = () => {
   const { matricule } = useParams();
+  const navigate = useNavigate();
+
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -20,7 +22,7 @@ const UserInterface = () => {
   const [response, setResponse] = useState("");
   const [selectedCurrency, setSelectedCurrency] = useState("EUR");
   const [conversionRate, setConversionRate] = useState(1);
-  const [micEnabled, setMicEnabled] = useState(true); // State for mic enabled/disabled
+  const [micEnabled, setMicEnabled] = useState(true);
   const recognitionRef = useRef(null);
   const chartRef = useRef(null);
 
@@ -45,26 +47,7 @@ const UserInterface = () => {
     { date: '2022-06', EUR: 1, USD: 1.07, GBP: 1.01, TND: 3.40 },
   ];
 
-  useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      const recognition = new SpeechRecognition();
-      recognition.lang = "en-US";
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-
-      recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        setQuery(transcript);
-      };
-
-      recognition.onerror = (event) => {
-        console.error("Speech recognition error:", event.error);
-      };
-
-      recognitionRef.current = recognition;
-    }
-  }, []);
+  
 
   const handleMicClick = () => {
     if (micEnabled && recognitionRef.current) {
@@ -72,18 +55,14 @@ const UserInterface = () => {
     }
   };
 
-  const handleToggleMic = () => {
-    setMicEnabled(!micEnabled); 
-  };
+  const handleToggleMic = () => setMicEnabled(!micEnabled);
 
   const handleKeyDown = async (e) => {
     if (e.key === "Enter" && query.trim()) {
       try {
         const res = await fetch("http://localhost:8000/ask", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: query }),
         });
         const data = await res.json();
@@ -109,40 +88,30 @@ const UserInterface = () => {
         setLoading(false);
       }
     };
-
     fetchPNInfo();
   }, [matricule]);
 
   useEffect(() => {
-    const rates = {
-      EUR: 1,
-      USD: 1.07,
-      GBP: 0.86,
-      NGN: 1300,
-      JPY: 164,
-      TND: 3.1,
-    };
+    const rates = { EUR: 1, USD: 1.07, GBP: 0.86, TND: 3.1 };
     setConversionRate(rates[selectedCurrency] || 1);
   }, [selectedCurrency]);
 
   useEffect(() => {
     if (chartRef.current && !loading) {
       const chartInstance = echarts.init(chartRef.current);
-
       const options = {
         title: { text: "Currency Conversion Over Time", left: "center" },
         tooltip: { trigger: "axis" },
         legend: { data: ["EUR", "USD", "GBP", "TND"], top: "10%" },
-        xAxis: { type: "category", data: currencyChartData.map((item) => item.date) },
+        xAxis: { type: "category", data: currencyChartData.map((i) => i.date) },
         yAxis: { type: "value" },
         series: ["EUR", "USD", "GBP", "TND"].map((currency) => ({
           name: currency,
           type: "line",
-          data: currencyChartData.map((item) => item[currency]),
+          data: currencyChartData.map((i) => i[currency]),
           smooth: true,
         })),
       };
-
       chartInstance.setOption(options);
       return () => chartInstance.dispose();
     }
@@ -167,6 +136,9 @@ const UserInterface = () => {
         <div style={styles.nameBlock}>
           <h1 style={styles.h1}>{user ? `${user.prenom} ${user.nom}` : "Utilisateur"}</h1>
           <p style={styles.secteur}>{user?.secteur || ""}</p>
+          <div style={styles.ProfileCircle} onClick={() => navigate(`/ProfilePage/${matricule}`)} aria-label="Profile">
+            <User size={30} color="#333" />
+          </div>
         </div>
       </div>
 
@@ -190,14 +162,8 @@ const UserInterface = () => {
               />
             </div>
             <div style={styles.micCircle} onClick={handleToggleMic} aria-label="Voice Assistant">
-  {micEnabled ? (
-    <Mic size={20} color="#333" />
-  ) : (
-    <MicOff size={20} color="#ccc" />
-  )}
-</div>
-
-            
+              {micEnabled ? <Mic size={20} color="#333" /> : <MicOff size={20} color="#ccc" />}
+            </div>
           </div>
 
           <div style={styles.currencySelector}>
@@ -219,31 +185,20 @@ const UserInterface = () => {
             animate={{ opacity: 1, x: -10 }}
             transition={{ duration: 2, ease: "easeOut" }}
           >
-            {[{
-              name: "Salaire",
-              icon: PackageSearch,
-              value: new Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: selectedCurrency,
-              }).format(user.salaire * conversionRate),
-              color: "#C80505",
-            },
-            {
-              name: "Devance", icon: Users, value: user.devance, color: "#C80505"
-            },
-            {
-              name: "Base", icon: ShoppingBag, value: user.base, color: "#C80505"
-            }].map((stat, index) => (
-              <motion.div
-                key={stat.name}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: index * 0.1 }}
-              >
-                <StatCard {...stat} />
-              </motion.div>
-            ))}
-            <AIAssistantCard />
+            <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+              <StatCard
+                name="Salaire"
+                icon={PackageSearch}
+                value={new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: selectedCurrency
+                }).format(user.salaire * conversionRate)}
+                color="#2ecc71"
+              />
+              <StatCard name="Devance" icon={Users} value={user.devance} color="#3498db" />
+              <StatCard name="Base" icon={ShoppingBag} value={user.base} color="#e67e22" />
+              <AIAssistantCard/>
+            </div>
           </motion.div>
 
           <div style={styles.chartWrapper}>
@@ -256,6 +211,10 @@ const UserInterface = () => {
 };
 
 const styles = {
+  statsGrid: {
+
+  },
+  
   container: {
     padding: "5rem",
     marginLeft: "15%",
@@ -264,7 +223,7 @@ const styles = {
   },
   chartWrapper: {
     marginBottom: "2rem",
-    width:"70%"
+    width: "70%",
   },
   headerRow: {
     display: "flex",
@@ -289,7 +248,7 @@ const styles = {
     width: "50%",
     position: "relative",
     left: "70%",
-    marginTop: "7%",
+    marginTop: "1%",
   },
   topRow: {
     display: "flex",
@@ -330,38 +289,28 @@ const styles = {
     boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
     cursor: "pointer",
   },
-  toggleContainer: {
-    marginTop: "1rem",
-    textAlign: "center",
-  },
-  toggleButton: {
-    padding: "0.5rem 1rem",
-    backgroundColor: "#007bff",
-    color: "#fff",
-    border: "none",
-    borderRadius: "20px",
+  ProfileCircle: {
+    position: "relative",
+    bottom: "50px",
+    left: "180%",
+    width: "60px",
+    height: "60px",
+    borderRadius: "50%",
+    backgroundColor: "#fff",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
     cursor: "pointer",
   },
   currencySelector: {
-    marginBottom: "1.5rem",
-    display: "flex",
-    alignItems: "center",
+    margin: "2rem 0",
   },
   select: {
     padding: "0.5rem 1rem",
-    border: "1px solid #ccc",
-    borderRadius: "20px",
     fontSize: "1rem",
-  },
-  statsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "20px",
-    marginTop: "2rem",
-  },
-  errorText: {
-    color: "red",
-    marginTop: "1rem",
+    borderRadius: "8px",
+    border: "1px solid #ccc",
   },
 };
 

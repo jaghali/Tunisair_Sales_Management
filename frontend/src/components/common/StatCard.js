@@ -1,58 +1,63 @@
+// StatCard.jsx
+import React from "react";
 import { motion } from "framer-motion";
 
-const StatCard = ({ name, icon: Icon, value, color }) => {
+const StatCard = ({ name, value, icon: Icon, color }) => {
   const cardStyle = {
-    backgroundColor: '#E5E6EB', 
-    backdropFilter: 'blur(10px)',  
-    borderRadius: '1rem',  
-    overflow: 'hidden',
-    boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-    transition: 'transform 0.3s, box-shadow 0.3s',
-  };
-
-  const contentStyle = {
-    padding: '1.25rem',  
-  };
-
-  const nameStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    fontSize: '0.875rem', 
-    color: 'black', 
-  };
-
-  const iconStyle = {
-    marginRight: '0.5rem',
-    fontSize: '1.25rem', 
-    
-  };
-
-  const valueStyle = {
-    marginTop: "30px", 
-    fontSize: "2rem", 
-    fontWeight: "600",
-    color: "black", 
+    position: "relative",
+    width: "15%",
+    padding: "2rem 2.5rem",
+    background: "rgba(0, 0, 0, 0.05)",
+    borderRadius: "1.5rem",
+    backdropFilter: "blur(20px)",
+    border: `1px solid ${color}`,
+    boxShadow: `0 0 20px ${color}33, inset 0 0 10px ${color}22`,
+    color: "black",
     textAlign: "center",
+    overflow: "hidden",
   };
-  
 
-  const hoverStyle = {
-    transform: 'translateY(-5px)',
-    boxShadow: '0px 25px 50px -12px rgba(0, 0, 0, 0.5)',
+  const iconWrapper = {
+    width: "72px",
+    height: "72px",
+    margin: "0 auto",
+    borderRadius: "50%",
+    background: "rgba(255,255,255,0.1)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    boxShadow: `0 0 15px ${color}55, inset 0 0 5px ${color}33`,
+  };
+
+  const titleStyle = {
+    marginTop: "1.5rem",
+    fontSize: "1.25rem",
+    fontWeight: 600,
+    letterSpacing: "0.5px",
+    color:"black"
+  };
+
+  const subtitleStyle = {
+    marginTop: "0.25rem",
+    fontSize: "0.875rem",
+    color: "black",
   };
 
   return (
     <motion.div
       style={cardStyle}
-      whileHover={{ ...hoverStyle }} // Apply hover effect
+      whileHover={{
+        transform: "translateY(-8px)",
+        boxShadow: `0 0 30px ${color}77, inset 0 0 12px ${color}44`,
+      }}
+      transition={{ type: "spring", stiffness: 200, damping: 20 }}
     >
-      <div style={contentStyle}>
-        <span style={nameStyle}>
-          <Icon size={20} style={{ ...iconStyle, color }} />
-          {name}
-        </span>
-        <p style={valueStyle}>{value}</p>
+      <div style={iconWrapper}>
+        <Icon size={32} color={color} />
       </div>
+
+      <h3 style={titleStyle}>{name}</h3>
+      <p style={subtitleStyle}>{value}</p>
     </motion.div>
   );
 };

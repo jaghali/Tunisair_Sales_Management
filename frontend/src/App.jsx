@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, matchPath } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+
 import LoginPage from "./pages/Login";
 import AdminUsers from "./pages/AdminUsers";
 import Contact from "./pages/Contact";
@@ -15,6 +16,7 @@ import Tauxdechange from "./pages/Tauxdechange";
 import Sidebar from "./components/Sidebar";
 import SidebarAgentSaisie from "./components/Sidebaragentsaisie";
 import SidebarFinancier from "./components/SidebarFinancier";
+import UserSidebar from "./components/UserSidebar";
 import VentePage from "./pages/VentePage";
 import VentePageArr from "./pages/VentePageArr";
 import OffrePage from "./pages/OffrePage";
@@ -27,11 +29,13 @@ import ConfrotationOffrePage from "./pages/ConfrotationOffrePage";
 import Avion from "./pages/Avion";
 import Redevance from "./pages/Redevance";
 import Commission from "./pages/Commission";
+import Gemini from "./pages/Gemini";
+import ProfilePage from "./pages/ProfilePage";
 import TrouxCaisse from "./pages/TrouxCaisse";
 import AgentSaisieDashboard from "./pages/AgentSaisieDashboard";
 import Devances from "./pages/Devances";
 import UserInterface from "./pages/UserInterface";
-import UserSidebar from "./components/UserSidebar";
+
 import "./App.css";
 
 function App() {
@@ -50,7 +54,6 @@ function MainLayout() {
     const timer = setTimeout(() => {
       setLoading(false);
     }, 2000);
-
     return () => clearTimeout(timer);
   }, []);
 
@@ -66,7 +69,20 @@ function MainLayout() {
     "/OffrePagearr",
     "/settings",
     "/ConfrontationPage/:id",
-    "/ConfrotationOffrePage"
+    "/ConfrotationOffrePage",
+  ];
+
+  const financierPages = [
+    "/direction-financiere-dashboard",
+    "/Redevance",
+    "/Commission",
+    "/TrouxCaisse",
+    "/Devances",
+  ];
+
+  const userPages = [
+    "/UserInterface/:matricule",
+    "/ProfilePage/:matricule",
   ];
 
   const hideSidebarRoutes = [
@@ -74,38 +90,25 @@ function MainLayout() {
     "/ForgotPasswordPage",
     "/OffrePage",
     "/OffrePagearr",
-    "/ConfrotationOffrePage"
+    "/ConfrotationOffrePage",
   ];
 
-  const FinancierPages = [
-    "/direction-financiere-dashboard",
-    "/Redevance",
-    "/Commission",
-    "/TrouxCaisse",
-    "/Devances"
-  ];
-
-  const isVentePage = matchPath("/ventePage/:id", location.pathname);
-  const isConfrontationPage = matchPath("/ConfrontationPage/:id", location.pathname);
+  const matchAnyPath = (paths) =>
+    paths.some((path) => matchPath({ path, end: false }, location.pathname));
 
   const hideSidebar =
     hideSidebarRoutes.includes(location.pathname) ||
-    matchPath("/ventePage/:id", location.pathname) ||
-    matchPath("/ConfrontationPage/:id", location.pathname) ||
-    matchPath("/ventePagearr/:id", location.pathname);
+    matchPath({ path: "/ventePage/:id", end: false }, location.pathname) ||
+    matchPath({ path: "/ConfrontationPage/:id", end: false }, location.pathname) ||
+    matchPath({ path: "/Gemini", end: true }, location.pathname);
 
-  let sidebarComponent = null;
-  if (!hideSidebar) {
-    if (FinancierPages.includes(location.pathname)) {
-      sidebarComponent = <SidebarFinancier />;
-    } else if (agentSaisiePages.includes(location.pathname)) {
-      sidebarComponent = <SidebarAgentSaisie />;
-    } else if (matchPath("/UserInterface/:matricule", location.pathname)) {
-      sidebarComponent = <UserSidebar />;
-    } else {
-      sidebarComponent = <Sidebar />;
-    }
-  }
+  const sidebarComponent = useMemo(() => {
+    if (hideSidebar) return null;
+    if (matchAnyPath(financierPages)) return <SidebarFinancier />;
+    if (matchAnyPath(agentSaisiePages)) return <SidebarAgentSaisie />;
+    if (matchAnyPath(userPages)) return <UserSidebar />;
+    return <Sidebar />;
+  }, [location.pathname]);
 
   return (
     <div style={styles.layout}>
@@ -162,6 +165,8 @@ function MainLayout() {
               <Route path="/agent-saisie-dashboard" element={<AgentSaisieDashboard />} />
               <Route path="/Devances" element={<Devances />} />
               <Route path="/UserInterface/:matricule" element={<UserInterface />} />
+              <Route path="/ProfilePage/:matricule" element={<ProfilePage />} />
+              <Route path="/Gemini" element={<Gemini />} />
             </Routes>
           </div>
         </div>
@@ -169,7 +174,6 @@ function MainLayout() {
     </div>
   );
 }
-
 const styles = {
   layout: {
     height: "100vh",

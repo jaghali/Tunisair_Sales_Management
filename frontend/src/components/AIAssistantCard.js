@@ -1,7 +1,10 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { useParams, useNavigate } from "react-router-dom";
 
 const AIAssistantCard = () => {
+  const navigate = useNavigate();
+
   const bubbleVariants = {
     animate: {
       scale: [1, 1.3, 1],
@@ -15,7 +18,7 @@ const AIAssistantCard = () => {
   };
 
   return (
-    <div style={styles.card}>
+    <div style={styles.card} onClick={() => navigate(`/Gemini`)}>
       <div style={styles.betaTag}>Beta</div>
 
       <div style={styles.header}>
@@ -53,13 +56,15 @@ const AIAssistantCard = () => {
 
 const styles = {
   card: {
+     cursor:"pointer",
     backgroundColor: "#000002",
     borderRadius: "30px",
+    width:"20%",
     padding: "20px",
     color: "white",
     textAlign: "center",
     boxShadow: "0px 20px 12px rgba(0, 0, 0, 0.1)",
-    position: "relative", // Required for positioning Beta tag
+    position: "relative", 
   },
   betaTag: {
     position: "absolute",

@@ -4,11 +4,14 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+import ContextProvider  from './components/Context';
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <ContextProvider> {/* ✅ Wrap App in the provider */}
+      <App />
+    </ContextProvider>
   </React.StrictMode>
 );
-
 reportWebVitals();
