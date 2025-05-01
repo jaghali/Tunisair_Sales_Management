@@ -148,7 +148,7 @@ const UserInterface = () => {
         <>
           <div style={styles.geminiAi}>
             <div style={styles.topRow}>
-              <label style={styles.label}>Hey, need help?</label>
+              <label style={styles.label}>Hey, need help ?</label>
               <img src={wavingemoji} alt="Waving Emoji" style={styles.iconImage} />
             </div>
             <div style={styles.bottomRow}>
