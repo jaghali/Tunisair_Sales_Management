@@ -131,7 +131,7 @@ const UserInterface = () => {
       <div style={styles.headerRow}>
         <div style={styles.titleBlock}>
           <h1 style={styles.h1}>Financial</h1>
-          <p style={styles.secteur}>Dashboard</p>
+          <p style={styles.secteur}>Dashboards</p>
         </div>
         <div style={styles.nameBlock}>
           <h1 style={styles.h1}>{user ? `${user.prenom} ${user.nom}` : "Utilisateur"}</h1>
