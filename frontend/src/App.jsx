@@ -33,7 +33,7 @@ import Gemini from "./pages/Gemini";
 import ProfilePage from "./pages/ProfilePage";
 import TrouxCaisse from "./pages/TrouxCaisse";
 import AgentSaisieDashboard from "./pages/AgentSaisieDashboard";
-import Devances from "./pages/Devances";
+import Avances from "./pages/Avances";
 import UserInterface from "./pages/UserInterface";
 
 import "./App.css";
@@ -77,7 +77,7 @@ function MainLayout() {
     "/Redevance",
     "/Commission",
     "/TrouxCaisse",
-    "/Devances",
+    "/Avances",
   ];
 
   const userPages = [
@@ -163,7 +163,7 @@ function MainLayout() {
               <Route path="/Commission" element={<Commission />} />
               <Route path="/TrouxCaisse" element={<TrouxCaisse />} />
               <Route path="/agent-saisie-dashboard" element={<AgentSaisieDashboard />} />
-              <Route path="/Devances" element={<Devances />} />
+              <Route path="/Avances" element={<Avances />} />
               <Route path="/UserInterface/:matricule" element={<UserInterface />} />
               <Route path="/ProfilePage/:matricule" element={<ProfilePage />} />
               <Route path="/Gemini" element={<Gemini />} />

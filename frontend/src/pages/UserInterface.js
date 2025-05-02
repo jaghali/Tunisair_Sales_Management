@@ -25,7 +25,9 @@ const UserInterface = () => {
   const [micEnabled, setMicEnabled] = useState(true);
   const recognitionRef = useRef(null);
   const chartRef = useRef(null);
-
+  const [totaleValeur, setTotaleValeur] = useState(0);
+  const [totaleEncaisse, setTotaleEncaisse] = useState(0);
+  
   const currencyChartData = [
     { date: '2021-01', EUR: 1, USD: 1.07, GBP: 0.86, TND: 3.1 },
     { date: '2021-02', EUR: 1, USD: 1.08, GBP: 0.85, TND: 3.2 },
@@ -73,11 +75,33 @@ const UserInterface = () => {
       }
     }
   };
-
+  useEffect(() => {
+    const fetchTotaux = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/entetevente");
+        const data = await res.json();
+  
+        // You may need to compute these if your API returns an array of enteteVente
+        const totalValeur = data.reduce((sum, item) => sum + (item.totaleValeur || 0), 0);
+        const totalEncaisse = data.reduce((sum, item) => sum + (item.totaleEncaisse || 0), 0);
+  
+        setTotaleValeur(totalValeur);
+        setTotaleEncaisse(totalEncaisse);
+      } catch (err) {
+        console.error("Erreur lors de la récupération des totaux:", err);
+      }
+    };
+  
+    fetchTotaux();
+  }, []);
+  
   useEffect(() => {
     const fetchPNInfo = async () => {
       try {
         const res = await fetch(`http://localhost:5000/api/PN/${matricule}`);
+
+        
+
         if (!res.ok) throw new Error("PN not found");
         const data = await res.json();
         setUser(data);
@@ -135,7 +159,7 @@ const UserInterface = () => {
         </div>
         <div style={styles.nameBlock}>
           <h1 style={styles.h1}>{user ? `${user.prenom} ${user.nom}` : "Utilisateur"}</h1>
-          <p style={styles.secteur}>{user?.secteur || ""}</p>
+          <p style={styles.secteur}>{user?.college || ""}</p>
           <div style={styles.ProfileCircle} onClick={() => navigate(`/ProfilePage/${matricule}`)} aria-label="Profile">
             <User size={30} color="#333" />
           </div>
@@ -186,16 +210,16 @@ const UserInterface = () => {
             transition={{ duration: 2, ease: "easeOut" }}
           >
             <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-              <StatCard
-                name="Salaire"
-                icon={PackageSearch}
-                value={new Intl.NumberFormat("en-US", {
-                  style: "currency",
-                  currency: selectedCurrency
-                }).format(user.salaire * conversionRate)}
-                color="#2ecc71"
-              />
-              <StatCard name="Avance" icon={Users} value={user.avance} color="#3498db" />
+            
+            <StatCard
+              name="Trous de Caisse"
+              icon={PackageSearch}
+              value={((totaleValeur - totaleEncaisse) * conversionRate).toFixed(2)}
+              color="#c0392b"
+            />
+
+
+              <StatCard name="Avance" icon={Users} value={user.avance * conversionRate} color="#3498db" />
               <StatCard name="Base" icon={ShoppingBag} value={user.base} color="#e67e22" />
               <AIAssistantCard/>
             </div>

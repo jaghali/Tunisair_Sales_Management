@@ -13,7 +13,8 @@ const DirectionFinanciereDashboard = () => {
   const [view, setView] = useState("gallery");  // State for toggle
   const chartRef = useRef(null);
   const pieChartRef = useRef(null);
-
+  const [totaleValeur, setTotaleValeur] = useState(0);
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -36,7 +37,24 @@ const DirectionFinanciereDashboard = () => {
 
   const commission14 = sumEtatVentesDepart * 0.14;
   const commission1 = (sumEtatVentesDepart * 0.01) + (commission14 / (numberOfEquipage || 1));
-
+  useEffect(() => {
+    const fetchTotaux = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/entetevente");
+        const data = await res.json();
+  
+        // You may need to compute these if your API returns an array of enteteVente
+        const totalValeur = data.reduce((sum, item) => sum + (item.totaleValeur || 0), 0);
+  
+        setTotaleValeur(totalValeur);
+      } catch (err) {
+        console.error("Erreur lors de la récupération des totaux:", err);
+      }
+    };
+  
+    fetchTotaux();
+  }, []);
+  
   useEffect(() => {
     if (!chartRef.current || !pieChartRef.current || groupedData.length === 0) return;
 
@@ -158,22 +176,23 @@ const DirectionFinanciereDashboard = () => {
             <p style={styles.error}>{error}</p>
           ) : (
             <div style={styles.statRow}>
-              <StatCard
-                name="Total Valeur"
+             <StatCard
+                name="Totale Valeur"
                 icon={Wallet}
-                value={`${sumEtatVentesDepart.toFixed(2)} TND`}
-                color="#2ecc71"
-              />
+                value={`${totaleValeur.toFixed(2)} €`}
+                color="#27ae60"
+                />
+              
               <StatCard
                 name="Commission Totale (14%)"
                 icon={Percent}
-                value={`${commission14.toFixed(2)} TND`}
+                value={`${commission14.toFixed(2)} €`}
                 color="#3498db"
               />
               <StatCard
                 name="Commission PNC Vendeur (1%)"
                 icon={User}
-                value={`${commission1.toFixed(2)} TND`}
+                value={`${commission1.toFixed(2)} €`}
                 color="#e67e22"
               />
               <StatCard

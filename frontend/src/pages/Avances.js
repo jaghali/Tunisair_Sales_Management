@@ -152,7 +152,7 @@ const Avances = () => {
         </td>
         <td style={styles.td}>{entete.pnC1}</td>
         <td style={styles.td}>
-          {ecart} EUR
+          {ecart} €
         </td>
         {/* Réduction toujours en Dinar */}
         <td style={styles.td}>
@@ -162,7 +162,7 @@ const Avances = () => {
         {/* Avance restante aussi en Dinar */}
         <td style={styles.td}>
           {avanceRestanteEnTND !== null
-            ? `${avanceRestanteEnTND.toFixed(2)} TND`
+            ? `${avanceRestanteEnTND.toFixed(2)} €`
             : "N/A"}
         </td>
 
