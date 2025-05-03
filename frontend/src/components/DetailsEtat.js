@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
 import { Edit, Trash, Save, X, Plus } from "lucide-react";
 import { motion } from 'framer-motion';
-import { Euro } from "lucide-react";
+import { useCurrency } from "../pages/CurrencyContext";
 
 const DetailsEtat = () => {
   const { id } = useParams(); // Get the ID from the URL
@@ -13,8 +13,23 @@ const DetailsEtat = () => {
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(null);
   const [editedItem, setEditedItem] = useState(null);
-
   const navigate = useNavigate();
+  function getCurrencySymbol(code) {
+    switch (code) {
+      case "TND":
+        return "DT";
+      case "USD":
+        return "$";
+      case "EUR":
+        return "€";
+      case "GBP":
+        return "£";
+      default:
+        return code;
+    }
+  }
+  const { currency } = useCurrency();
+  const symbol = getCurrencySymbol(currency);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -100,7 +115,7 @@ const DetailsEtat = () => {
                     ) : (
                       field === 'totaleEncaisse' ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          {data[field]} <Euro size={16} color="#4a4a4a" />
+                          {data[field]} {symbol}
                         </div>
                       ) : (
                         data[field]

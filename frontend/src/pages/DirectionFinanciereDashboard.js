@@ -4,6 +4,7 @@ import * as echarts from "echarts";
 import { Wallet, Percent, User, Users, GridIcon, LineChartIcon } from "lucide-react";  
 import StatCard from "../components/common/StatCard";
 import { motion } from "framer-motion"; // Import motion
+import { useCurrency } from "../pages/CurrencyContext";
 
 const DirectionFinanciereDashboard = () => {
   const [groupedData, setGroupedData] = useState([]);
@@ -11,10 +12,25 @@ const DirectionFinanciereDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [view, setView] = useState("gallery");  // State for toggle
+  const [selectedMonth, setSelectedMonth] = useState("");
   const chartRef = useRef(null);
   const pieChartRef = useRef(null);
-  const [totaleValeur, setTotaleValeur] = useState(0);
-  
+  function getCurrencySymbol(code) {
+    switch (code) {
+      case "TND":
+        return "DT";
+      case "USD":
+        return "$";
+      case "EUR":
+        return "€";
+      case "GBP":
+        return "£";
+      default:
+        return code;
+    }
+  }
+  const { currency } = useCurrency();
+  const symbol = getCurrencySymbol(currency);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -31,29 +47,20 @@ const DirectionFinanciereDashboard = () => {
     };
     fetchData();
   }, []);
+  const handleMonthChange = (e) => {
+    setSelectedMonth(e.target.value);
+  };
 
-  const sumEtatVentesDepart = groupedData.reduce((acc, curr) => acc + curr.totalValeur, 0);
+  const selectedYear = selectedMonth ? parseInt(selectedMonth.split("-")[0]) : null;
+  const selectedMonthNumber = selectedMonth ? parseInt(selectedMonth.split("-")[1]) : null;
+  const totalValeurForSelectedMonth = groupedData
+  .filter((item) => item.annee === selectedYear && item.mois === selectedMonthNumber)
+  .reduce((acc, item) => acc + item.totalValeur, 0);
+
   const numberOfEquipage = equipageData.length;
 
-  const commission14 = sumEtatVentesDepart * 0.14;
-  const commission1 = (sumEtatVentesDepart * 0.01) + (commission14 / (numberOfEquipage || 1));
-  useEffect(() => {
-    const fetchTotaux = async () => {
-      try {
-        const res = await fetch("http://localhost:5000/api/entetevente");
-        const data = await res.json();
-  
-        // You may need to compute these if your API returns an array of enteteVente
-        const totalValeur = data.reduce((sum, item) => sum + (item.totaleValeur || 0), 0);
-  
-        setTotaleValeur(totalValeur);
-      } catch (err) {
-        console.error("Erreur lors de la récupération des totaux:", err);
-      }
-    };
-  
-    fetchTotaux();
-  }, []);
+  const commission14 = totalValeurForSelectedMonth * 0.14;
+  const commission1 = (totalValeurForSelectedMonth * 0.01) + (commission14 / (numberOfEquipage || 1));
   
   useEffect(() => {
     if (!chartRef.current || !pieChartRef.current || groupedData.length === 0) return;
@@ -157,6 +164,7 @@ const DirectionFinanciereDashboard = () => {
 
   return (
     <div style={styles.pageContainer}>
+      
       <motion.div 
         style={styles.cardContainer}
         initial={{ opacity: 0 }}
@@ -170,6 +178,21 @@ const DirectionFinanciereDashboard = () => {
           transition={{ duration: 0.5 }}
         >
           <h1 style={styles.title}>Overview Page</h1>
+          <div style={styles.monthSelectorWrapper}>
+  <div style={styles.monthSelector}>
+    <label htmlFor="month" style={styles.monthLabel}>
+      📅 Choisir un mois :
+    </label>
+    <input
+      type="month"
+      id="month"
+      onChange={handleMonthChange}
+      value={selectedMonth}
+      style={styles.monthInput}
+    />
+  </div>
+</div>
+
           {loading ? (
             <p style={styles.loading}>Chargement...</p>
           ) : error ? (
@@ -179,20 +202,20 @@ const DirectionFinanciereDashboard = () => {
              <StatCard
                 name="Totale Valeur"
                 icon={Wallet}
-                value={`${totaleValeur.toFixed(2)} €`}
+                value={`${totalValeurForSelectedMonth.toFixed(2)} ${symbol}`}
                 color="#27ae60"
                 />
               
               <StatCard
                 name="Commission Totale (14%)"
                 icon={Percent}
-                value={`${commission14.toFixed(2)} €`}
+                value={`${commission14.toFixed(2)} ${symbol}`}
                 color="#3498db"
               />
               <StatCard
                 name="Commission PNC Vendeur (1%)"
                 icon={User}
-                value={`${commission1.toFixed(2)} €`}
+                value={`${commission1.toFixed(2)} ${symbol}`}
                 color="#e67e22"
               />
               <StatCard
@@ -292,6 +315,37 @@ const DirectionFinanciereDashboard = () => {
 };
 
 const styles = {
+  monthSelectorWrapper: {
+    position: "fixed",      // reste en haut à droite
+    top: "20px",
+    right: "20px",
+    zIndex: 1000,           // reste au-dessus des autres éléments
+  },
+  
+  monthSelector: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    backgroundColor: "#fff",
+    padding: "10px 15px",
+    borderRadius: "8px",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
+  },
+  
+  monthLabel: {
+    fontWeight: "600",
+    color: "#2c3e50",
+    fontSize: "14px",
+  },
+  
+  monthInput: {
+    padding: "6px 10px",
+    fontSize: "14px",
+    borderRadius: "5px",
+    border: "1px solid #ccc",
+    outline: "none",
+  },
+  
   pageContainer: {
     minHeight: "100vh",
     backgroundColor: "#f4f6f8",

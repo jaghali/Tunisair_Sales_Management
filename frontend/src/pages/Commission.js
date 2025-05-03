@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-
+import { useCurrency } from "../pages/CurrencyContext";
 const Commission = () => {
   const [groupedData, setGroupedData] = useState([]);
   const [equipageData, setEquipageData] = useState([]);
@@ -10,9 +10,25 @@ const Commission = () => {
   const [selectedMonth, setSelectedMonth] = useState("");
   const [activeDetails, setActiveDetails] = useState(null);
   const [entetes, setEntetes] = useState([]);
-
   const chartRef = useRef(null);
   const pieChartRef = useRef(null);
+  function getCurrencySymbol(code) {
+        switch (code) {
+          case "TND":
+            return "DT";
+          case "USD":
+            return "$";
+          case "EUR":
+            return "€";
+          case "GBP":
+            return "£";
+          default:
+            return code;
+        }
+      }
+      const { currency } = useCurrency();
+      const symbol = getCurrencySymbol(currency);
+  
 
   const filteredGroupedData = selectedMonth
   ? groupedData.filter(item => {
@@ -110,7 +126,7 @@ const sumFilteredEtatVentes = filteredEtatVentes.reduce((acc, curr) => acc + cur
                 <th style={styles.th}>Matricule</th>
                 <th style={styles.th}>PNC</th>
                 <th style={styles.th}>Statut</th>
-                <th style={styles.th}>Commission (€)</th>
+                <th style={styles.th}>Commission {symbol}</th>
                 <th style={styles.th}>Détails</th>
               </tr>
             </thead>
@@ -131,7 +147,7 @@ const sumFilteredEtatVentes = filteredEtatVentes.reduce((acc, curr) => acc + cur
                       <td style={styles.td}>{e.matricule}</td>
                       <td style={styles.td}>{e.pnc}</td>
                       <td style={styles.td}>{status}</td>
-                      <td style={styles.td}>{commission}</td>
+                      <td style={styles.td}>{commission} {symbol}</td>
                       <td style={styles.td}>
                      <button
                      style={{ padding: "5px 10px", cursor: "pointer" }}
@@ -160,7 +176,7 @@ const sumFilteredEtatVentes = filteredEtatVentes.reduce((acc, curr) => acc + cur
               <tr key={j}>
                 <td style={styles.td}>{entete.numerO_ETAT}</td>
                 <td style={styles.td}>{entete.datE_EDITION}</td>
-                <td style={styles.td}>{(entete.totaleEncaisse * 0.14 / (numberOfFilteredEquipage || 1)).toFixed(2)}</td>
+                <td style={styles.td}>{(entete.totaleEncaisse * 0.14 / (numberOfFilteredEquipage || 1)).toFixed(2)} {symbol}</td>
               </tr>
             ))}
           </tbody>

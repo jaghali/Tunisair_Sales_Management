@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
+import { useCurrency } from "../pages/CurrencyContext";
 import {
   Button,
   Dialog,
@@ -22,6 +23,22 @@ const EnteteVente = () => {
   const [editedItem, setEditedItem] = useState(null);
   const [openForm, setOpenForm] = useState(false);
   const [etatVenteArrivee, setEtatVenteDepart] = useState([]);
+  function getCurrencySymbol(code) {
+        switch (code) {
+          case "TND":
+            return "DT";
+          case "USD":
+            return "$";
+          case "EUR":
+            return "€";
+          case "GBP":
+            return "£";
+          default:
+            return code;
+        }
+      }
+      const { currency } = useCurrency();
+      const symbol = getCurrencySymbol(currency);
 
   const [newItem, setNewItem] = useState({
     fournisseur: "",
@@ -193,7 +210,7 @@ const EnteteVente = () => {
                     <td style={styles.cell}>{row.datE_EDITION}</td>
                     <td style={styles.cell}>{row.numerO_ETAT}</td>
                     <td style={styles.cell}>{row.pnC1}</td>
-                    <td style={styles.cell}>{row.totaleValeur}<Euro size={15}/></td>
+                    <td style={styles.cell}>{row.totaleValeur} {symbol}</td>
                     <td style={styles.cell}>
                       {isEditing === row.id ? (
                         <TextField
@@ -204,7 +221,7 @@ const EnteteVente = () => {
                         />
                       ) : (
                         parseFloat(row.totaleEncaisse).toFixed(2)
-                      )}    <Euro size={15}/>
+                      )} {symbol}
 
                     </td>
                     <td style={styles.cell}>

@@ -17,6 +17,7 @@ const EnteteVenteArr = () => {
   
   const [newItem, setNewItem] = useState({ fournisseur: "", airoport: "", datE_EDITION: "", numerO_ETAT: "",fL01:"" ,fL02:"" , fL03:"",cC1:"", pnC1: "" , noM1:"" ,noM2:"" , cC2:""  , pnC2: "" ,agenT_SAISIE: "" });
   const navigate = useNavigate();
+  
 
   useEffect(() => {
     const fetchData = async () => {

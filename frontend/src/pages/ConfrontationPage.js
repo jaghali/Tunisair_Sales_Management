@@ -4,6 +4,7 @@ import { Box, Typography, Table, TableHead, TableRow, TableCell, TableBody, Pape
 import { useParams } from 'react-router-dom';
 import {  Undo2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useCurrency } from "../pages/CurrencyContext";
 
 const Confrontation = () => {
   const [etatVenteDepart, setEtatVenteDepart] = useState([]);
@@ -13,7 +14,22 @@ const Confrontation = () => {
   const [selectedStatus, setSelectedStatus] = useState(""); // Statut global sélectionné
   const [confrontationData, setConfrontationData] = useState([]);
   const navigate = useNavigate();
-
+  function getCurrencySymbol(code) {
+    switch (code) {
+      case "TND":
+        return "DT";
+      case "USD":
+        return "$";
+      case "EUR":
+        return "€";
+      case "GBP":
+        return "£";
+      default:
+        return code;
+    }
+  }
+  const { currency } = useCurrency();
+  const symbol = getCurrencySymbol(currency);
   const { id } = useParams(); // ID de EnteteVente
 
   useEffect(() => {
@@ -103,13 +119,13 @@ const Confrontation = () => {
       {/* Totaux globaux dans des Box Material UI */}
       <Box display="flex" flexDirection="row" gap={5} justifyContent="center">
         <Box display="flex" alignItems="center" justifyContent="center" p={2} bgcolor="#f5f5f5" borderRadius={2} boxShadow={2} width={200} minHeight={60}>
-          <Typography variant="h6" color="primary">Total Tunisair: {totalDepart}</Typography>
+          <Typography variant="h6" color="primary">Total Tunisair: {totalDepart} {symbol}</Typography>
         </Box>
         <Box display="flex" alignItems="center" justifyContent="center" p={2} bgcolor="#f5f5f5" borderRadius={2} boxShadow={2} width={200} minHeight={60}>
-          <Typography variant="h6" color="secondary">Total Fournisseur: {totalArrivee}</Typography>
+          <Typography variant="h6" color="secondary">Total Fournisseur: {totalArrivee} {symbol}</Typography>
         </Box>
         <Box display="flex" alignItems="center" justifyContent="center" p={2} bgcolor="#f5f5f5" borderRadius={2} boxShadow={2} width={200} minHeight={60}>
-          <Typography variant="h6" color="primary">Ecart: {difference}</Typography>
+          <Typography variant="h6" color="primary">Ecart: {difference} {symbol}</Typography>
         </Box>
       </Box>
 

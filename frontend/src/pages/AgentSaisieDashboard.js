@@ -4,7 +4,7 @@ import * as echarts from "echarts";
 import { Wallet, Users, LineChartIcon } from "lucide-react";  
 import StatCard from "../components/common/StatCard";
 import { motion } from "framer-motion";
-
+import { useCurrency } from "../pages/CurrencyContext";
 const AgentSaisieDashboard = () => {
   const [groupedData, setGroupedData] = useState([]);
   const [equipageData, setEquipageData] = useState([]);
@@ -13,6 +13,22 @@ const AgentSaisieDashboard = () => {
   const [view, setView] = useState("line"); // Only line chart now
   const chartRef = useRef(null);
   const pieChartRef = useRef(null);
+   function getCurrencySymbol(code) {
+        switch (code) {
+          case "TND":
+            return "DT";
+          case "USD":
+            return "$";
+          case "EUR":
+            return "€";
+          case "GBP":
+            return "£";
+          default:
+            return code;
+        }
+      }
+      const { currency } = useCurrency();
+      const symbol = getCurrencySymbol(currency);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -147,7 +163,7 @@ const AgentSaisieDashboard = () => {
               <StatCard
                 name="Total Valeur"
                 icon={Wallet}
-                value={`${sumEtatVentesDepart.toFixed(2)} TND`}
+                value={`${sumEtatVentesDepart.toFixed(2)} ${symbol}`}
                 color="#2ecc71"
               />
               <StatCard

@@ -25,6 +25,7 @@
     "@fullcalendar/core": "^6.1.15",
     "@fullcalendar/daygrid": "^6.1.15",
     "@fullcalendar/react": "^6.1.15",
+    "@google/generative-ai": "^0.24.1",
     "@heroui/pagination": "^2.2.13",
     "@lottiefiles/dotlottie-react": "^0.12.3",
     "@mantine/core": "^7.17.4",

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
+import { useCurrency } from "../pages/CurrencyContext";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -22,6 +23,22 @@ const Redevance = () => {
   const [error, setError] = useState(null);
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);
+  function getCurrencySymbol(code) {
+        switch (code) {
+          case "TND":
+            return "DT";
+          case "USD":
+            return "$";
+          case "EUR":
+            return "€";
+          case "GBP":
+            return "£";
+          default:
+            return code;
+        }
+      }
+      const { currency } = useCurrency();
+      const symbol = getCurrencySymbol(currency);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -122,15 +139,15 @@ const Redevance = () => {
                 <div style={styles.dataSection}>
                   <p style={styles.dataText}>
                     <strong>Total Valeur pour le mois sélectionné :</strong>{" "}
-                    {totalValeurForSelectedMonth.toFixed(2)} TND
+                    {totalValeurForSelectedMonth.toFixed(2)} {symbol}
                   </p>
                   <p style={styles.dataText}>
                     <strong>Redevance (85%) :</strong>{" "}
-                    {(totalValeurForSelectedMonth * 0.85).toFixed(2)} TND
+                    {(totalValeurForSelectedMonth * 0.85).toFixed(2)} {symbol}
                   </p>
                   <p style={styles.dataText}>
                     <strong>Retenue (15%) :</strong>{" "}
-                    {(totalValeurForSelectedMonth * 0.15).toFixed(2)} TND
+                    {(totalValeurForSelectedMonth * 0.15).toFixed(2)} {symbol}
                   </p>
                 </div>
               )}

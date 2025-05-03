@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, matchPath } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
-
+import { CurrencyProvider } from "./pages/CurrencyContext";
 import LoginPage from "./pages/Login";
 import AdminUsers from "./pages/AdminUsers";
 import Contact from "./pages/Contact";
@@ -40,9 +40,11 @@ import "./App.css";
 
 function App() {
   return (
+    <CurrencyProvider>
     <Router>
       <MainLayout />
     </Router>
+    </CurrencyProvider>
   );
 }
 

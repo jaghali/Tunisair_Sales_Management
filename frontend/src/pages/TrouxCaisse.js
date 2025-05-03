@@ -1,10 +1,26 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+import { useCurrency } from "../pages/CurrencyContext";
 const TrouxCaisse = () => {
   const [groupedData, setGroupedData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  function getCurrencySymbol(code) {
+      switch (code) {
+        case "TND":
+          return "DT";
+        case "USD":
+          return "$";
+        case "EUR":
+          return "€";
+        case "GBP":
+          return "£";
+        default:
+          return code;
+      }
+    }
+    const { currency } = useCurrency();
+    const symbol = getCurrencySymbol(currency);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,10 +73,10 @@ const TrouxCaisse = () => {
                         {new Date(entete.datE_EDITION).toLocaleDateString("fr-FR")}
                       </td>
                       <td style={styles.td}>{entete.pnC1}</td>
-                      <td style={styles.td}>{entete.totaleValeur}</td>
-                      <td style={styles.td}>{entete.totaleEncaisse}</td>
+                      <td style={styles.td}>{entete.totaleValeur} {symbol}</td>
+                      <td style={styles.td}>{entete.totaleEncaisse} {symbol}</td>
                       <td style={{ ...styles.td, color: ecart < 0 ? "green" : "red" }}>
-                        {ecart}
+                        {ecart} {symbol}
                       </td>
                     </tr>
                   );

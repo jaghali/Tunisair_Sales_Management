@@ -20,6 +20,7 @@ const VentePage = () => {
   const [pncs, setPncs] = useState([]);
   const navigate = useNavigate();
   const { id } = useParams();
+  
 
   useEffect(() => {
     const fetchData = async () => {

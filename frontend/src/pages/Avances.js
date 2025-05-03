@@ -1,5 +1,34 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useCurrency } from "../pages/CurrencyContext";
+function getCurrencySymbol(code) {
+  switch (code) {
+    case "TND":
+      return "DT";
+    case "USD":
+      return "$";
+    case "EUR":
+      return "€";
+    case "GBP":
+      return "£";
+    default:
+      return code;
+  }
+}
+function getCurrencyTaux(code) {
+  switch (code) {
+    case "TND":
+      return 1;
+    case "USD":
+      return 2.97;
+    case "EUR":
+      return 3.37;
+    case "GBP":
+      return 3,96;
+    default:
+      return code;
+  }
+}
 
 const Avances = () => {
   const [enteteVentes, setEnteteVentes] = useState([]);
@@ -9,7 +38,9 @@ const Avances = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(""); // ex: "2025-04"
-
+  const { currency } = useCurrency();
+  const symbol = getCurrencySymbol(currency);
+  const taux = getCurrencyTaux(currency);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,26 +75,6 @@ const Avances = () => {
     return yearMonth === selectedMonth;
   });
 
-
-  const getTauxEtDeviseCode = (deviseId, dateEtat) => {
-    const dateRef = new Date(dateEtat);
-
-    const tauxDisponible = tauxChange
-      .filter((t) => t.deviseId === deviseId)
-      .sort((a, b) => {
-        const diffA = Math.abs(new Date(a.date) - dateRef);
-        const diffB = Math.abs(new Date(b.date) - dateRef);
-        return diffA - diffB;
-      })[0];
-
-    const devise = devises.find((d) => d.id === deviseId);
-
-    return {
-      taux: tauxDisponible?.valeur ?? 1,
-      code: devise?.code ?? "???",
-    };
-  };
-
   const getAvanceForPN = (matricule) => {
     return pnList.find((pn) => pn.matricule === matricule)?.avance ?? null;
   };
@@ -77,7 +88,7 @@ const Avances = () => {
       const multipleDeCinq = Math.floor(ecart / 5) * 5;
       const avance = getAvanceForPN(entete.pnC1);
       const avanceRestante = avance !== null ? avance - multipleDeCinq : null;
-      const ecartEnTND = ecart / 0.29;
+      const ecartEnTND = ecart * taux;
       const avanceRestanteEnTND = avanceRestante !== null ? avanceRestante : null;
   
       const line = `${entete.numerO_ETAT} | ${new Date(entete.datE_EDITION).toLocaleDateString("fr-FR")} | ${entete.pnC1} | ${ecartEnTND.toFixed(2)} | ${avanceRestanteEnTND !== null ? avanceRestanteEnTND.toFixed(2) : "N/A"} | ${(ecart - multipleDeCinq).toFixed(2)}\n`;
@@ -125,7 +136,7 @@ const Avances = () => {
                   <th style={styles.th}>État N°</th>
                   <th style={styles.th}>Date</th>
                   <th style={styles.th}>PNC</th>
-                  <th style={styles.th}>Trous de caisse en Euro</th>
+                  <th style={styles.th}>Trous de caisse</th>
                   <th style={styles.th}>Réduction</th>
                   <th style={styles.th}>Avance Aprés Réduction (x5)</th>
                   <th style={styles.th}>Reste De L'Ecart</th>
@@ -138,10 +149,8 @@ const Avances = () => {
     const avance = getAvanceForPN(entete.pnC1);
     const avanceRestante = avance !== null ? avance - multipleDeCinq : null;
 
-    const { taux } = getTauxEtDeviseCode(entete.deviseId, entete.datE_EDITION);
-
     // Conversion en Dinar
-    const ecartEnTND = ecart / 0.29;
+    const ecartEnTND = ecart * taux;
     const avanceRestanteEnTND = avanceRestante !== null ? avanceRestante : null; // avance est déjà en TND
 
     return (
@@ -152,11 +161,11 @@ const Avances = () => {
         </td>
         <td style={styles.td}>{entete.pnC1}</td>
         <td style={styles.td}>
-          {ecart} €
+          {ecart.toFixed(2)} {symbol}
         </td>
         {/* Réduction toujours en Dinar */}
         <td style={styles.td}>
-          {ecartEnTND.toFixed(2)} TND
+          {ecartEnTND.toFixed(2)} {'TND'}
         </td>
 
         {/* Avance restante aussi en Dinar */}

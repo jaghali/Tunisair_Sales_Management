@@ -1,12 +1,28 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Box, Typography, Table, TableHead, TableRow, TableCell, TableBody, Paper, TablePagination } from "@mui/material";
-
+import { useCurrency } from "../pages/CurrencyContext";
 const ConfrotationOffrePage = () => {
   const [etatOffresDepart, setEtatOffresDepart] = useState([]);
   const [etatOffresArrivee, setEtatOffresArrivee] = useState([]);
   const [page, setPage] = useState(0); // Current page
   const [rowsPerPage, setRowsPerPage] = useState(5); // Rows per page
+  function getCurrencySymbol(code) {
+      switch (code) {
+        case "TND":
+          return "DT";
+        case "USD":
+          return "$";
+        case "EUR":
+          return "€";
+        case "GBP":
+          return "£";
+        default:
+          return code;
+      }
+    }
+    const { currency } = useCurrency();
+    const symbol = getCurrencySymbol(currency);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,15 +76,15 @@ const ConfrotationOffrePage = () => {
 <div>
   <Box display="flex" flexDirection="row" gap={5} justifyContent="center">
     <Box display="flex" alignItems="center" justifyContent="center" p={2} bgcolor="#f5f5f5" borderRadius={2} boxShadow={2} width={200} minHeight={60}>
-      <Typography variant="h6" color="primary">Total Départ: {totalDepart}</Typography>
+      <Typography variant="h6" color="primary">Total Départ: {totalDepart} {symbol}</Typography>
     </Box>
 
     <Box display="flex" alignItems="center" justifyContent="center" p={2} bgcolor="#f5f5f5" borderRadius={2} boxShadow={2} width={200} minHeight={60}>
-      <Typography variant="h6" color="secondary">Total Arrivée: {totalArrivee}</Typography>
+      <Typography variant="h6" color="secondary">Total Arrivée: {totalArrivee} {symbol}</Typography>
     </Box>
 
     <Box display="flex" alignItems="center" justifyContent="center" p={2} bgcolor="#f5f5f5" borderRadius={2} boxShadow={2} width={200} minHeight={60}>
-      <Typography variant="h6" color="primary">Ecart: {difference}</Typography>
+      <Typography variant="h6" color="primary">Ecart: {difference} {symbol}</Typography>
     </Box>
   </Box>
 </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { ArrowLeftRight } from "lucide-react";
+import { useCurrency } from "../pages/CurrencyContext";
 import {
   IconButton,
   Dialog,
@@ -122,7 +123,6 @@ function UpdateDeviseForm({ formData, onChange, onCancel, onSubmit }) {
 }
 
 export default function Devise() {
-  const [currency, setCurrency] = useState("TND"); // trimestre selection
   const [converterCurrency, setConverterCurrency] = useState("TND"); // convertisseur
   const [rate, setRate] = useState(null);
   const [amount, setAmount] = useState(1);
@@ -131,6 +131,7 @@ export default function Devise() {
   const [editData, setEditData] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
+  const { currency, setCurrency } = useCurrency(); 
 
   const API_URL = "http://localhost:5000/api/Devise";
 
@@ -145,6 +146,11 @@ export default function Devise() {
   const loadDevises = async () => {
     const res = await axios.get(API_URL);
     setDevises(res.data);
+  };
+  
+  const handleCurrencyChange = (event) => {
+    const selected = event.target.value;
+    setCurrency(selected); // met à jour dans context + localStorage
   };
 
   const handleAdd = async (data) => {
@@ -168,11 +174,6 @@ export default function Devise() {
 
   const handleCancelUpdate = () => setEditData(null);
 
-  const handleCurrencyChange = (event) => {
-    const selectedCurrency = event.target.value;
-    setCurrency(selectedCurrency);
-    localStorage.setItem("trimesterCurrency", selectedCurrency);
-  };
 
   useEffect(() => {
     axios
