@@ -26,7 +26,7 @@ import { Edit, Delete } from '@mui/icons-material';
 const Tauxdechange = () => {
     const [tauxChanges, setTauxChanges] = useState([]);
     const [devises, setDevises] = useState([]);
-    const [formData, setFormData] = useState({ valeur: '', date: '', deviseId: '' });
+    const [formData, setFormData] = useState({ valeur:'', date: '', deviseId: '' });
     const [editingId, setEditingId] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -60,16 +60,24 @@ const Tauxdechange = () => {
         e.preventDefault();
         setLoading(true);
         const dataToSubmit = { 
-            ...formData, 
-            date: formData.date ? new Date(formData.date).toISOString() : '' 
+            valeur: parseFloat(formData.valeur),
+            date: formData.date ? new Date(formData.date).toISOString() : '',
+            deviseId: parseInt(formData.deviseId)
         };
-    
+        const dataToEdit = { 
+            id: editingId, 
+            valeur: parseFloat(formData.valeur),
+            date: formData.date ? new Date(formData.date).toISOString() : '',
+            deviseId: parseInt(formData.deviseId)
+        };
+
         const request = editingId 
-            ? axios.put(`${apiUrl}/${editingId}`, dataToSubmit) 
+            ? axios.put(`${apiUrl}/${editingId}`,dataToEdit ) 
             : axios.post(apiUrl, dataToSubmit);
     
         request
             .then(response => {
+                console.log("Réponse du backend:", response.data);
                 const updatedTauxChanges = editingId
                     ? tauxChanges.map(t =>
                         t.id === editingId ? { ...dataToSubmit, id: editingId } : t
@@ -105,7 +113,7 @@ const Tauxdechange = () => {
     const handleEdit = (taux) => {
         setFormData({
             valeur: taux.valeur,
-            date: taux.date.split('T')[0], // Only get the date part of the string
+            date: taux.date ? taux.date.split('T')[0] : '', // Only get the date part of the string
             deviseId: taux.deviseId
         });
         setEditingId(taux.id);
@@ -198,7 +206,7 @@ const Tauxdechange = () => {
                             {tauxChanges.map((taux) => (
                                 <TableRow key={taux.id}>
                                     <TableCell>{taux.valeur}</TableCell>
-                                    <TableCell>{taux.date}</TableCell>
+                                    <TableCell>{new Date(taux.date).toLocaleDateString()}</TableCell>
                                     <TableCell>{getDeviseNom(taux.deviseId)}</TableCell>
                                     <TableCell align="right">
                                         <Button

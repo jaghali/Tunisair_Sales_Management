@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TunisairSalesManagement.Data;
 
@@ -11,9 +12,11 @@ using TunisairSalesManagement.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250504081840_notObligationDevise")]
+    partial class notObligationDevise
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -545,15 +548,6 @@ namespace backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("EnteteVenteID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
                     b.Property<int>("QuantiteDotation")
                         .HasColumnType("int");
 
@@ -567,8 +561,6 @@ namespace backend.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Code");
-
-                    b.HasIndex("EnteteVenteID");
 
                     b.ToTable("EtatOffresArrivee");
                 });
@@ -582,15 +574,6 @@ namespace backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("EnteteVenteID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
                     b.Property<int>("QuantiteDotation")
                         .HasColumnType("int");
 
@@ -604,8 +587,6 @@ namespace backend.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Code");
-
-                    b.HasIndex("EnteteVenteID");
 
                     b.ToTable("EtatOffresDepart");
                 });
@@ -968,28 +949,6 @@ namespace backend.Migrations
                         .IsRequired();
 
                     b.Navigation("Fournisseur");
-                });
-
-            modelBuilder.Entity("TunisairSalesManagement.Models.EtatOffresArrivee", b =>
-                {
-                    b.HasOne("TunisairSalesManagement.Models.EnteteVente", "EnteteVente")
-                        .WithMany()
-                        .HasForeignKey("EnteteVenteID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("EnteteVente");
-                });
-
-            modelBuilder.Entity("TunisairSalesManagement.Models.EtatOffresDepart", b =>
-                {
-                    b.HasOne("TunisairSalesManagement.Models.EnteteVente", "EnteteVente")
-                        .WithMany()
-                        .HasForeignKey("EnteteVenteID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("EnteteVente");
                 });
 
             modelBuilder.Entity("TunisairSalesManagement.Models.EtatVentesArrivee", b =>

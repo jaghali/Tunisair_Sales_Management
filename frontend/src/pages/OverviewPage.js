@@ -12,6 +12,18 @@ const OverviewPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const chartRef = useRef(null);
+  const [chartData, setChartData] = useState([]);
+
+useEffect(() => {
+  if (!loading && !error) {
+    setChartData([
+      { value: articleCount, name: "Articles" },
+      { value: fournisseurCount, name: "Fournisseurs" },
+      { value: pnCount, name: "PN" },
+    ]);
+  }
+}, [articleCount, fournisseurCount, pnCount, loading, error]);
+
 
   useEffect(() => {
     const fetchCounts = async () => {
@@ -36,11 +48,15 @@ const OverviewPage = () => {
   }, []);
 
   useEffect(() => {
-    if (!chartRef.current) return;
-
+    if (!chartRef.current || chartData.length === 0) return;
+  
     const chart = echarts.init(chartRef.current);
     const option = {
-      legend: { top: "bottom" },
+      legend: {
+        orient: "verticale",
+        bottom: 0, 
+        left: "left"
+      },     
       toolbox: {
         show: true,
         feature: {
@@ -52,29 +68,21 @@ const OverviewPage = () => {
       },
       series: [
         {
-          name: "Nightingale Chart",
+          name: "Répartition",
           type: "pie",
           radius: [50, 250],
           center: ["50%", "50%"],
           roseType: "area",
           itemStyle: { borderRadius: 8 },
-          data: [
-            { value: 40, name: "rose 1" },
-            { value: 38, name: "rose 2" },
-            { value: 32, name: "rose 3" },
-            { value: 30, name: "rose 4" },
-            { value: 28, name: "rose 5" },
-            { value: 26, name: "rose 6" },
-            { value: 22, name: "rose 7" },
-            { value: 18, name: "rose 8" },
-          ],
+          data: chartData, // ici on remplace
         },
       ],
     };
-
+  
     chart.setOption(option);
     return () => chart.dispose();
-  }, []);
+  }, [chartData]); // dépendance ajoutée
+  
 
   const animateCount = (setState, targetValue) => {
     let start = 0;
@@ -123,6 +131,7 @@ const OverviewPage = () => {
 
         {/* Nightingale Pie Chart */}
         <div ref={chartRef} style={{ height: "500px", width: "100%", marginTop: "40px" }} />
+        
       </main>
     </div>
   );

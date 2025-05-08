@@ -52,7 +52,14 @@ public class TauxChangeController : ControllerBase
         if (id != tauxChange.Id)
             return BadRequest("ID mismatch");
 
-        _context.Entry(tauxChange).State = EntityState.Modified;
+        var existingTaux = await _context.TauxChange.FindAsync(id);
+        if (existingTaux == null)
+        return NotFound();
+
+        // Mise à jour des champs
+        existingTaux.Valeur = tauxChange.Valeur;
+        existingTaux.Date = tauxChange.Date;
+        existingTaux.DeviseId = tauxChange.DeviseId;
         await _context.SaveChangesAsync();
 
         return NoContent();

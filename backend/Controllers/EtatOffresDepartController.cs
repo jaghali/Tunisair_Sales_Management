@@ -22,7 +22,11 @@ namespace TunisairSalesManagement.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<EtatOffresDepart>>> GetEtatOffresDepart()
         {
-            var etatOffresDepart = await _context.EtatOffresDepart.ToListAsync();
+            var etatOffresDepart = await _context.EtatOffresDepart
+            .AsNoTracking()
+            .OrderBy(e => e.EnteteVenteID)
+            .ThenBy(e => e.Code)
+            .ToListAsync();
             return Ok(etatOffresDepart);
         }
 

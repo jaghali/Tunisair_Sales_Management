@@ -13,6 +13,23 @@ const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
+    // Fonction pour décoder le JWT et extraire les informations
+    function parseJwt(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(
+                atob(base64)
+                    .split('')
+                    .map(c => `%${('00' + c.charCodeAt(0).toString(16)).slice(-2)}`)
+                    .join('')
+            );
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            return null;
+        }
+    }
+
     const handleLogin = async (e) => {
         e.preventDefault();
         setErrorMessage("");
@@ -23,7 +40,17 @@ const LoginPage = () => {
             });
 
             if (response.data.token) {
+                // Stocker le token dans localStorage
+                const token = response.data.token;
                 localStorage.setItem("token", response.data.token);
+
+                // Décoder le token et extraire le rôle
+                const decodedToken = parseJwt(token);
+                const role = decodedToken?.["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+                // Assurez-vous que "role" est le bon nom de la clé dans le token
+                if (role) {
+                    localStorage.setItem("role", role);
+                }
                 navigate(response.data.redirect);
             }
         } catch (error) {

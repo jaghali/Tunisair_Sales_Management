@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,Link } from "react-router-dom";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle ,TextField} from "@mui/material";
 import { Edit, Trash, Save, X ,  Plus } from "lucide-react";
 import { motion } from 'framer-motion';
@@ -28,10 +28,6 @@ const EnteteOffreArr = () => {
     };
     fetchData();
   }, []);
-
-  const handleDetailClick = () => {
-    navigate(`/OffrePagearr`);
-  };
 
   const handleEdit = (item) => {
     setIsEditing(item.id);
@@ -156,7 +152,9 @@ const EnteteOffreArr = () => {
                         </>
                       )}
                     </td>
-                    <td style={styles.cell}><Button onClick={handleDetailClick}>View More ...</Button></td>
+                    <Link to={`/OffrePagearr/${row.id}`}>
+                        <Button>View More ...</Button>
+                    </Link>
                   </tr>
                 ))
               ) : (

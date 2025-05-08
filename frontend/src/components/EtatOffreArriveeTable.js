@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Edit, Trash, Save, X, Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { TablePagination, Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField,Autocomplete, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
 
 const EtatOffreArriveeTable = () => {
@@ -11,6 +11,7 @@ const EtatOffreArriveeTable = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [editedItem, setEditedItem] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
+  const { id } = useParams();
   const [prixArticles, setPrixArticles] = useState([]);
   const [newItem, setNewItem] = useState({
     code: "",
@@ -20,6 +21,7 @@ const EtatOffreArriveeTable = () => {
     quantiteOfferte: "",
     quantiteVente: "",
     restant: "", 
+    enteteVenteID: id,
   });
   const [articles, setArticles] = useState([]);
 
@@ -67,10 +69,11 @@ const EtatOffreArriveeTable = () => {
   const fetchData = useCallback(async () => {
     try {
       const response = await axios.get("http://localhost:5000/api/EtatOffresArrivee");
+      const filteredData = response.data.filter(item => item.enteteVenteID === parseInt(id));
       if (response.data.length > 0) {
         setColumns(Object.keys(response.data[0]));
       }
-      setData(response.data);
+      setData(filteredData);
     } catch (error) {
       console.error("Erreur lors de la récupération des données :", error);
     }
@@ -81,14 +84,17 @@ const EtatOffreArriveeTable = () => {
     fetchArticles(); // Récupérer les articles au démarrage
   }, [fetchData, fetchArticles]);
 
-  const handleDelete = async (code) => {
+  const handleDelete = async (code, id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/EtatOffresArrivee/${code}`);
-      fetchData();
+      await axios.delete(`http://localhost:5000/api/EtatOffresArrivee/${code}/${parseInt(id)}`);
+      // Supprimer côté interface aussi
+      setData(prev => prev.filter(item => !(item.code === code && item.enteteVenteID === parseInt(id))));
     } catch (error) {
       console.error("Erreur lors de la suppression :", error);
     }
   };
+  
+  
 
   const handleEdit = (item) => {
     setEditedItem(item);
@@ -100,7 +106,7 @@ const EtatOffreArriveeTable = () => {
 
   const handleSaveEdit = async () => {
     try {
-      await axios.put(`http://localhost:5000/api/EtatOffresArrivee/${editedItem.code}`, editedItem);
+      await axios.put(`http://localhost:5000/api/EtatOffresArrivee/${editedItem.id}`, editedItem);
       fetchData();
       setEditedItem(null);
     } catch (error) {
@@ -141,6 +147,7 @@ const EtatOffreArriveeTable = () => {
       quantiteOfferte:parseInt(newItem.quantiteOfferte, 10),
       restant: newItem.restant,
       totEm:parseInt(newItem.totEm, 10),
+      enteteVenteID: newItem.enteteVenteID,
        
     };
     try {
@@ -152,7 +159,6 @@ const EtatOffreArriveeTable = () => {
         description: "",
         qtDotation: "",
         totEm: "",
-      
         quantiteOfferte: "",
         restant: "", 
       });
@@ -201,8 +207,10 @@ const EtatOffreArriveeTable = () => {
                          fullWidth
                          style={style.inputField}
                        />
+                    
            
                      )}
+                     
                    />
 
           {["code","qtDotation", "totEm", "quantiteOfferte"].map((col) => (
@@ -216,9 +224,16 @@ const EtatOffreArriveeTable = () => {
               style={style.input}
               disabled={col === "code" || col === "description" } 
             />
+            
           ))}
-      
-   
+          <TextField
+                      label="EnteteVenteID"
+                      value={newItem.enteteVenteID || ""}
+                      fullWidth
+                      margin="dense"
+                      style={style.input}
+                      disabled
+                    />
           <TextField
             label="Restant"
             value={newItem.restant || ""}
@@ -276,7 +291,7 @@ const EtatOffreArriveeTable = () => {
                   ) : (
                     <>
                       <Edit onClick={() => handleEdit(item)} style={{...style.icon, color: "#00a3f5"}} />
-                      <Trash onClick={() => handleDelete(item.code)} style={{...style.icon, color: "#e74c3c"}} />
+                      <Trash onClick={() => handleDelete(item.code,id)} style={{...style.icon, color: "#e74c3c"}} />
                     </>
                   )}
                 </td>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Edit, Trash, Save, X, Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useParams,useNavigate } from "react-router-dom";
 import { TablePagination, Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField,Autocomplete, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
 
 const EtatOffresDepartTable = () => {
@@ -12,14 +12,15 @@ const EtatOffresDepartTable = () => {
   const [editedItem, setEditedItem] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
   const [prixArticles, setPrixArticles] = useState([]);
+  const { id } = useParams();
   const [newItem, setNewItem] = useState({
     code: "",
     description: "",
     qtDotation: "",
     totEm: "",
     quantiteOfferte: "",
-    quantiteVente: "",
     restant: "", 
+    enteteVenteID: id,
   });
   const [articles, setArticles] = useState([]);
 
@@ -68,14 +69,15 @@ const EtatOffresDepartTable = () => {
   const fetchData = useCallback(async () => {
     try {
       const response = await axios.get("http://localhost:5000/api/EtatOffresDepart");
-      if (response.data.length > 0) {
-        setColumns(Object.keys(response.data[0]));
-      }
-      setData(response.data);
+      const filteredData = response.data.filter(item => item.enteteVenteID === parseInt(id));
+      setData(filteredData);
+
+      console.log("Selected enteteVenteId:", id);
+
     } catch (error) {
       console.error("Erreur lors de la récupération des données :", error);
     }
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     fetchData();
@@ -142,7 +144,7 @@ const EtatOffresDepartTable = () => {
       quantiteOfferte:parseInt(newItem.quantiteOfferte, 10),
       restant: newItem.restant,
       totEm:parseInt(newItem.totEm, 10),
-       
+      enteteVenteID: newItem.enteteVenteID,
     };
     try {
       await axios.post("http://localhost:5000/api/EtatOffresDepart", formattedItem);
@@ -152,8 +154,7 @@ const EtatOffresDepartTable = () => {
         code: "",
         description: "",
         qtDotation: "",
-        totEm: "",
-      
+        totEm: "",   
         quantiteOfferte: "",
         restant: "", 
       });
@@ -221,7 +222,14 @@ const EtatOffresDepartTable = () => {
               disabled={col === "code" || col === "description" } 
             />
           ))}
-      
+         <TextField
+            label="EnteteVenteID"
+            value={newItem.enteteVenteID || ""}
+            fullWidth
+            margin="dense"
+            style={style.input}
+            disabled
+          />
    
           <TextField
             label="Restant"
@@ -245,11 +253,12 @@ const EtatOffresDepartTable = () => {
       <table className="table">
         <thead >
           <tr style={style.headerRow}>
-            {columns.map((col) => (
-              <th key={col} style={style.headerCell}>
-                {col}
-              </th>
-            ))}
+          <th style={style.headerCell}>Code</th>
+            <th style={style.headerCell}>Description</th>
+            <th style={style.headerCell}>QtDotation</th>
+            <th style={style.headerCell}>TotEm</th>
+            <th style={style.headerCell}>QuantiteOfferte</th>
+            <th style={style.headerCell}>Restant</th>
             <th style={style.headerCell}>Actions</th>
           </tr>
         </thead>
@@ -258,19 +267,60 @@ const EtatOffresDepartTable = () => {
             const isEditing = editedItem && editedItem.code === item.code;
             return (
               <tr key={index} style={style.row}>
-                {columns.map((col) => (
-                  <td key={col} style={style.cell}>
-                    {isEditing ? (
-                      <TextField
-                        value={editedItem[col]}
-                        onChange={(e) => handleChange(e, col)}
-                        style={style.input}
-                      />
-                    ) : (
-                      item[col]
-                    )}
-                  </td>
-                ))}
+                <td style={style.cell}>{isEditing ? (
+                  <TextField
+                  value={editedItem.code}
+                  onChange={(e) => handleChange(e, "code")}
+                  style={style.input}
+                />
+                ) : (
+                  item.code
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                <TextField
+                  value={editedItem.description}
+                  onChange={(e) => handleChange(e, "description")}
+                  style={style.input}
+                />
+                ) : (
+                item.description
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                <TextField
+                  value={editedItem.quantiteDotation}
+                  onChange={(e) => handleChange(e, "qtDotation")}
+                  style={style.input}
+                />
+                ) : (
+                  item.quantiteDotation
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                <TextField
+                  value={editedItem.totEm}
+                  onChange={(e) => handleChange(e, "totEm")}
+                  style={style.input}
+                />
+                ) : (
+                  item.totEm
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                <TextField
+                  value={editedItem.quantiteOfferte}
+                  onChange={(e) => handleChange(e, "quantiteOfferte")}
+                  style={style.input}
+                />
+                ) : (
+                  item.quantiteOfferte
+                )}</td>
+                <td style={style.cell}>{isEditing ? (
+                <TextField
+                  value={editedItem.restant}
+                  onChange={(e) => handleChange(e, "restant")}
+                  style={style.input}
+                />
+                ) : (
+                  item.restant
+                )}</td>
                 <td style={style.cell}>
                   {isEditing ? (
                     <>

@@ -35,7 +35,7 @@ import TrouxCaisse from "./pages/TrouxCaisse";
 import AgentSaisieDashboard from "./pages/AgentSaisieDashboard";
 import Avances from "./pages/Avances";
 import UserInterface from "./pages/UserInterface";
-
+import ProtectedRoute from "./components/ProtectedRoute";
 import "./App.css";
 
 function App() {
@@ -67,11 +67,11 @@ function MainLayout() {
     "/enteteVentearr",
     "/ventePage/:id",
     "/ventePagearr/:id",
-    "/OffrePage",
-    "/OffrePagearr",
+    "/OffrePage/:id",
+    "/OffrePagearr/:id",
     "/settings",
     "/ConfrontationPage/:id",
-    "/ConfrotationOffrePage",
+    "/ConfrotationOffrePage/:id",
   ];
 
   const financierPages = [
@@ -90,9 +90,9 @@ function MainLayout() {
   const hideSidebarRoutes = [
     "/",
     "/ForgotPasswordPage",
-    "/OffrePage",
-    "/OffrePagearr",
-    "/ConfrotationOffrePage",
+    "/OffrePage/:id",
+    "/OffrePagearr/:id",
+    "/ConfrotationOffrePage/:id",
   ];
 
   const matchAnyPath = (paths) =>
@@ -101,6 +101,9 @@ function MainLayout() {
   const hideSidebar =
     hideSidebarRoutes.includes(location.pathname) ||
     matchPath({ path: "/ventePage/:id", end: false }, location.pathname) ||
+    matchPath({ path: "/ventePagearr/:id", end: false }, location.pathname) ||
+    matchPath({ path: "/OffrePage/:id", end: false }, location.pathname) ||
+    matchPath({ path: "/OffrePagearr/:id", end: false }, location.pathname) ||
     matchPath({ path: "/ConfrontationPage/:id", end: false }, location.pathname) ||
     matchPath({ path: "/Gemini", end: true }, location.pathname);
 
@@ -140,32 +143,32 @@ function MainLayout() {
           <div style={styles.content}>
             <Routes>
               <Route path="/" element={<LoginPage />} />
-              <Route path="/overviewPage" element={<OverviewPage />} />
-              <Route path="/admin-users" element={<AdminUsers />} />
-              <Route path="/admin-contact" element={<Contact />} />
-              <Route path="/direction-financiere-dashboard" element={<DirectionFinanciereDashboard />} />
-              <Route path="/avances-consultation" element={<AvancesConsultation />} />
-              <Route path="/enteteVente" element={<EnteteVente />} />
-              <Route path="/enteteVentearr" element={<EnteteVenteArr />} />
-              <Route path="/enteteOffre" element={<EnteteOffres />} />
-              <Route path="/enteteOffrearr" element={<EnteteOffresArr />} />
-              <Route path="/ventePage/:id" element={<VentePage />} />
-              <Route path="/ventePagearr/:id" element={<VentePageArr />} />
-              <Route path="/OffrePage" element={<OffrePage />} />
-              <Route path="/OffrePagearr" element={<OffrePageArr />} />
-              <Route path="/ArticlesPage" element={<ArticlesPage />} />
+              <Route path="/overviewPage" element={<ProtectedRoute allowedRoles={["Admin"]}><OverviewPage /></ProtectedRoute>} />
+              <Route path="/admin-users" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminUsers /></ProtectedRoute>} />
+              <Route path="/admin-contact" element={<ProtectedRoute allowedRoles={["Admin"]}><Contact /></ProtectedRoute>} />
+              <Route path="/direction-financiere-dashboard" element={<ProtectedRoute allowedRoles={["DirectionFinanciere"]}><DirectionFinanciereDashboard /></ProtectedRoute>} />
+              <Route path="/avances-consultation" element={<ProtectedRoute allowedRoles={["DirectionFinanciere"]}><AvancesConsultation /></ProtectedRoute>} />
+              <Route path="/enteteVente" element={<ProtectedRoute allowedRoles={["AgentSaisie"]}><EnteteVente /></ProtectedRoute>} />
+              <Route path="/enteteVentearr" element={<ProtectedRoute allowedRoles={["AgentSaisie"]}><EnteteVenteArr /></ProtectedRoute>} />
+              <Route path="/enteteOffre" element={<ProtectedRoute allowedRoles={["AgentSaisie"]}><EnteteOffres /></ProtectedRoute>} />
+              <Route path="/enteteOffrearr" element={<ProtectedRoute allowedRoles={["AgentSaisie"]}><EnteteOffresArr /></ProtectedRoute>} />
+              <Route path="/ventePage/:id" element={<ProtectedRoute allowedRoles={["AgentSaisie"]}><VentePage /></ProtectedRoute>} />
+              <Route path="/ventePagearr/:id" element={<ProtectedRoute allowedRoles={["AgentSaisie"]}><VentePageArr /></ProtectedRoute>} />
+              <Route path="/OffrePage/:id" element={<ProtectedRoute allowedRoles={["AgentSaisie"]}><OffrePage /></ProtectedRoute>} />
+              <Route path="/OffrePagearr/:id" element={<ProtectedRoute allowedRoles={["AgentSaisie"]}><OffrePageArr /></ProtectedRoute>} />
+              <Route path="/ArticlesPage" element={<ProtectedRoute allowedRoles={["Admin"]}><ArticlesPage /></ProtectedRoute>} />
               <Route path="/ForgotPasswordPage" element={<ForgotPasswordPage />} />
-              <Route path="/Devise" element={<Devise />} />
-              <Route path="/Tauxdechange" element={<Tauxdechange />} />
-              <Route path="/FournisseurPage" element={<FournisseurPage />} />
-              <Route path="/ConfrontationPage/:id" element={<Confrontation />} />
-              <Route path="/ConfrotationOffrePage" element={<ConfrotationOffrePage />} />
-              <Route path="/Avion" element={<Avion />} />
-              <Route path="/Redevance" element={<Redevance />} />
-              <Route path="/Commission" element={<Commission />} />
-              <Route path="/TrouxCaisse" element={<TrouxCaisse />} />
-              <Route path="/agent-saisie-dashboard" element={<AgentSaisieDashboard />} />
-              <Route path="/Avances" element={<Avances />} />
+              <Route path="/Devise" element={<ProtectedRoute allowedRoles={["Admin"]}><Devise /></ProtectedRoute>} />
+              <Route path="/Tauxdechange" element={<ProtectedRoute allowedRoles={["Admin"]}><Tauxdechange /></ProtectedRoute>} />
+              <Route path="/FournisseurPage" element={<ProtectedRoute allowedRoles={["Admin"]}><FournisseurPage /></ProtectedRoute>} />
+              <Route path="/ConfrontationPage/:id" element={<ProtectedRoute allowedRoles={["AgentSaisie"]}><Confrontation /></ProtectedRoute>} />
+              <Route path="/ConfrotationOffrePage/:id" element={<ProtectedRoute allowedRoles={["AgentSaisie"]}><ConfrotationOffrePage /></ProtectedRoute>} />
+              <Route path="/Avion" element={<ProtectedRoute allowedRoles={["Admin"]}><Avion /></ProtectedRoute>} />
+              <Route path="/Redevance" element={<ProtectedRoute allowedRoles={["DirectionFinanciere"]}><Redevance /></ProtectedRoute>} />
+              <Route path="/Commission" element={<ProtectedRoute allowedRoles={["DirectionFinanciere"]}><Commission /></ProtectedRoute>} />
+              <Route path="/TrouxCaisse" element={<ProtectedRoute allowedRoles={["DirectionFinanciere"]}><TrouxCaisse /></ProtectedRoute>} />
+              <Route path="/agent-saisie-dashboard" element={<ProtectedRoute allowedRoles={["AgentSaisie"]}><AgentSaisieDashboard /></ProtectedRoute>} />
+              <Route path="/Avances" element={<ProtectedRoute allowedRoles={["DirectionFinanciere"]}><Avances /></ProtectedRoute>} />
               <Route path="/UserInterface/:matricule" element={<UserInterface />} />
               <Route path="/ProfilePage/:matricule" element={<ProfilePage />} />
               <Route path="/Gemini" element={<Gemini />} />

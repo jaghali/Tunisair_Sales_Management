@@ -18,8 +18,8 @@ namespace TunisairSalesManagement.Models
 
         [Required]
         [ForeignKey("Devise")]
-        public int DeviseId { get; set; }
+        public int? DeviseId { get; set; }
 
-        public Devise Devise { get; set; }
+        public Devise? Devise { get; set; }
     }
 }

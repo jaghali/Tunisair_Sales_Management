@@ -22,18 +22,46 @@ namespace TunisairSalesManagement.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<EtatOffresArrivee>>> GetEtatOffresArrivee()
         {
-            var etatOffresArrivee = await _context.EtatOffresArrivee.ToListAsync();
-            return Ok(etatOffresArrivee); 
+            var etatOffresArrivee = await _context.EtatOffresArrivee
+            .AsNoTracking()
+            .OrderBy(e => e.EnteteVenteID)
+            .ThenBy(e => e.Code)
+            .ToListAsync();
+            return Ok(etatOffresArrivee);
         }
+
+         // 🔹 GET: api/EtatOffresArrivee/{code} (Récupérer un article par code)
+        [HttpGet("{code}")]
+        public async Task<ActionResult<EtatOffresArrivee>> GetEtatOffresArriveeByMatricule(string code)
+        {
+            var article = await _context.EtatOffresArrivee.FindAsync(code);
+
+            if (article == null)
+            {
+                return NotFound();
+            }
+
+            return article;
+        }
+
 
         // POST: api/EtatOffresArrivee
         [HttpPost]
         public async Task<ActionResult<EtatOffresArrivee>> PostEtatOffresArrivee(EtatOffresArrivee etatOffresArrivee)
         {
+            // Vérifie seulement s'il est déjà dans CET état spécifique
+            var existingInSameVente = await _context.EtatOffresArrivee
+           .AnyAsync(e => e.Code == etatOffresArrivee.Code && 
+                     e.EnteteVenteID == etatOffresArrivee.EnteteVenteID);
+
+            if (existingInSameVente)
+            {
+                return BadRequest("Cet article a déjà été ajouté à cet état de vente.");
+            }
             _context.EtatOffresArrivee.Add(etatOffresArrivee);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetEtatOffresArrivee), new { code = etatOffresArrivee.Code }, etatOffresArrivee);
+            return CreatedAtAction(nameof(GetEtatOffresArriveeByMatricule), new { code = etatOffresArrivee.Code }, etatOffresArrivee);
         }
 
         // PUT: api/EtatOffresArrivee/5
@@ -66,21 +94,25 @@ namespace TunisairSalesManagement.Controllers
             return NoContent();
         }
 
-        // DELETE: api/EtatOffresArrivee/5
-        [HttpDelete("{code}")]
-        public async Task<IActionResult> DeleteEtatOffresArrivee(string code)
-        {
-            var etatOffresArrivee = await _context.EtatOffresArrivee.FindAsync(code);
-            if (etatOffresArrivee == null)
-            {
-                return NotFound();
-            }
+       // DELETE: api/EtatOffresArrivee/{id}/{enteteVenteID}
+[HttpDelete("{code}/{enteteVenteID}")]
+public async Task<IActionResult> DeleteEtatOffresArrivee(string code, int enteteVenteID)
+{
+    var article = await _context.EtatOffresArrivee
+        .FirstOrDefaultAsync(a => a.Code == code && a.EnteteVenteID == enteteVenteID);
 
-            _context.EtatOffresArrivee.Remove(etatOffresArrivee);
-            await _context.SaveChangesAsync();
+    if (article == null)
+    {
+        return NotFound("Article non trouvé dans cet état de vente.");
+    }
 
-            return NoContent();
-        }
+    _context.EtatOffresArrivee.Remove(article);
+    await _context.SaveChangesAsync();
+
+    return NoContent();
+}
+
+
 
         private bool EtatOffresArriveeExists(string code)
         {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,Link } from "react-router-dom";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle ,TextField} from "@mui/material";
 import { Edit, Trash, Save, X ,  Plus } from "lucide-react";
 import { motion } from 'framer-motion';
@@ -156,7 +156,9 @@ const EnteteOffre = () => {
                         </>
                       )}
                     </td>
-                    <td style={styles.cell}><Button onClick={handleDetailClick}>View More ...</Button></td>
+                    <Link to={`/OffrePage/${row.id}`}>
+                        <Button>View More ...</Button>
+                    </Link>
                   </tr>
                 ))
               ) : (
