@@ -3,6 +3,7 @@ import axios from "axios";
 import { Edit, Trash, Save, X, Plus } from "lucide-react";
 import { useParams,useNavigate } from "react-router-dom";
 import { TablePagination, Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField,Autocomplete, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
+import { motion } from "framer-motion";
 
 const EtatOffresDepartTable = () => {
   const [data, setData] = useState([]);
@@ -170,16 +171,18 @@ const EtatOffresDepartTable = () => {
 
   return (
     <div>
-      <h2 style={style.heading}>Etat des Offres Tunisair</h2>
-      <Button
-        variant="contained"
-        color="primary"
-        startIcon={<Plus />}
-        onClick={() => setShowDialog(true)}
-        style={style.addButton}
-      >
-        Ajouter
-      </Button>
+    
+      <motion.button
+          onClick={() => setShowDialog(true)}
+
+          style={style.addButton}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        transition={{ type: "spring", stiffness: 300 }}
+                      >
+              <Plus  />
+                        Ajouter
+                      </motion.button>
       <Button onClick={handleDetailClick}>Confronter</Button>
 
       <Dialog open={showDialog} onClose={() => setShowDialog(false)}>
@@ -374,24 +377,37 @@ const style = {
     fontSize: "16px",
     marginBottom: "10px",
   },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    marginTop: "20px",
-    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-    borderRadius: "8px",
-    overflow: "hidden",
-  },
-  headerRow: {
-    backgroundColor: "#f2f2f2",
-    color: "#fff",
-  },
-  headerCell: {
-    padding: "10px",
-    borderBottom: "2px solid #ddd",
-    textAlign: "left",
-    color:"black",
-  },
+ tableStyle : {
+  width: "70%",
+  borderCollapse: "collapse",
+  marginTop: "1rem",
+  marginLeft: "auto",
+  marginRight: "auto",
+  boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+  borderRadius: "8px",
+  overflow: "hidden"
+},
+
+headerRowStyle : {
+  backgroundColor: "#b71c1c",
+  color: "#ffffff"
+},
+
+tableHeaderStyle : {
+  padding: "0.8rem",
+  fontSize: "0.9rem",
+  fontWeight: "600",
+  borderBottom: "2px solid #880e0e",
+  textAlign: "left"
+},
+tableCellStyle : {
+  padding: "0.7rem",
+  fontSize: "0.85rem",
+  borderBottom: "1px solid #ddd",
+  textAlign: "left",
+  color: "#333"
+},
+
   row: {
     borderBottom: "1px solid #ddd",
     transition: "background 0.3s",

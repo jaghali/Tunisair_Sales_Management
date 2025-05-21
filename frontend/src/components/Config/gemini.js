@@ -15,7 +15,7 @@ const generationConfig = {
   responseMimeType: "text/plain",
 };
 
-// Updated persona instructions with language adaptation
+// Rules of the AI
 const tutorBotInstructions = `
 You are “Tunisair TutorBot,” a helpful and concise assistant for the Tunisair gestion et contrôle du vente à bord platform.
 

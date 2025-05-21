@@ -1,4 +1,4 @@
-import {  Settings   ,Plane , LogOut, PlaneLanding, GiftIcon , House } from "lucide-react";
+import {  Settings   ,Plane , LogOut, PlaneLanding, GiftIcon , House ,Languages } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
@@ -9,6 +9,7 @@ const SIDEBAR_ITEMS = [
     { name: "Redevance", icon: PlaneLanding, color: "#6366f1", href: "/Redevance" },
     { name: "Commission", icon:GiftIcon , color: "#8B5CF6", href: "/Commission" },
     { name: "Avance en devise", icon:GiftIcon , color: "#8B5CF6", href: "/Avances" },
+    { name: "Change Language", icon:Languages , color: "#8B5CF6", href: "/Avances" },
 
     { name: "Logout", icon: LogOut, color: "#6EE7B7", href: "/" },
 ];

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TunisairSalesManagement.Data;
 
@@ -11,16 +12,109 @@ using TunisairSalesManagement.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250512095701_AddDetailFLTable")]
+    partial class AddDetailFLTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.5")
+                .HasAnnotation("ProductVersion", "9.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("DetailFL", b =>
+                {
+                    b.Property<int>("NUMFL")
+                        .HasColumnType("int")
+                        .HasColumnOrder(0);
+
+                    b.Property<int>("NUMVOL")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1);
+
+                    b.Property<float>("CARBCOEFCONV")
+                        .HasColumnType("real");
+
+                    b.Property<int>("CARBCONSOM")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CARBJAUGEARR")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CARBJAUGEDEP")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CARBRAV")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CARBRAVKG")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CARBRAVUNITE")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CARBVOLPREC")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CIE")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DATEDEPPREV")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DATEVOL")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DATEVOLOP")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DUREEVOLAB")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DUREEVOLBB")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ESCALEARR")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ESCALEDEP")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("HEUREABARR")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("HEUREABDEP")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("HEUREBBARR")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("HEUREBBDEP")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MAT")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NUMORDRE")
+                        .HasColumnType("int");
+
+                    b.Property<string>("VOLOPERATIONNEL")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("NUMFL", "NUMVOL");
+
+                    b.HasIndex("NUMFL");
+
+                    b.ToTable("DetailFLs");
+                });
 
             modelBuilder.Entity("Equipage", b =>
                 {
@@ -276,97 +370,6 @@ namespace backend.Migrations
                     b.HasIndex("FournisseurId");
 
                     b.ToTable("Articles");
-                });
-
-            modelBuilder.Entity("TunisairSalesManagement.Models.DetailFL", b =>
-                {
-                    b.Property<int>("NUMFL")
-                        .HasColumnType("int")
-                        .HasColumnOrder(0);
-
-                    b.Property<int>("NUMVOL")
-                        .HasColumnType("int")
-                        .HasColumnOrder(1);
-
-                    b.Property<double?>("CARBCOEFCONV")
-                        .HasColumnType("float");
-
-                    b.Property<int?>("CARBCONSOM")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("CARBJAUGEARR")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("CARBJAUGEDEP")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("CARBRAV")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("CARBRAVKG")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CARBRAVUNITE")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("CARBVOLPREC")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CIE")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("DATEDEPPREV")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DATEVOL")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DATEVOLOP")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("DUREEVOLAB")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("DUREEVOLBB")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ESCALEARR")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ESCALEDEP")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("HEUREABARR")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("HEUREABDEP")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("HEUREBBARR")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("HEUREBBDEP")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("MAT")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("NUMORDRE")
-                        .HasColumnType("int");
-
-                    b.Property<string>("VOLOPERATIONNEL")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("NUMFL", "NUMVOL");
-
-                    b.HasIndex("NUMFL");
-
-                    b.ToTable("DetailFL");
                 });
 
             modelBuilder.Entity("TunisairSalesManagement.Models.Devise", b =>
@@ -797,10 +800,6 @@ namespace backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Nom")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -907,7 +906,7 @@ namespace backend.Migrations
 
             modelBuilder.Entity("Equipage", b =>
                 {
-                    b.HasOne("TunisairSalesManagement.Models.DetailFL", null)
+                    b.HasOne("DetailFL", null)
                         .WithMany("Equipages")
                         .HasForeignKey("DetailFLNUMFL", "DetailFLNUMVOL");
                 });
@@ -1057,14 +1056,14 @@ namespace backend.Migrations
                     b.Navigation("Devise");
                 });
 
+            modelBuilder.Entity("DetailFL", b =>
+                {
+                    b.Navigation("Equipages");
+                });
+
             modelBuilder.Entity("TunisairSalesManagement.Models.Articles", b =>
                 {
                     b.Navigation("PrixArticles");
-                });
-
-            modelBuilder.Entity("TunisairSalesManagement.Models.DetailFL", b =>
-                {
-                    b.Navigation("Equipages");
                 });
 
             modelBuilder.Entity("TunisairSalesManagement.Models.Devise", b =>

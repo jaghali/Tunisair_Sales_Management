@@ -37,7 +37,7 @@ import Avances from "./pages/Avances";
 import UserInterface from "./pages/UserInterface";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./App.css";
-
+import "./i18n.js"
 function App() {
   return (
     <CurrencyProvider>

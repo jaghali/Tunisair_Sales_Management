@@ -12,11 +12,12 @@ import {
   TextField,
   Autocomplete,
 } from "@mui/material";
+import { motion } from "framer-motion";
 
 const EtatVentesDepartTable = () => {
   const [data, setData] = useState([]);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [editedItem, setEditedItem] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
   const [prixArticles, setPrixArticles] = useState([]);
@@ -191,18 +192,32 @@ const EtatVentesDepartTable = () => {
   const paginatedData = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
-    <div>
-      <h2 style={style.heading}>Etat des Ventes Tunisair</h2>
-      <Button
-        variant="contained"
-        color="primary"
-        startIcon={<Plus />}
-        onClick={() => setShowDialog(true)}
-        style={style.addButton}
-      >
-        Ajouter
-      </Button>
-      <Button onClick={handleDetailClick}>Confronter</Button>
+      <div style={{ padding: "2%", maxWidth: "1000px", margin: "0 auto", marginLeft:"-10%" }}>
+      <div style={style.Buttonsalligned}> 
+         <motion.button
+                        onClick={handleDetailClick}
+                        style={style.ConfronterButton}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        transition={{ type: "spring", stiffness: 300 }}
+                      >
+              <Plus  />
+                        Confronter
+                      </motion.button>
+                <motion.button
+          onClick={() => setShowDialog(true)}
+
+          style={style.addButton}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        transition={{ type: "spring", stiffness: 300 }}
+                      >
+              <Plus  />
+                        Ajouter
+              </motion.button>
+               
+               </div>
+      
 
       <Dialog open={showDialog} onClose={() => setShowDialog(false)}>
         <DialogTitle>Ajouter un nouvel élément</DialogTitle>
@@ -402,13 +417,13 @@ const EtatVentesDepartTable = () => {
                 <td style={style.cell}>
                   {isEditing ? (
                     <div>
-                      <Button onClick={handleSaveEdit} style={style.saveButton}><Save /></Button>
-                      <Button onClick={handleCancelEdit} style={style.cancelButton}><X /></Button>
+                      <Button onClick={handleSaveEdit} style={{ color: "green", cursor: "pointer" }} ><Save /></Button>
+                      <Button onClick={handleCancelEdit} style={{ color: "red", cursor: "pointer" }}><X /></Button>
                     </div>
                   ) : (
                     <div>
-                      <Button onClick={() => handleEdit(item)}><Edit /></Button>
-                      <Button onClick={() => handleDelete(item.code)}><Trash /></Button>
+                      <Button onClick={() => handleEdit(item)} style={{ color: "#00a3f5", cursor: "pointer" }}><Edit /></Button>
+                      <Button onClick={() => handleDelete(item.code)} style={{ color: "#e74c3c", cursor: "pointer" }} ><Trash /></Button>
                     </div>
                   )}
                 </td>
@@ -431,34 +446,53 @@ const EtatVentesDepartTable = () => {
   );
 };
 const style = {
+  ConfronterButton : {
+    padding: "10px 20px",
+    backgroundColor: "#2ECC71",
+    color: "#fff",
+    border: "none",
+    borderRadius: "5px",
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
+    fontSize: "16px",
+    marginLeft: "0",
+},
+  Buttonsalligned : {
+  display: "flex",
+  gap: "73%",
+  alignItems: "center",
+},
   heading: {
     textAlign: "center",
     fontSize: "20px",
     fontWeight: "bold",
-    color: "#c80505",
+    backgroundColor: "#b71c1c",
+    color: "#ffffff",
     marginBottom: "15px",
   },
   addButton: {
-    display: "flex",
-    alignItems: "center",
-    backgroundColor: "#28a745",
+    padding: "10px 20px",
+    backgroundColor: "#C80505",
     color: "#fff",
     border: "none",
-    padding: "10px 15px",
     borderRadius: "5px",
+    display: "flex",
+    alignItems: "center",
     cursor: "pointer",
     fontSize: "16px",
-    marginBottom: "10px",
+    marginLeft: "15%",
   },
   headerRow: {
-    backgroundColor: "#f2f2f2",
-    color: "#fff",
+    backgroundColor: "#b71c1c",
+    color: "#ffffff",
   },
   headerCell: {
-    padding: "10px",
-    borderBottom: "2px solid #ddd",
-    textAlign: "left",
-    color: "black",
+     padding: "0.8rem",
+  fontSize: "0.9rem",
+  fontWeight: "600",
+  borderBottom: "2px solid #880e0e",
+  textAlign: "left"
   },
   row: {
     transition: "background 0.3s",

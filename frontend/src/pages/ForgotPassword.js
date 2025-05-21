@@ -1,103 +1,144 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
+import { TextField, InputAdornment } from "@mui/material";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 
-const ForgotPasswordPage = () => {
+const ForgotPassword = () => {
+    const [matricule, setMatricule] = useState("");
     const [email, setEmail] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
-    const navigate = useNavigate();
+    const [showEmail, setShowEmail] = useState(false);
 
-    const handleForgotPassword = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setErrorMessage("");
         setSuccessMessage("");
+
         try {
-            const response = await axios.post("http://localhost:5000/api/auth/forgot-password", { email });
-            setSuccessMessage("A new password has been sent to your email.");
+           const response = await axios.post("http://localhost:5000/api/PN/forgot-password", {
+    Matricule: matricule,
+    Email: email,
+});
+
+
+
+            if (response.data.success) {
+                setSuccessMessage("A new password has been sent to your email.");
+            } else {
+                setErrorMessage("Unable to reset password. Please try again.");
+            }
         } catch (error) {
-            setErrorMessage("Error sending email. Please try again.");
+            setErrorMessage("Failed to send reset email. Please check your information.");
         }
     };
 
     const styles = {
         container: {
             fontFamily: "Roboto",
-            textAlign: "center",
             display: "flex",
             justifyContent: "center",
-            height: "100%",
+            alignItems: "center",
             width: "100%",
-            color: "white",
-            position: "relative",
-            marginTop: "10%",
-            maxheight: "200",
-            marginLeft: "-10%",
+            height: "100vh",
+        },
+        backgroundWrapper: {
+            width: "80%",
+            height: "100vh",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            flexDirection: "column",
+            background: "linear-gradient(to right, #c80505 50%, white 50%)",
         },
         formWrapper: {
-            justifyContent: "center",
             width: "100%",
             maxWidth: "400px",
             padding: "25px",
-            height: "30%",
-            maxheight: "200",
-            backgroundColor: "#3D3D3D",
-            borderRadius: "8px",
-            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+            backgroundColor: "white",
+            borderRadius: "15px",
+            boxShadow: "10px 10px 30px rgba(0, 0, 0, 0.1)",
             textAlign: "center",
         },
-        input: {
+        TextField: {
             width: "94%",
             marginBottom: "12px",
-            padding: "12px",
-            color: "#1a202c",
-            borderRadius: "8px",
-            border: "1px solid #4a5568",
-            outline: "none",
         },
         button: {
             width: "100%",
             padding: "12px",
             backgroundColor: "#c80505",
             color: "#fff",
-            borderRadius: "8px",
+            borderRadius: "20px",
             fontWeight: "bold",
             cursor: "pointer",
-        },
-        message: {
-            marginTop: "12px",
-            color: "green",
-            textAlign: "center",
+            marginTop: "5%",
         },
         error: {
             marginTop: "12px",
             color: "red",
             textAlign: "center",
         },
+        success: {
+            marginTop: "12px",
+            color: "green",
+            textAlign: "center",
+        },
     };
 
     return (
-        <div style={styles.container}>
-            <div style={styles.formWrapper}>
-                <h2 style={{ fontSize: "20px", fontWeight: "600", marginBottom: "16px" }}>Forgot Password</h2>
-                <form onSubmit={handleForgotPassword} style={{ display: "flex", flexDirection: "column" }}>
-                    <input
-                        type="email"
-                        placeholder="Enter your email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        style={styles.input}
-                    />
-                    <button type="submit" style={styles.button}>
-                        Reset Password
-                    </button>
-                    {successMessage && <p style={styles.message}>{successMessage}</p>}
-                    {errorMessage && <p style={styles.error}>{errorMessage}</p>}
-                </form>
+        <div style={styles.backgroundWrapper}>
+            <div style={styles.container}>
+                <div style={styles.formWrapper}>
+                    <h2 style={{ fontSize: "20px", fontWeight: "600", marginBottom: "16px", color: "#3D3D3D" }}>
+                        RESET PASSWORD
+                    </h2>
+                    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column" }}>
+                        <TextField
+                            type="text"
+                            variant="standard"
+                            label="Matricule"
+                            value={matricule}
+                            onChange={(e) => setMatricule(e.target.value)}
+                            required
+                            style={styles.TextField}
+                            InputLabelProps={{ style: { color: "#3D3D3D" } }}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <PersonOutlineIcon style={{ color: "gray" }} />
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
+                        <TextField
+                            type={showEmail ? "text" : "email"}
+                            variant="standard"
+                            label="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            style={styles.TextField}
+                            InputLabelProps={{ style: { color: "#3D3D3D" } }}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <span onClick={() => setShowEmail(!showEmail)} style={{ cursor: "pointer" }}>
+                                            {showEmail ? <EyeOff style={{ color: "gray" }} /> : <Eye style={{ color: "gray" }} />}
+                                        </span>
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
+                        <button type="submit" style={styles.button}>Send Email</button>
+                        {errorMessage && <p style={styles.error}>{errorMessage}</p>}
+                        {successMessage && <p style={styles.success}>{successMessage}</p>}
+                    </form>
+                </div>
             </div>
         </div>
     );
 };
 
-export default ForgotPasswordPage;
+export default ForgotPassword;

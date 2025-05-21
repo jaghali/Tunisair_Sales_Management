@@ -21,6 +21,7 @@ namespace TunisairSalesManagement.Models
         public string Password { get; set; } 
         public double? Avance { get; set; }
 
+        public string Email { get; set; }
 
 
     }

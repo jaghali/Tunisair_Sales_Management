@@ -19,6 +19,9 @@ const EnteteVente = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [fourniss, setFourniss] = useState([]);
+  const [DetailFL, setDetailFL] = useState([]);
+
   const [isEditing, setIsEditing] = useState(null);
   const [editedItem, setEditedItem] = useState(null);
   const [openForm, setOpenForm] = useState(false);
@@ -76,6 +79,7 @@ const EnteteVente = () => {
       try {
         const enteteRes = await axios.get("http://localhost:5000/api/EnteteVente");
         const departRes = await axios.get("http://localhost:5000/api/EtatVentesDepart");
+        
   
         const entetes = enteteRes.data;
         const lignesDepart = departRes.data;
@@ -95,8 +99,15 @@ const EnteteVente = () => {
   
         // Mise à jour de l'état local après les modifications
         const refreshed = await axios.get("http://localhost:5000/api/EnteteVente");
+        const fournRes = await axios.get("http://localhost:5000/api/Fournisseurs");
+        const Detfl = await axios.get("http://localhost:5000/api/detailfl");
+
+        setDetailFL(Detfl.data);
+
+        setFourniss(fournRes.data);
+
         setData(refreshed.data);
-        setEtatVenteDepart(lignesDepart); // si tu les utilises aussi
+        setEtatVenteDepart(lignesDepart); 
   
       } catch (err) {
         console.error(err);
@@ -111,7 +122,7 @@ const EnteteVente = () => {
   
 
   const handleEdit = (item) => {
-    console.log("Editing item:", item);  // Check item data
+    console.log("Editing item:", item);
     setIsEditing(item.id);
     setEditedItem({ ...item });
   };
@@ -275,26 +286,60 @@ const EnteteVente = () => {
           <div style={{ display: "flex", gap: "15px", marginBottom: "10px" }}>
           <TextField label="Numéro Etat" value={newItem.numerO_ETAT} onChange={(e) => setNewItem({ ...newItem, numerO_ETAT: e.target.value })} fullWidth />
 
-            <TextField label="Fournisseur" value={newItem.fournisseur} onChange={(e) => setNewItem({ ...newItem, fournisseur: e.target.value })} fullWidth />
+          <Select
+  value={newItem.fournisseur}
+  onChange={(e) => setNewItem({ ...newItem, fournisseur: e.target.value })}
+  fullWidth
+  displayEmpty
+>
+  <MenuItem value="" disabled>
+    <em>Fournisseur</em>
+  </MenuItem>
+  {fourniss.map((f) => (
+    <MenuItem key={f.id} value={f.nom}>
+      {f.nom}
+    </MenuItem>
+  ))}
+</Select>
+
           </div>
           <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
           <TextField label="Airoport" value={newItem.airoport} onChange={(e) => setNewItem({ ...newItem, airoport: e.target.value })} fullWidth />
 
           <TextField label="Date Edition" type="date" InputLabelProps={{ shrink: true }} value={newItem.datE_EDITION} onChange={(e) => setNewItem({ ...newItem, datE_EDITION: e.target.value })} fullWidth />
-          <TextField label="Agent Saisie" value={newItem.agenT_SAISIE} onChange={(e) => setNewItem({ ...newItem, agenT_SAISIE: e.target.value })} fullWidth />
           </div>
           
           
           <div style={{ display: "flex", gap: "15px", marginBottom: "10px" }}>
-          <TextField label="fL 01" value={newItem.fL01} onChange={(e) => setNewItem({ ...newItem, fL01: e.target.value })} fullWidth />
+          <Select
+            value={newItem.numfl}
+            onChange={(e) => setNewItem({ ...newItem, numfl: e.target.value })}
+            fullWidth
+            displayEmpty
+          >
+            <MenuItem value="" disabled>
+              <em>FL01</em>
+            </MenuItem>
+            {DetailFL.map((item) => (
+              <MenuItem key={item.id} value={item.numfl}>
+                {item.numfl}
+              </MenuItem>
+            ))}
+          </Select>
+
+         
           <TextField label="fL 02" value={newItem.fL02} onChange={(e) => setNewItem({ ...newItem, fL02: e.target.value })} fullWidth />
             <TextField label="fL 03" value={newItem.fL03} onChange={(e) => setNewItem({ ...newItem, fL03: e.target.value })} fullWidth />
             
           </div>
           <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
           <TextField label="cc 1" value={newItem.cC1} onChange={(e) => setNewItem({ ...newItem, cC1: e.target.value })} fullWidth />
-          <TextField label="PNC 1" value={newItem.pnC1} onChange={(e) => setNewItem({ ...newItem, pnC1: e.target.value })} fullWidth />
-            <TextField label="noM 1" value={newItem.noM1} onChange={(e) => setNewItem({ ...newItem, noM1: e.target.value })} fullWidth />
+          <TextField
+        label="PNC 1"
+        value={newItem.pnC1}
+        onChange={(e) => setNewItem({ ...newItem, pnC1: e.target.value })}
+        fullWidth
+      />            <TextField label="noM 1" value={newItem.noM1} onChange={(e) => setNewItem({ ...newItem, noM1: e.target.value })} fullWidth />
             
           </div>  
           <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>

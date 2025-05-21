@@ -81,7 +81,6 @@ const UserInterface = () => {
         const res = await fetch("http://localhost:5000/api/entetevente");
         const data = await res.json();
   
-        // You may need to compute these if your API returns an array of enteteVente
         const totalValeur = data.reduce((sum, item) => sum + (item.totaleValeur || 0), 0);
         const totalEncaisse = data.reduce((sum, item) => sum + (item.totaleEncaisse || 0), 0);
   

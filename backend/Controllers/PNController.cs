@@ -5,10 +5,15 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using OfficeOpenXml;  // EPPlus pour lire Excel
-using BCrypt.Net; // Pour le hachage des mots de passe
+using OfficeOpenXml;  // EPPlus for Excel reading
+using BCrypt.Net; // For password hashing
 using TunisairSalesManagement.Data;
 using TunisairSalesManagement.Models;
+using MailKit.Net.Smtp;
+using MailKit.Security;
+using MimeKit;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace TunisairSalesManagement.Controllers
 {
@@ -23,26 +28,24 @@ namespace TunisairSalesManagement.Controllers
             _context = context;
         }
 
-        // ?? 1. Obtenir tous les PN
+        // 1. Get all PN
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PN>>> GetPNs()
         {
             var pns = await _context.PN.ToListAsync();
 
-            // Assurer que Password ne soit jamais null
             foreach (var pn in pns)
             {
                 if (string.IsNullOrEmpty(pn.Password))
                 {
-                    pn.Password = "DefaultPassword"; // ou tout autre valeur s�curis�e
+                    pn.Password = "DefaultPassword";
                 }
             }
 
             return Ok(pns);
         }
 
-
-        // ?? 2. Obtenir un PN par matricule
+        // 2. Get PN by matricule
         [HttpGet("{matricule}")]
         public async Task<ActionResult<PN>> GetPN(string matricule)
         {
@@ -51,11 +54,10 @@ namespace TunisairSalesManagement.Controllers
             return pn;
         }
 
-        // ?? 3. Ajouter un PN
+        // 3. Create PN
         [HttpPost]
         public async Task<ActionResult<PN>> CreatePN(PN pn)
         {
-            // Hacher le mot de passe avant de l�enregistrer
             pn.Password = BCrypt.Net.BCrypt.HashPassword(pn.Password);
             _context.PN.Add(pn);
             await _context.SaveChangesAsync();
@@ -63,7 +65,7 @@ namespace TunisairSalesManagement.Controllers
             return CreatedAtAction(nameof(GetPN), new { matricule = pn.MATRICULE }, pn);
         }
 
-        // ?? 4. Modifier un PN
+        // 4. Update PN
         [HttpPut("{matricule}")]
         public async Task<IActionResult> UpdatePN(string matricule, PN pn)
         {
@@ -72,7 +74,6 @@ namespace TunisairSalesManagement.Controllers
             var existingPN = await _context.PN.FindAsync(matricule);
             if (existingPN == null) return NotFound();
 
-            // Mise � jour des champs
             existingPN.Nom = pn.Nom;
             existingPN.Prenom = pn.Prenom;
             existingPN.BASE = pn.BASE;
@@ -88,7 +89,7 @@ namespace TunisairSalesManagement.Controllers
             return NoContent();
         }
 
-        // ?? 5. Supprimer un PN
+        // 5. Delete PN
         [HttpDelete("{matricule}")]
         public async Task<IActionResult> DeletePN(string matricule)
         {
@@ -100,12 +101,12 @@ namespace TunisairSalesManagement.Controllers
             return NoContent();
         }
 
-        // ?? 6. Importer un fichier Excel
+        // 6. Import PN from Excel
         [HttpPost("import")]
         public async Task<IActionResult> ImportPN(IFormFile file)
         {
             if (file == null || file.Length == 0)
-                return BadRequest("Aucun fichier n'a �t� t�l�charg�.");
+                return BadRequest("Aucun fichier n'a été téléchargé.");
 
             var pnList = new List<PN>();
 
@@ -116,18 +117,16 @@ namespace TunisairSalesManagement.Controllers
                     await file.CopyToAsync(stream);
                     using (var package = new ExcelPackage(stream))
                     {
-                        var worksheet = package.Workbook.Worksheets[0]; // Premi�re feuille du fichier
+                        var worksheet = package.Workbook.Worksheets[0];
 
                         int rowCount = worksheet.Dimension.Rows;
-                        for (int row = 2; row <= rowCount; row++) // Commencer � la ligne 2 (ignorer l'en-t�te)
+                        for (int row = 2; row <= rowCount; row++)
                         {
                             var password = worksheet.Cells[row, 7].Text;
 
-                            // Si le mot de passe est vide, tu peux d�finir un mot de passe par d�faut ou ignorer l'enregistrement
                             if (string.IsNullOrEmpty(password))
                             {
-                                // D�finir un mot de passe par d�faut ou sauter cette ligne
-                                password = "DefaultPassword";  // Exemple : mot de passe par d�faut
+                                password = "DefaultPassword";
                             }
 
                             var pn = new PN
@@ -138,25 +137,89 @@ namespace TunisairSalesManagement.Controllers
                                 BASE = worksheet.Cells[row, 4].Text,
                                 COLLEGE = worksheet.Cells[row, 5].Text,
                                 SECTEUR = worksheet.Cells[row, 6].Text,
-                                Password = BCrypt.Net.BCrypt.HashPassword(password) // Hachage du mot de passe (maintenant non vide)
-                                
+                                Password = BCrypt.Net.BCrypt.HashPassword(password)
                             };
 
                             pnList.Add(pn);
                         }
-
                     }
                 }
 
                 _context.PN.AddRange(pnList);
                 await _context.SaveChangesAsync();
 
-                return Ok($"Importation r�ussie ! {pnList.Count} enregistrements ajout�s.");
+                return Ok($"Importation réussie ! {pnList.Count} enregistrements ajoutés.");
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Erreur lors de l'importation : {ex.Message}");
             }
         }
+
+        // 7. Forgot password: generate random password, update DB, send email
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            var user = await _context.PN.FirstOrDefaultAsync(p => p.MATRICULE == request.Matricule && p.Email == request.Email);
+            if (user == null)
+                return NotFound(new { success = false, message = "Invalid matricule or email." });
+
+            var newPassword = GenerateRandomPassword(10);
+
+            // Update password in database
+            user.Password = newPassword;
+            await _context.SaveChangesAsync();
+
+            try
+            {
+                var email = new MimeMessage();
+                email.From.Add(new MailboxAddress("Tunisair", "your_email@gmail.com"));
+                email.To.Add(new MailboxAddress(user.Prenom, user.Email));
+                email.Subject = "🔐 Your New Password";
+                email.Body = new TextPart("plain")
+                {
+                    Text = $"Hello {user.Nom},\n\nYour new password is: {newPassword}\n\nPlease change it after logging in."
+                };
+
+                using var smtp = new SmtpClient();
+                await smtp.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+                await smtp.AuthenticateAsync("labidiweldchhiba24@gmail.com", "uwnb kgkj txfl auqk");
+                await smtp.SendAsync(email);
+                await smtp.DisconnectAsync(true);
+
+                return Ok(new { success = true, message = "Password reset email sent." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Failed to send email.", details = ex.Message });
+            }
+        }
+
+        // Helper method: generate secure random password
+        private string GenerateRandomPassword(int length)
+        {
+            const string valid = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            StringBuilder res = new StringBuilder();
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                byte[] uintBuffer = new byte[sizeof(uint)];
+
+                while (res.Length < length)
+                {
+                    rng.GetBytes(uintBuffer);
+                    uint num = BitConverter.ToUInt32(uintBuffer, 0);
+                    res.Append(valid[(int)(num % (uint)valid.Length)]);
+                }
+            }
+
+            return res.ToString();
+        }
+    }
+
+    // Request DTO for forgot password endpoint
+    public class ForgotPasswordRequest
+    {
+        public string Matricule { get; set; }
+        public string Email { get; set; }
     }
 }

@@ -20,7 +20,8 @@ const VentePage = () => {
   const [pncs, setPncs] = useState([]);
   const navigate = useNavigate();
   const { id } = useParams();
-  
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -114,7 +115,38 @@ const VentePage = () => {
   };
 
   return (
-    <div style={{ padding: "2%", maxWidth: "1000px", margin: "0 auto" }}>
+    
+     <motion.div animate={{ marginLeft: sidebarOpen ? 250 : 0 }} transition={{ type: "spring", stiffness: 260, damping: 20 }}>
+      <motion.div
+        initial={{ x: -300 }}
+        animate={{ x: sidebarOpen ? 0 : -300 }}
+        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          height: "100%",
+          width: "250px",
+          backgroundColor: "#fff",
+          color: "#fff",
+          padding: "1rem",
+          zIndex: 9999,
+          boxShadow: "2px 0 5px rgba(0,0,0,0.3)",
+          overflowY: "auto", 
+          scrollbarWidth: "none", 
+          msOverflowStyle: "none",
+
+        }}
+      >        
+      <DetailsEtat />
+
+      </motion.div>
+
+     
+
+      <div style={{ padding: "2%", maxWidth: "1000px", margin: "0 auto" }}>
+       
+
       <Tabs
         value={tabValue}
         onChange={(e, newValue) => setTabValue(newValue)}
@@ -131,24 +163,32 @@ const VentePage = () => {
         <Tab label="État Ventes Tunisair" icon={<motion.div whileHover={{ scale: 1.2 }}><ShoppingBag /></motion.div>} />
       </Tabs>
 
-      <Undo2
-        style={{ cursor: "pointer", color: "#B71C1C" }}
-        size={28}
-        onClick={() => navigate(-1)}
-      />
+      
 
       {tabValue === 0 && (
-        <div>
-          <DetailsEtat />
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<Plus />}
-            onClick={() => setIsAdding(true)}
-            style={{ marginTop: "1rem" }}
-          >
-            Ajouter
-          </Button>
+        <div style={{marginTop:"3%"}}>
+         <div style={Buttonsalligned}> 
+           <motion.button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        style={ShowButton}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        transition={{ type: "spring", stiffness: 300 }}
+      >
+        {sidebarOpen ? "Hide Details" : "Show Details"}
+      </motion.button>
+          <motion.button
+                  onClick={() => setIsAdding(true)}
+                  style={addButton}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+        <Plus  />
+                  Ajouter
+                </motion.button>
+         </div>
+          
           <table style={tableStyle}>
             <thead>
               <tr style={headerRowStyle}>
@@ -257,9 +297,40 @@ const VentePage = () => {
   <EtatVentesDepartTable data={venteEtatDepart} />
 )}
     </div>
+        </motion.div>
+
   );
 };
-
+const Buttonsalligned = {
+  display: "flex",
+  gap: "19rem", // space between buttons
+  alignItems: "center", // vertical alignment
+};
+  const addButton = {
+    padding: "10px 20px",
+    backgroundColor: "#C80505",
+    color: "#fff",
+    border: "none",
+    borderRadius: "5px",
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
+    fontSize: "16px",
+  
+    marginLeft: "15%",
+};
+ const ShowButton = {
+    padding: "10px 20px",
+    backgroundColor: "#2ECC71",
+    color: "#fff",
+    border: "none",
+    borderRadius: "5px",
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
+    fontSize: "16px",
+    marginLeft: "15%",
+};
 const tableStyle = {
   width: "70%",
   borderCollapse: "collapse",
