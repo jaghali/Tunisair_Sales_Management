@@ -1,20 +1,38 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Box, Typography, Table, TableHead, TableRow, TableCell, TableBody, Paper, TablePagination, Select, MenuItem, FormControl, InputLabel, Button } from "@mui/material";
-import { useParams } from 'react-router-dom';
-import {  Undo2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import {
+  Box,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Paper,
+  TablePagination,
+  FormControl,
+  InputLabel,
+} from "@mui/material";
+import { useParams, useNavigate } from "react-router-dom";
+import { RotateCcw, Undo2, Plane, Package, ShieldOff } from "lucide-react";
 import { useCurrency } from "../pages/CurrencyContext";
+import StatCard from "../components/common/StatCard";
+import { motion } from "framer-motion";
+import { CustomAnimatedSelect, MenuItem } from "../components/common/AnimatedSelectComponents";
+import { Select } from "@mui/material";
 
 const Confrontation = () => {
   const [etatVenteDepart, setEtatVenteDepart] = useState([]);
   const [etatVenteArrivee, setEtatVenteArrivee] = useState([]);
-  const [page, setPage] = useState(0); // Current page
-  const [rowsPerPage, setRowsPerPage] = useState(5); // Rows per page
-  const [selectedStatus, setSelectedStatus] = useState(""); // Statut global sélectionné
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [confrontationData, setConfrontationData] = useState([]);
   const navigate = useNavigate();
-  function getCurrencySymbol(code) {
+  const { currency } = useCurrency();
+  const { id } = useParams();
+  const [status, setStatus] = useState("Approved");
+
+  // Currency symbol helper
+  const getCurrencySymbol = (code) => {
     switch (code) {
       case "TND":
         return "DT";
@@ -27,16 +45,17 @@ const Confrontation = () => {
       default:
         return code;
     }
-  }
-  const { currency } = useCurrency();
+  };
+
   const symbol = getCurrencySymbol(currency);
-  const { id } = useParams(); // ID de EnteteVente
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const responseDepart = await axios.get("http://localhost:5000/api/EtatVentesDepart");
-        const responseArrivee = await axios.get("http://localhost:5000/api/EtatVentesarrivee");
+        const [responseDepart, responseArrivee] = await Promise.all([
+          axios.get("http://localhost:5000/api/EtatVentesDepart"),
+          axios.get("http://localhost:5000/api/EtatVentesarrivee"),
+        ]);
         setEtatVenteDepart(responseDepart.data);
         setEtatVenteArrivee(responseArrivee.data);
       } catch (error) {
@@ -46,23 +65,23 @@ const Confrontation = () => {
     fetchData();
   }, [id]);
 
- // Filtrer les données selon l'ID de EnteteVente
- const filteredEtatVenteDepart = etatVenteDepart.filter(item => item.enteteVenteID === parseInt(id));
- const filteredEtatVenteArrivee = etatVenteArrivee.filter(item => item.enteteVenteID === parseInt(id));
+  const filteredEtatVenteDepart = etatVenteDepart.filter(
+    (item) => item.enteteVenteID === parseInt(id)
+  );
+  const filteredEtatVenteArrivee = etatVenteArrivee.filter(
+    (item) => item.enteteVenteID === parseInt(id)
+  );
 
- // Calculer les totaux globaux filtrés par ID
- const totalDepart = filteredEtatVenteDepart.reduce((acc, item) => acc + item.valeur, 0);
- const totalArrivee = filteredEtatVenteArrivee.reduce((acc, item) => acc + item.valeur, 0);
- const difference = totalDepart - totalArrivee;
+  const totalDepart = filteredEtatVenteDepart.reduce((acc, item) => acc + item.valeur, 0);
+  const totalArrivee = filteredEtatVenteArrivee.reduce((acc, item) => acc + item.valeur, 0);
+  const difference = totalDepart - totalArrivee;
 
-  // Indexer etatVenteDepart pour un accès rapide
-  const departMap = Object.fromEntries(etatVenteDepart.map(item => [item.description, item]));
+  const departMap = Object.fromEntries(
+    filteredEtatVenteDepart.map((item) => [item.description, item])
+  );
 
-  // Construire la liste des comparaisons
   const generateConfrontationData = () => {
-    const data = etatVenteArrivee
-    .filter(arriveeItem => arriveeItem.enteteVenteID === parseInt(id))
-    .map(arriveeItem => {
+    const data = filteredEtatVenteArrivee.map((arriveeItem) => {
       const departItem = departMap[arriveeItem.description] || {};
       return {
         code: arriveeItem.code,
@@ -72,12 +91,12 @@ const Confrontation = () => {
         quantiteVenteDepart: departItem.quantiteVente || 0,
         quantiteVenteArrivee: arriveeItem.quantiteVendue,
         prixUnitaireHTDepart: departItem.prixUnitaireHT || 0,
-        prixUnitaireHTArrivee: arriveeItem.prixUnitaireHT,
-        valeurDepart: departItem.valeur,
-        valeurArrivee: arriveeItem.valeur,
+        prixUnitaireHTArrivee: arriveeItem.prixUnitaireHT || 0,
+        valeurDepart: departItem.valeur || 0,
+        valeurArrivee: arriveeItem.valeur || 0,
         restantDepart: departItem.restant || 0,
-        restantArrivee: arriveeItem.restant,
-        id: arriveeItem.enteteVenteID // Assuming each item has a unique _id
+        restantArrivee: arriveeItem.restant || 0,
+        id: arriveeItem.enteteVenteID,
       };
     });
     setConfrontationData(data);
@@ -85,70 +104,111 @@ const Confrontation = () => {
 
   useEffect(() => {
     generateConfrontationData();
-  }, [etatVenteArrivee, etatVenteDepart]); // Rebuild data when data changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [etatVenteArrivee, etatVenteDepart]);
 
-  // Fonction pour mettre à jour le statut via l'API
-  const updateStatut = async (statut) => {
+  const updateStatut = async (newStatus) => {
     try {
-      console.log("Request Data: ", { statut,id});  // Log request data to verify it's correct
-      const response = await axios.put("http://localhost:5000/api/EnteteVente/updateStatus", { statut, id });
+      console.log("Request Data: ", { statut: newStatus, id });
+      const response = await axios.put("http://localhost:5000/api/EnteteVente/updateStatus", {
+        statut: newStatus,
+        id,
+      });
       console.log("Réponse de la mise à jour du statut:", response.data);
       alert("Statut mis à jour avec succès dans la base de données!");
     } catch (error) {
-      console.error("Erreur lors de la mise à jour du statut", error.response ? error.response.data : error);
+      console.error(
+        "Erreur lors de la mise à jour du statut",
+        error.response ? error.response.data : error
+      );
+      alert("Erreur lors de la mise à jour du statut.");
     }
-  };  
+  };
 
-  // Pagination handling
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0); // Reset to first page when changing rows per page
+    setPage(0);
   };
 
   return (
     <div style={styles.container}>
-       <Undo2
-              style={{ cursor: "pointer", color: "#B71C1C" }}
-              size={28}
-              onClick={() => navigate(-1)}
+      <Undo2
+        style={{ cursor: "pointer", color: "#B71C1C" }}
+        size={28}
+        onClick={() => navigate(-1)}
+        title="Retour"
+      />
+
+      <div style={styles.statsGrid}>
+        <motion.div
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 2, ease: "easeOut" }}
+        >
+          <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+            <StatCard
+              name="Total Tunisair:"
+              icon={Plane}
+              value={`${totalDepart.toFixed(2)} ${symbol}`}
+              color="#c0392b"
             />
-      {/* Totaux globaux dans des Box Material UI */}
-      <Box display="flex" flexDirection="row" gap={5} justifyContent="center">
-        <Box display="flex" alignItems="center" justifyContent="center" p={2} bgcolor="#f5f5f5" borderRadius={2} boxShadow={2} width={200} minHeight={60}>
-          <Typography variant="h6" color="primary">Total Tunisair: {totalDepart} {symbol}</Typography>
-        </Box>
-        <Box display="flex" alignItems="center" justifyContent="center" p={2} bgcolor="#f5f5f5" borderRadius={2} boxShadow={2} width={200} minHeight={60}>
-          <Typography variant="h6" color="secondary">Total Fournisseur: {totalArrivee} {symbol}</Typography>
-        </Box>
-        <Box display="flex" alignItems="center" justifyContent="center" p={2} bgcolor="#f5f5f5" borderRadius={2} boxShadow={2} width={200} minHeight={60}>
-          <Typography variant="h6" color="primary">Ecart: {difference} {symbol}</Typography>
-        </Box>
-      </Box>
+            <StatCard
+              name="Total Fournisseur:"
+              icon={Package}
+              value={`${totalArrivee.toFixed(2)} ${symbol}`}
+              color="#3498db"
+            />
+            <StatCard
+              name="Écart:"
+              icon={ShieldOff}
+              value={`${difference.toFixed(2)} ${symbol}`}
+              color="#e67e22"
+            />
+          </div>
+        </motion.div>
+      </div>
 
-      {/* Sélecteur de statut global */}
-      <Box display="flex" justifyContent="center" mb={3}>
-        <FormControl>
-          <InputLabel>Statut</InputLabel>
-          <Select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            label="Statut"
-          >
-            <MenuItem value="Approved">Approved</MenuItem>
-            <MenuItem value="Not Approved">Not Approved</MenuItem>
-          </Select>
-        </FormControl>
-        <Button variant="contained" color="primary" onClick={() => updateStatut(selectedStatus)} sx={{ marginLeft: 2 }}>
-          Mettre à jour le statut global
-        </Button>
-      </Box>
+      <motion.div
+  style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: 24  ,marginLeft:"65%"}}
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  transition={{ duration: 0.5 }}
+>
+  <FormControl sx={{ minWidth: 200 }}>
+    <InputLabel id="select-status-label">Statut</InputLabel>
+    <Select
+  labelId="select-status-label"
+  id="select-status"
+  value={status}
+  onChange={(e) => setStatus(e.target.value)}
+  label="Statut"
+  displayEmpty
+>
+  <MenuItem value="Approved">Approved</MenuItem>
+  <MenuItem value="Not Approved">Not Approved</MenuItem>
+</Select>
+  </FormControl>
 
-      {/* Tableau de confrontation */}
-      <Paper elevation={3} sx={{ marginTop: 3, overflow: "hidden" }}>
+  <motion.button
+    onClick={() => updateStatut(status)}
+    style={styles.UpdateButton}
+    whileHover={{ scale: 1.1 }}
+    whileTap={{ scale: 0.9 }}
+    transition={{ type: "spring", stiffness: 300 }}
+    type="button"
+  >
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <RotateCcw />
+      Mettre à jour le statut global
+    </div>
+  </motion.button>
+</motion.div>
+
+
         <Table>
           <TableHead sx={{ backgroundColor: "#f2f2f2" }}>
             <TableRow>
@@ -165,7 +225,6 @@ const Confrontation = () => {
               <TableCell>Restant Départ</TableCell>
               <TableCell>Restant Arrivée</TableCell>
               <TableCell>EnteteVenteID</TableCell>
-
             </TableRow>
           </TableHead>
           <TableBody>
@@ -181,12 +240,11 @@ const Confrontation = () => {
                   <TableCell>{item.quantiteVenteArrivee}</TableCell>
                   <TableCell>{item.prixUnitaireHTDepart}</TableCell>
                   <TableCell>{item.prixUnitaireHTArrivee}</TableCell>
-                  <TableCell>{item.valeurDepart}</TableCell>
-                  <TableCell>{item.valeurArrivee}</TableCell>
+                  <TableCell>{item.valeurDepart.toFixed(2)}</TableCell>
+                  <TableCell>{item.valeurArrivee.toFixed(2)}</TableCell>
                   <TableCell>{item.restantDepart}</TableCell>
                   <TableCell>{item.restantArrivee}</TableCell>
                   <TableCell>{item.id}</TableCell>
-
                 </TableRow>
               ))}
           </TableBody>
@@ -200,7 +258,6 @@ const Confrontation = () => {
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
-      </Paper>
     </div>
   );
 };
@@ -210,8 +267,26 @@ const styles = {
     padding: "50px",
     display: "flex",
     flexDirection: "column",
-    gap: "20px"
-  }
+    gap: "20px",
+    overflowX: "hidden",
+    maxWidth: "100%",
+    boxSizing: "border-box",
+  },
+  statsGrid: {
+    width: "100%",
+    marginLeft: "19%",
+  },
+  UpdateButton: {
+    padding: "20px 20px",
+    backgroundColor: "#C80505",
+    color: "#fff",
+    border: "none",
+    borderRadius: "5px",
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
+    fontSize: "16px",
+  },
 };
 
 export default Confrontation;

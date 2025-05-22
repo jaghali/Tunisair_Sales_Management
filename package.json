@@ -44,7 +44,7 @@
     "echarts-gl": "^2.0.9",
     "emailjs": "^4.0.3",
     "formatDate": "^1.0.0",
-    "framer-motion": "^12.5.0",
+    "framer-motion": "^12.12.1",
     "fullcalendar": "^6.1.15",
     "heroui-cli": "^1.0.0",
     "i18next": "^25.2.0",
@@ -66,17 +66,19 @@
     "react-leaflet": "^5.0.0-rc.2",
     "react-loading": "^2.0.3",
     "react-router-dom": "^7.5.0",
-    "react-scripts": "^5.0.1",
+    "react-scripts": "^3.0.1",
     "react-select": "^5.10.1",
     "react-spinners": "^0.15.0",
     "recharts": "^2.15.3",
     "rsuite": "^5.79.1",
     "styled-components": "^6.1.17",
-    "sweetalert2": "^11.17.2"
+    "sweetalert2": "^11.6.13"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
+    "cross-env": "^7.0.3",
     "postcss": "^8.5.3",
-    "tailwindcss": "^3.4.17"
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.8.3"
   }
 }
