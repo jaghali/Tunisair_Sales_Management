@@ -38,6 +38,7 @@ namespace TunisairSalesManagement.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Equipage>().ToTable("Equipage");
 
             // Définir les clés primaires
             modelBuilder.Entity<EtatOffresDepart>()

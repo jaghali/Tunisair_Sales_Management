@@ -44,7 +44,5 @@ namespace TunisairSalesManagement.Models
 
         public int? MAT { get; set; }
 
-        // Navigation property (if Equipage depends on NUMFL/NUMVOL or just NUMFL)
-        public ICollection<Equipage> Equipages { get; set; }
     }
 }

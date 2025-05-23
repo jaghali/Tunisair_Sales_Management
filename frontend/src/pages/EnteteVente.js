@@ -21,7 +21,7 @@ const EnteteVente = () => {
   const [error, setError] = useState(null);
   const [fourniss, setFourniss] = useState([]);
   const [DetailFL, setDetailFL] = useState([]);
-
+  const [pnList, setPnList] = useState([]);
   const [isEditing, setIsEditing] = useState(null);
   const [editedItem, setEditedItem] = useState(null);
   const [openForm, setOpenForm] = useState(false);
@@ -101,9 +101,10 @@ const EnteteVente = () => {
         const refreshed = await axios.get("http://localhost:5000/api/EnteteVente");
         const fournRes = await axios.get("http://localhost:5000/api/Fournisseurs");
         const Detfl = await axios.get("http://localhost:5000/api/detailfl");
+        const pnRes = await axios.get("http://localhost:5000/api/pn");
 
         setDetailFL(Detfl.data);
-
+        setPnList(pnRes.data);
         setFourniss(fournRes.data);
 
         setData(refreshed.data);
@@ -312,20 +313,36 @@ const EnteteVente = () => {
           
           <div style={{ display: "flex", gap: "15px", marginBottom: "10px" }}>
           <Select
-            value={newItem.numfl}
-            onChange={(e) => setNewItem({ ...newItem, numfl: e.target.value })}
-            fullWidth
-            displayEmpty
-          >
-            <MenuItem value="" disabled>
-              <em>FL01</em>
-            </MenuItem>
-            {DetailFL.map((item) => (
-              <MenuItem key={item.id} value={item.numfl}>
-                {item.numfl}
-              </MenuItem>
-            ))}
-          </Select>
+  value={newItem.fL01}
+  onChange={(e) => {
+    const selectedNumfl = e.target.value;
+    const selectedDetail = DetailFL.find(item => item.numfl === selectedNumfl);
+    console.log("Selected detail:", selectedDetail);
+    const matchedPn = selectedDetail 
+    ? pnList.find(pn => Number(pn.matricule) === Number(selectedDetail.mat))
+    : null;
+    console.log("Matched PNC:", matchedPn);
+
+    setNewItem({
+      ...newItem,
+      fL01: selectedNumfl,
+      pnC1: selectedDetail ? selectedDetail.mat : '' , // auto-remplissage de PNC1
+      noM1: matchedPn ? matchedPn.nom : '' // auto-remplissage NOM1
+    });
+  }}
+  fullWidth
+  displayEmpty
+>
+  <MenuItem value="" disabled>
+    <em>FL01</em>
+  </MenuItem>
+  {DetailFL.map((item) => (
+    <MenuItem key={item.id} value={item.numfl}>
+      {item.numfl}
+    </MenuItem>
+  ))}
+</Select>
+
 
          
           <TextField label="fL 02" value={newItem.fL02} onChange={(e) => setNewItem({ ...newItem, fL02: e.target.value })} fullWidth />
@@ -335,12 +352,13 @@ const EnteteVente = () => {
           <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
           <TextField label="cc 1" value={newItem.cC1} onChange={(e) => setNewItem({ ...newItem, cC1: e.target.value })} fullWidth />
           <TextField
+          disabled
         label="PNC 1"
         value={newItem.pnC1}
         onChange={(e) => setNewItem({ ...newItem, pnC1: e.target.value })}
         fullWidth
-      />            <TextField label="noM 1" value={newItem.noM1} onChange={(e) => setNewItem({ ...newItem, noM1: e.target.value })} fullWidth />
-            
+          />            
+          <TextField disabled label="noM 1" value={newItem.noM1} onChange={(e) => setNewItem({ ...newItem, noM1: e.target.value })} fullWidth />       
           </div>  
           <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
           <TextField label="noM 2" value={newItem.noM2} onChange={(e) => setNewItem({ ...newItem, noM2: e.target.value })} fullWidth />

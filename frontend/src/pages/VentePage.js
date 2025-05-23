@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import EtatVentesDepartTable from "../components/EtatVentesDepartTable";
-import { Edit, Trash, Plus, Save, X, Users, ShoppingBag, Undo2 } from "lucide-react";
+import { Edit, Trash, Plus, Save, X, Users, ShoppingBag,Zap, Undo2 } from "lucide-react";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import { Button, TextField, Autocomplete } from "@mui/material";
@@ -23,7 +23,40 @@ const VentePage = () => {
   const { id } = useParams();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { showToast } = useToast();
-
+  
+  const handleFetchAutomatedEquipage = async () => {
+    try {
+      const currentId = parseInt(id);
+  
+      // Appel à l'endpoint automatisé
+      const response = await axios.get(`http://localhost:5000/api/Equipage/automatedEquipage/${currentId}`);
+  
+      const newEquipages = response.data;
+  
+      // Filtrer les doublons basés sur matricule et enteteVenteID
+      const alreadyAddedMatricules = venteDetails.map(item => item.matricule);
+      const filteredEquipages = newEquipages.filter(
+        eq => !alreadyAddedMatricules.includes(eq.mat)
+      );
+  
+      // Pour chaque équipage non dupliqué, ajouter dans la base manuellement
+      const addedEquipages = await Promise.all(filteredEquipages.map(async (eq) => {
+        const res = await axios.post(`http://localhost:5000/api/ListeEquipageV`, {
+          matricule: eq.mat,
+          pnc: "", // à compléter si nécessaire
+          enteteVenteID: currentId
+        });
+        return res.data;
+      }));
+  
+      setVenteDetails([...venteDetails, ...addedEquipages]);
+      showToast("Équipage ajouté automatiquement avec succès.");
+    } catch (err) {
+      console.error(err);
+      setError("Erreur lors de la récupération automatique de l'équipage.");
+    }
+  };
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -49,6 +82,13 @@ const VentePage = () => {
 
     if (id) fetchData();
   }, [id]);
+
+  useEffect(() => {
+    if (id && venteDetails.length === 0) {
+      handleFetchAutomatedEquipage();
+    }
+  }, [id, venteDetails.length]);
+  
 
   const [enteteVente, setEnteteVente] = useState(null);
 
@@ -189,6 +229,7 @@ const VentePage = () => {
         <Plus  />
                   Ajouter
                 </motion.button>
+
          </div>
           
           <table style={tableStyle}>
@@ -196,7 +237,6 @@ const VentePage = () => {
               <tr style={headerRowStyle}>
                 <th style={tableHeaderStyle}>PNC</th>
                 <th style={tableHeaderStyle}>Matricule</th>
-                <th style={tableHeaderStyle}>EnteteVenteID</th>
                 <th style={tableHeaderStyle}>Status</th>
                 <th style={tableHeaderStyle}>Actions</th>
               </tr>
@@ -254,7 +294,6 @@ const VentePage = () => {
                         item.matricule
                       )}
                     </td>
-                    <td style={tableCellStyle}>{item.enteteVenteID}</td>
                     <td style={tableCellStyle}>
                     <span style={{
   padding: "4px 10px",
