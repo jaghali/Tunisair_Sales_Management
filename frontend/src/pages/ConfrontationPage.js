@@ -17,8 +17,9 @@ import { RotateCcw, Undo2, Plane, Package, ShieldOff } from "lucide-react";
 import { useCurrency } from "../pages/CurrencyContext";
 import StatCard from "../components/common/StatCard";
 import { motion } from "framer-motion";
-import { CustomAnimatedSelect, MenuItem } from "../components/common/AnimatedSelectComponents";
+import {MenuItem } from "../components/common/AnimatedSelectComponents";
 import { Select } from "@mui/material";
+import { useToast } from "./toast";
 
 const Confrontation = () => {
   const [etatVenteDepart, setEtatVenteDepart] = useState([]);
@@ -30,6 +31,7 @@ const Confrontation = () => {
   const { currency } = useCurrency();
   const { id } = useParams();
   const [status, setStatus] = useState("Approved");
+  const { showToast } = useToast();
 
   // Currency symbol helper
   const getCurrencySymbol = (code) => {
@@ -115,7 +117,7 @@ const Confrontation = () => {
         id,
       });
       console.log("Réponse de la mise à jour du statut:", response.data);
-      alert("Statut mis à jour avec succès dans la base de données!");
+      showToast("Statut mis à jour avec succès");
     } catch (error) {
       console.error(
         "Erreur lors de la mise à jour du statut",

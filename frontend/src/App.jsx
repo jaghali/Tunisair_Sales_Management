@@ -37,14 +37,22 @@ import Avances from "./pages/Avances";
 import UserInterface from "./pages/UserInterface";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./App.css";
+import { ToastProvider  } from "./pages/toast";
+import { PanelContextProvider } from "./pages/ResizablePanel";
+
 
 function App() {
   return (
-    <CurrencyProvider>
-    <Router>
-      <MainLayout />
-    </Router>
-    </CurrencyProvider>
+    
+  <CurrencyProvider>
+  <ToastProvider>
+    <PanelContextProvider value="someValue">
+      <Router>
+        <MainLayout />
+      </Router>
+    </PanelContextProvider>
+  </ToastProvider>
+</CurrencyProvider>
   );
 }
 
@@ -173,6 +181,7 @@ function MainLayout() {
               <Route path="/ProfilePage/:matricule" element={<ProfilePage />} />
               <Route path="/Gemini" element={<Gemini />} />
             </Routes>
+            
           </div>
         </div>
       )}

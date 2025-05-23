@@ -69,12 +69,13 @@ const LoginPage = () => {
             justifyContent: "center",
             alignItems: "center",
             width: "100%",
-            height: "100vh", // Ensure full height
-            position: "relative", // To position the image relative to this container
+            height: "100%",
+            position: "relative",
+            overflow: "hidden",
         },
         backgroundWrapper: {
             width: "60%",
-            height: "100vh",
+            height: "100vh", 
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
@@ -193,8 +194,6 @@ const LoginPage = () => {
         },
     }}
 />
-
-    
                         <button type="submit" style={styles.button}>Login</button>
                         {errorMessage && <p style={styles.error}>{errorMessage}</p>}
                         <p style={styles.forgotPasswordLink} onClick={() => navigate("/ForgotPasswordPage")}>

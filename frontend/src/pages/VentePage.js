@@ -8,6 +8,7 @@ import { Button, TextField, Autocomplete } from "@mui/material";
 import { motion } from "framer-motion";
 import DetailsEtat from "../components/DetailsEtat";
 import { useNavigate, useParams } from "react-router-dom";
+import { useToast } from "./toast";
 
 const VentePage = () => {
   const [venteDetails, setVenteDetails] = useState([]);
@@ -21,6 +22,7 @@ const VentePage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { showToast } = useToast();
 
 
   useEffect(() => {
@@ -60,7 +62,7 @@ const VentePage = () => {
       );
   
       if (isAlreadyAdded) {
-        setError("Cet équipage a déjà été ajouté à cet état.");
+        showToast("Cet équipage exist déjà .");
         return;
       }
   

@@ -8,6 +8,7 @@ import { Button, TextField, Autocomplete, Snackbar } from "@mui/material";
 import { motion } from "framer-motion";
 import DetailsEtat from "../components/DetailsEtat";
 import { useNavigate, useParams } from "react-router-dom";
+import { useToast } from "./toast";
 
 const VentePageArr = () => {
   const [venteDetails, setVenteDetails] = useState([]);
@@ -23,6 +24,7 @@ const VentePageArr = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { showToast } = useToast();
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -43,7 +45,7 @@ const VentePageArr = () => {
         setPncs(pncResponse.data);
         setEntete(enteteResponse.data[0]); // Assuming the first entete is relevant
       } catch (err) {
-        setError("Erreur lors du chargement des données.");
+        showToast("Erreur lors du chargement des données.");
       } finally {
         setLoading(false);
       }
@@ -59,7 +61,7 @@ const VentePageArr = () => {
       setIsAdding(false);
       setNewItem({ pnc: "", matricule: "" });
     } catch (error) {
-      setError("Erreur lors de l'ajout.");
+      showToast("Erreur lors de l'ajout.");
     } finally {
       setIsSaving(false);
     }
@@ -73,7 +75,7 @@ const VentePageArr = () => {
       setVenteDetails(venteDetails.map(item => item.matricule === editedItem.matricule ? editedItem : item));
       setEditedItem(null);
     } catch (error) {
-      setError("Erreur lors de la modification.");
+      showToast("Erreur lors de la modification.");
     }
   };
 
@@ -88,7 +90,7 @@ const VentePageArr = () => {
         )
       );
     } catch (error) {
-      setError("Erreur lors de la suppression.");
+      showToast("Erreur lors de la suppression.");
     }
   };
   

@@ -5,16 +5,59 @@ import { User, Mic, MicOff, ShoppingBag, Users, PackageSearch } from "lucide-rea
 import StatCard from "../components/common/StatCard";
 import { motion } from "framer-motion";
 import * as echarts from "echarts";
-import EURFlag from "../components/Images/flags/Flag_of_Europe.svg.png";
-import USDFlag from "../components/Images/flags/Flag_of_the_United_States.png";
-import GBPFlag from "../components/Images/flags/Flag_of_the_United_Kingdom.png";
-import TNDFlag from "../components/Images/flags/Flag_of_Tunisia.png";
 import AIAssistantCard from "../components/AIAssistantCard";
+import { Languages } from "lucide-react";
+import { Menu, MenuItem } from "@mui/material";
+import zIndex from "@mui/material/styles/zIndex";
+
+const translations = {
+  fr: {
+    financial: "Financier",
+    dashboards: "Tableaux de bord",
+    loading: "Chargement...",
+    errorLoadingUser: "Impossible de charger les infos utilisateur.",
+    heyNeedHelp: "Hé, besoin d'aide ?",
+    inputPlaceholder: "Demandez-moi n'importe quoi !",
+    trousDeCaisse: "Trous de Caisse",
+    avance: "Avance",
+    base: "Base",
+    selectLanguage: "Choisir la langue",
+    profileAria: "Profil",
+    voiceAssistantAria: "Assistant vocal",
+    user: "Utilisateur",
+  },
+  en: {
+    financial: "Financial",
+    dashboards: "Dashboards",
+    loading: "Loading...",
+    errorLoadingUser: "Unable to load user info.",
+    heyNeedHelp: "Hey, need help?",
+    inputPlaceholder: "Just ask me anything!",
+    trousDeCaisse: "Cash Gaps",
+    avance: "Advance",
+    base: "Base",
+    selectLanguage: "Select Language",
+    profileAria: "Profile",
+    voiceAssistantAria: "Voice Assistant",
+    user: "User",
+  },
+};
 
 const UserInterface = () => {
   const { matricule } = useParams();
   const navigate = useNavigate();
 
+const [anchorEl, setAnchorEl] = useState(null);
+const open = Boolean(anchorEl);
+
+const handleMenuClick = (event) => {
+  setAnchorEl(event.currentTarget);
+};
+
+const handleMenuClose = (lang) => {
+  if (lang) setLanguage(lang);
+  setAnchorEl(null);
+};
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -27,7 +70,10 @@ const UserInterface = () => {
   const chartRef = useRef(null);
   const [totaleValeur, setTotaleValeur] = useState(0);
   const [totaleEncaisse, setTotaleEncaisse] = useState(0);
-  
+  const [language, setLanguage] = useState("fr");
+
+  const t = translations[language];
+
   const currencyChartData = [
     { date: '2021-01', EUR: 1, USD: 1.07, GBP: 0.86, TND: 3.1 },
     { date: '2021-02', EUR: 1, USD: 1.08, GBP: 0.85, TND: 3.2 },
@@ -50,8 +96,7 @@ const UserInterface = () => {
   ];
 
   
-
-  const handleMicClick = () => {
+ const handleMicClick = () => {
     if (micEnabled && recognitionRef.current) {
       recognitionRef.current.start();
     }
@@ -75,7 +120,7 @@ const UserInterface = () => {
       }
     }
   };
-  useEffect(() => {
+   useEffect(() => {
     const fetchTotaux = async () => {
       try {
         const res = await fetch("http://localhost:5000/api/entetevente");
@@ -90,29 +135,25 @@ const UserInterface = () => {
         console.error("Erreur lors de la récupération des totaux:", err);
       }
     };
-  
     fetchTotaux();
   }, []);
-  
+
   useEffect(() => {
     const fetchPNInfo = async () => {
       try {
         const res = await fetch(`http://localhost:5000/api/PN/${matricule}`);
-
-        
-
         if (!res.ok) throw new Error("PN not found");
         const data = await res.json();
         setUser(data);
       } catch (err) {
         console.error("Failed to load PN info:", err);
-        setError("Impossible de charger les infos utilisateur.");
+        setError(t.errorLoadingUser);
       } finally {
         setLoading(false);
       }
     };
     fetchPNInfo();
-  }, [matricule]);
+  }, [matricule, t.errorLoadingUser]);
 
   useEffect(() => {
     const rates = { EUR: 1, USD: 1.07, GBP: 0.86, TND: 3.1 };
@@ -123,7 +164,7 @@ const UserInterface = () => {
     if (chartRef.current && !loading) {
       const chartInstance = echarts.init(chartRef.current);
       const options = {
-        title: { text: "Currency Conversion Over Time", left: "center" },
+        title: { text: language === "fr" ? "Conversion de devises au fil du temps" : "Currency Conversion Over Time", left: "center" },
         tooltip: { trigger: "axis" },
         legend: { data: ["EUR", "USD", "GBP", "TND"], top: "10%" },
         xAxis: { type: "category", data: currencyChartData.map((i) => i.date) },
@@ -138,31 +179,43 @@ const UserInterface = () => {
       chartInstance.setOption(options);
       return () => chartInstance.dispose();
     }
-  }, [currencyChartData, selectedCurrency, loading]);
+  }, [currencyChartData, selectedCurrency, loading, language]);
 
-  if (loading) return <div style={styles.container}><p>Chargement...</p></div>;
-
-  const currencyOptions = [
-    { code: "EUR", name: "EUR (€)", flag: EURFlag },
-    { code: "USD", name: "USD ($)", flag: USDFlag },
-    { code: "GBP", name: "GBP (£)", flag: GBPFlag },
-    { code: "TND", name: "TND (د.ت)", flag: TNDFlag },
-  ];
+  if (loading) return <div style={styles.container}><p>{t.loading}</p></div>;
 
   return (
     <div style={styles.container}>
       <div style={styles.headerRow}>
         <div style={styles.titleBlock}>
-          <h1 style={styles.h1}>Financial</h1>
-          <p style={styles.secteur}>Dashboards</p>
+          <h1 style={styles.h1}>{t.financial}</h1>
+          <p style={styles.secteur}>{t.dashboards}</p>
         </div>
         <div style={styles.nameBlock}>
-          <h1 style={styles.h1}>{user ? `${user.prenom} ${user.nom}` : "Utilisateur"}</h1>
-          <p style={styles.secteur}>{user?.college || ""}</p>
-          <div style={styles.ProfileCircle} onClick={() => navigate(`/ProfilePage/${matricule}`)} aria-label="Profile">
-            <User size={30} color="#333" />
+  <div>
+    <h1 style={styles.h1}>{user ? `${user.prenom} ${user.nom}` : t.user}</h1>
+    <p style={styles.secteur}>{user?.college || ""}</p>
+  </div>
+  <div
+    style={styles.ProfileCircle}
+    onClick={() => navigate(`/ProfilePage/${matricule}`)}
+  >
+    <User size={30} color="#333" />
+  </div>
+</div>
+         <div style={styles.LanguageSelector}>
+            <button
+              onClick={handleMenuClick}
+              style={styles.languageButton}
+              aria-label={t.selectLanguage}
+            >
+              <Languages size={30} color="#c80505" />
+            </button>
+
+            <Menu anchorEl={anchorEl} open={open} onClose={() => handleMenuClose()}>
+              <MenuItem onClick={() => handleMenuClose("fr")}>Français</MenuItem>
+              <MenuItem onClick={() => handleMenuClose("en")}>English</MenuItem>
+            </Menu>
           </div>
-        </div>
       </div>
 
       {error && <p style={styles.errorText}>{error}</p>}
@@ -171,36 +224,25 @@ const UserInterface = () => {
         <>
           <div style={styles.geminiAi}>
             <div style={styles.topRow}>
-              <label style={styles.label}>Hey, need help ?</label>
+              <label style={styles.label}>{t.heyNeedHelp}</label>
               <img src={wavingemoji} alt="Waving Emoji" style={styles.iconImage} />
             </div>
             <div style={styles.bottomRow}>
               <input
                 type="text"
-                placeholder="Just ask me anything!"
+                placeholder={t.inputPlaceholder}
                 style={styles.input}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
               />
             </div>
-            <div style={styles.micCircle} onClick={handleToggleMic} aria-label="Voice Assistant">
+            <div style={styles.micCircle} onClick={handleToggleMic} aria-label={t.voiceAssistantAria}>
               {micEnabled ? <Mic size={20} color="#333" /> : <MicOff size={20} color="#ccc" />}
             </div>
           </div>
 
-          <div style={styles.currencySelector}>
-            <select
-              id="currency"
-              value={selectedCurrency}
-              onChange={(e) => setSelectedCurrency(e.target.value)}
-              style={styles.select}
-            >
-              {currencyOptions.map((option) => (
-                <option key={option.code} value={option.code}>{option.name}</option>
-              ))}
-            </select>
-          </div>
+         
 
           <motion.div
             style={styles.statsGrid}
@@ -209,18 +251,15 @@ const UserInterface = () => {
             transition={{ duration: 2, ease: "easeOut" }}
           >
             <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-            
-            <StatCard
-              name="Trous de Caisse"
-              icon={PackageSearch}
-              value={((totaleValeur - totaleEncaisse) * conversionRate).toFixed(2)}
-              color="#c0392b"
-            />
-
-
-              <StatCard name="Avance" icon={Users} value={user.avance * conversionRate} color="#3498db" />
-              <StatCard name="Base" icon={ShoppingBag} value={user.base} color="#e67e22" />
-              <AIAssistantCard/>
+              <StatCard
+                name={t.trousDeCaisse}
+                icon={PackageSearch}
+                value={((totaleValeur - totaleEncaisse) * conversionRate).toFixed(2)}
+                color="#c0392b"
+              />
+              <StatCard name={t.avance} icon={Users} value={(user.avance * conversionRate).toFixed(2)} color="#3498db" />
+              <StatCard name={t.base} icon={ShoppingBag} value={user.base} color="#e67e22" />
+              <AIAssistantCard />
             </div>
           </motion.div>
 
@@ -234,13 +273,11 @@ const UserInterface = () => {
 };
 
 const styles = {
-  statsGrid: {
+  statsGrid: {},
 
-  },
-  
   container: {
     padding: "5rem",
-    marginLeft: "15%",
+    marginLeft: "20%",
     marginTop: "-4rem",
     overflowX: "hidden",
   },
@@ -253,9 +290,30 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: "2rem",
+    width:"100%"
   },
-  titleBlock: { textAlign: "left" },
-  nameBlock: { marginRight: "20%" },
+  titleBlock: { 
+    textAlign: "left" ,
+    marginBottom:"15%",
+
+  },
+  nameBlock: {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '1rem',
+  marginLeft: '50%',
+  marginBottom: '15%',
+},
+ProfileCircle: {
+  width: '50px',
+  height: '50px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  cursor: 'pointer',
+  marginLeft: 'auto',
+  zIndex: 999,
+},
   secteur: {
     fontSize: "0.875rem",
     color: "#666",
@@ -309,32 +367,30 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
     cursor: "pointer",
   },
-  ProfileCircle: {
-    position: "relative",
-    bottom: "50px",
-    left: "180%",
-    width: "60px",
-    height: "60px",
-    borderRadius: "50%",
-    backgroundColor: "#fff",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-    cursor: "pointer",
+  LanguageSelector: {
+    margin: "1rem 0",
+    width: "00%",
+    marginBottom:"20%",
   },
-  currencySelector: {
-    margin: "2rem 0",
+  languageButton:{
+    backgroundColor:"transparent",
+    border:"none",
+    cursor:"pointer",
+
   },
   select: {
-    padding: "0.5rem 1rem",
+    width: "100%",
+    padding: "0.3rem",
     fontSize: "1rem",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
+    borderRadius: "5px",
   },
+  errorText: {
+    color: "red",
+  },
+  
 };
 
 export default UserInterface;

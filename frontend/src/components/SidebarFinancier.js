@@ -9,7 +9,6 @@ const SIDEBAR_ITEMS = [
     { name: "Redevance", icon: PlaneLanding, color: "#6366f1", href: "/Redevance" },
     { name: "Commission", icon:GiftIcon , color: "#8B5CF6", href: "/Commission" },
     { name: "Avance en devise", icon:GiftIcon , color: "#8B5CF6", href: "/Avances" },
-    { name: "Change Language", icon:Languages , color: "#8B5CF6", href: "/Avances" },
 
     { name: "Logout", icon: LogOut, color: "#6EE7B7", href: "/" },
 ];
