@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate,Link } from "react-router-dom";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle ,TextField} from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle ,TextField,Select,MenuItem,} from "@mui/material";
 import { Edit, Trash, Save, X ,  Plus } from "lucide-react";
 import { motion } from 'framer-motion';
 
@@ -9,6 +9,9 @@ const EnteteOffreArr = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [fourniss, setFourniss] = useState([]);
+  const [DetailFL, setDetailFL] = useState([]);
+  const [pnList, setPnList] = useState([]);
   const [isEditing, setIsEditing] = useState(null);
   const [editedItem, setEditedItem] = useState(null);
   const [openForm, setOpenForm] = useState(false);
@@ -20,6 +23,13 @@ const EnteteOffreArr = () => {
       try {
         const response = await axios.get("http://localhost:5000/api/EnteteOffre");
         setData(response.data);
+        const fournRes = await axios.get("http://localhost:5000/api/Fournisseurs");
+        const Detfl = await axios.get("http://localhost:5000/api/detailfl");
+        const pnRes = await axios.get("http://localhost:5000/api/pn");
+
+        setDetailFL(Detfl.data);
+        setPnList(pnRes.data);
+        setFourniss(fournRes.data);
       } catch (err) {
         setError("Erreur lors du chargement des données.");
       } finally {
@@ -169,36 +179,142 @@ const EnteteOffreArr = () => {
 
 <Dialog open={openForm} onClose={() => setOpenForm(false)}>
         <DialogTitle>Ajouter Etat De Vente</DialogTitle>
-        <DialogContent>
+<DialogContent>
           <div style={{ display: "flex", gap: "15px", marginBottom: "10px" }}>
           <TextField label="Numéro Etat" value={newItem.numerO_ETAT} onChange={(e) => setNewItem({ ...newItem, numerO_ETAT: e.target.value })} fullWidth />
 
-            <TextField label="Fournisseur" value={newItem.avion} onChange={(e) => setNewItem({ ...newItem, avion: e.target.value })} fullWidth />
+          <Select
+  value={newItem.avion}
+  onChange={(e) => setNewItem({ ...newItem, avion: e.target.value })}
+  fullWidth
+  displayEmpty
+>
+  <MenuItem value="" disabled>
+    <em>Fournisseur</em>
+  </MenuItem>
+  {fourniss.map((f) => (
+    <MenuItem key={f.id} value={f.nom}>
+      {f.nom}
+    </MenuItem>
+  ))}
+</Select>
+
           </div>
           <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
           <TextField label="Airoport" value={newItem.airoport} onChange={(e) => setNewItem({ ...newItem, airoport: e.target.value })} fullWidth />
 
           <TextField label="Date Edition" type="date" InputLabelProps={{ shrink: true }} value={newItem.datE_EDITION} onChange={(e) => setNewItem({ ...newItem, datE_EDITION: e.target.value })} fullWidth />
-          <TextField label="Agent Saisie" value={newItem.agenT_SAISIE} onChange={(e) => setNewItem({ ...newItem, agenT_SAISIE: e.target.value })} fullWidth />
           </div>
           
           
           <div style={{ display: "flex", gap: "15px", marginBottom: "10px" }}>
-          <TextField label="fL 01" value={newItem.fL01} onChange={(e) => setNewItem({ ...newItem, fL01: e.target.value })} fullWidth />
-          <TextField label="fL 02" value={newItem.fL02} onChange={(e) => setNewItem({ ...newItem, fL02: e.target.value })} fullWidth />
+          <Select
+  value={newItem.fL01}
+  onChange={(e) => {
+    const selectedNumfl = e.target.value;
+    const selectedDetail = DetailFL.find(item => item.numfl === selectedNumfl);
+    console.log("Selected detail:", selectedDetail);
+    const matchedPn = selectedDetail 
+    ? pnList.find(pn => Number(pn.matricule) === Number(selectedDetail.mat))
+    : null;
+    console.log("Matched PNC:", matchedPn);
+
+    setNewItem({
+      ...newItem,
+      fL01: selectedNumfl,
+      pnC1: selectedDetail ? selectedDetail.mat : '' , // auto-remplissage de PNC1
+      noM1: matchedPn ? matchedPn.nom : '' // auto-remplissage NOM1
+    });
+  }}
+  fullWidth
+  displayEmpty
+>
+  <MenuItem value="" disabled>
+    <em>FL01</em>
+  </MenuItem>
+  {DetailFL.map((item) => (
+    <MenuItem key={item.id} value={item.numfl}>
+      {item.numfl}
+    </MenuItem>
+  ))}
+</Select>
+
+
+         
+<Select
+  value={newItem.fL02}
+  onChange={(e) => {
+    const selectedNumfl = e.target.value;
+    const selectedDetail = DetailFL.find(item => item.numfl === selectedNumfl);
+    console.log("Selected detail:", selectedDetail);
+    const matchedPn = selectedDetail 
+    ? pnList.find(pn => Number(pn.matricule) === Number(selectedDetail.mat))
+    : null;
+    console.log("Matched PNC:", matchedPn);
+
+    setNewItem({
+      ...newItem,
+      fL02: selectedNumfl,
+      pnC2: selectedDetail ? selectedDetail.mat : '' , // auto-remplissage de PNC1
+      noM2: matchedPn ? matchedPn.nom : '' // auto-remplissage NOM1
+    });
+  }}
+  fullWidth
+  displayEmpty
+>
+  <MenuItem value="" disabled>
+    <em>FL02</em>
+  </MenuItem>
+  {DetailFL.map((item) => (
+    <MenuItem key={item.id} value={item.numfl}>
+      {item.numfl}
+    </MenuItem>
+  ))}
+</Select>
             <TextField label="fL 03" value={newItem.fL03} onChange={(e) => setNewItem({ ...newItem, fL03: e.target.value })} fullWidth />
             
           </div>
           <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
-          <TextField label="cc 1" value={newItem.cC1} onChange={(e) => setNewItem({ ...newItem, cC1: e.target.value })} fullWidth />
-          <TextField label="PNC 1" value={newItem.pnC1} onChange={(e) => setNewItem({ ...newItem, pnC1: e.target.value })} fullWidth />
-            <TextField label="noM 1" value={newItem.noM1} onChange={(e) => setNewItem({ ...newItem, noM1: e.target.value })} fullWidth />
-            
+          <Select
+      fullWidth
+      value={newItem.cC1}
+      onChange={(e) => setNewItem({ ...newItem, cC1: e.target.value })}
+      displayEmpty
+      style={{ marginTop: 16 }}
+    >
+      <MenuItem value="" disabled>CC1</MenuItem>
+      {pnList
+        .filter(p => p.college === "C/C")
+        .map((pn) => (
+          <MenuItem key={pn.id} value={pn.nom}>{pn.nom}</MenuItem>
+        ))}
+    </Select>
+          <TextField
+          disabled
+        label="PNC 1"
+        value={newItem.pnC1}
+        onChange={(e) => setNewItem({ ...newItem, pnC1: e.target.value })}
+        fullWidth
+          />            
+          <TextField disabled label="noM 1" value={newItem.noM1} onChange={(e) => setNewItem({ ...newItem, noM1: e.target.value })} fullWidth />       
           </div>  
           <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
-          <TextField label="noM 2" value={newItem.noM2} onChange={(e) => setNewItem({ ...newItem, noM2: e.target.value })} fullWidth />
-          <TextField label="cC 2" value={newItem.cC2} onChange={(e) => setNewItem({ ...newItem, cC2: e.target.value })} fullWidth />
-            <TextField label="PNC 2" value={newItem.pnC2} onChange={(e) => setNewItem({ ...newItem, pnC2: e.target.value })} fullWidth />
+          <TextField disabled label="noM 2" value={newItem.noM2} onChange={(e) => setNewItem({ ...newItem, noM2: e.target.value })} fullWidth />
+          <Select
+      fullWidth
+      value={newItem.cC2}
+      onChange={(e) => setNewItem({ ...newItem, cC2: e.target.value })}
+      displayEmpty
+      style={{ marginTop: 16 }}
+    >
+      <MenuItem value="" disabled fullWidth >CC2</MenuItem>
+      {pnList
+        .filter(p => p.college === "C/C")
+        .map((pn) => (
+          <MenuItem key={pn.id} value={pn.nom}>{pn.nom}</MenuItem>
+        ))}
+    </Select>
+          <TextField disabled label="PNC 2" value={newItem.pnC2} onChange={(e) => setNewItem({ ...newItem, pnC2: e.target.value })} fullWidth />
           </div>
         </DialogContent>
         <DialogActions>
