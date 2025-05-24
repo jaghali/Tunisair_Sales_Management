@@ -41,9 +41,11 @@ const VentePage = () => {
   
       // Pour chaque équipage non dupliqué, ajouter dans la base manuellement
       const addedEquipages = await Promise.all(filteredEquipages.map(async (eq) => {
+        // Cherche le PNC correspondant dans la liste des PN
+        const matchedPNC = pncs.find(p => p.matricule === eq.mat.toString());     
         const res = await axios.post(`http://localhost:5000/api/ListeEquipageV`, {
           matricule: eq.mat,
-          pnc: "", // à compléter si nécessaire
+          pnc: matchedPNC ? matchedPNC.nom : "", 
           enteteVenteID: currentId
         });
         return res.data;
