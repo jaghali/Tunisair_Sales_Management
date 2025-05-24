@@ -99,6 +99,7 @@ const EnteteVente = () => {
   
         // Mise à jour de l'état local après les modifications
         const refreshed = await axios.get("http://localhost:5000/api/EnteteVente");
+        
         const fournRes = await axios.get("http://localhost:5000/api/Fournisseurs");
         const Detfl = await axios.get("http://localhost:5000/api/detailfl");
         const pnRes = await axios.get("http://localhost:5000/api/pn");
@@ -183,8 +184,6 @@ const EnteteVente = () => {
       }
     }
   };
-
-  const totalArrivee = etatVenteArrivee.reduce((acc, item) => acc + item.valeur, 0);
 
   return (
     <div style={styles.container}>
@@ -345,12 +344,54 @@ const EnteteVente = () => {
 
 
          
-          <TextField label="fL 02" value={newItem.fL02} onChange={(e) => setNewItem({ ...newItem, fL02: e.target.value })} fullWidth />
+<Select
+  value={newItem.fL02}
+  onChange={(e) => {
+    const selectedNumfl = e.target.value;
+    const selectedDetail = DetailFL.find(item => item.numfl === selectedNumfl);
+    console.log("Selected detail:", selectedDetail);
+    const matchedPn = selectedDetail 
+    ? pnList.find(pn => Number(pn.matricule) === Number(selectedDetail.mat))
+    : null;
+    console.log("Matched PNC:", matchedPn);
+
+    setNewItem({
+      ...newItem,
+      fL02: selectedNumfl,
+      pnC2: selectedDetail ? selectedDetail.mat : '' , // auto-remplissage de PNC1
+      noM2: matchedPn ? matchedPn.nom : '' // auto-remplissage NOM1
+    });
+  }}
+  fullWidth
+  displayEmpty
+>
+  <MenuItem value="" disabled>
+    <em>FL02</em>
+  </MenuItem>
+  {DetailFL.map((item) => (
+    <MenuItem key={item.id} value={item.numfl}>
+      {item.numfl}
+    </MenuItem>
+  ))}
+</Select>
             <TextField label="fL 03" value={newItem.fL03} onChange={(e) => setNewItem({ ...newItem, fL03: e.target.value })} fullWidth />
             
           </div>
           <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
-          <TextField label="cc 1" value={newItem.cC1} onChange={(e) => setNewItem({ ...newItem, cC1: e.target.value })} fullWidth />
+          <Select
+      fullWidth
+      value={newItem.cC1}
+      onChange={(e) => setNewItem({ ...newItem, cC1: e.target.value })}
+      displayEmpty
+      style={{ marginTop: 16 }}
+    >
+      <MenuItem value="" disabled>CC1</MenuItem>
+      {pnList
+        .filter(p => p.college === "C/C")
+        .map((pn) => (
+          <MenuItem key={pn.id} value={pn.nom}>{pn.nom}</MenuItem>
+        ))}
+    </Select>
           <TextField
           disabled
         label="PNC 1"
@@ -361,9 +402,22 @@ const EnteteVente = () => {
           <TextField disabled label="noM 1" value={newItem.noM1} onChange={(e) => setNewItem({ ...newItem, noM1: e.target.value })} fullWidth />       
           </div>  
           <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
-          <TextField label="noM 2" value={newItem.noM2} onChange={(e) => setNewItem({ ...newItem, noM2: e.target.value })} fullWidth />
-          <TextField label="cC 2" value={newItem.cC2} onChange={(e) => setNewItem({ ...newItem, cC2: e.target.value })} fullWidth />
-            <TextField label="PNC 2" value={newItem.pnC2} onChange={(e) => setNewItem({ ...newItem, pnC2: e.target.value })} fullWidth />
+          <TextField disabled label="noM 2" value={newItem.noM2} onChange={(e) => setNewItem({ ...newItem, noM2: e.target.value })} fullWidth />
+          <Select
+      fullWidth
+      value={newItem.cC2}
+      onChange={(e) => setNewItem({ ...newItem, cC2: e.target.value })}
+      displayEmpty
+      style={{ marginTop: 16 }}
+    >
+      <MenuItem value="" disabled fullWidth >CC2</MenuItem>
+      {pnList
+        .filter(p => p.college === "C/C")
+        .map((pn) => (
+          <MenuItem key={pn.id} value={pn.nom}>{pn.nom}</MenuItem>
+        ))}
+    </Select>
+          <TextField disabled label="PNC 2" value={newItem.pnC2} onChange={(e) => setNewItem({ ...newItem, pnC2: e.target.value })} fullWidth />
           </div>
         </DialogContent>
         <DialogActions>

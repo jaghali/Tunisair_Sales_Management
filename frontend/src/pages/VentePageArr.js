@@ -170,12 +170,11 @@ const VentePageArr = () => {
                                Ajouter
                              </motion.button>
                       </div>
-              <table style={tableStyle}>
+                      <table style={tableStyle}>
                           <thead>
                             <tr style={headerRowStyle}>
                               <th style={tableHeaderStyle}>PNC</th>
                               <th style={tableHeaderStyle}>Matricule</th>
-                              <th style={tableHeaderStyle}>EnteteVenteID</th>
                               <th style={tableHeaderStyle}>Status</th>
                               <th style={tableHeaderStyle}>Actions</th>
                             </tr>
@@ -233,7 +232,6 @@ const VentePageArr = () => {
                                       item.matricule
                                     )}
                                   </td>
-                                  <td style={tableCellStyle}>{item.enteteVenteID}</td>
                                   <td style={tableCellStyle}>
                                   <span style={{
                 padding: "4px 10px",
