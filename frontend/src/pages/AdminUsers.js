@@ -131,7 +131,6 @@ const AdminUsers = () => {
                 rowsPerPage={rowsPerPage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 rowsPerPageOptions={[5, 10 , 20]}
-                style={{ color: "#c80505" }}
             />
             
 

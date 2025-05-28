@@ -5,6 +5,7 @@ import { TablePagination, Dialog, DialogTitle, DialogContent, DialogActions,  Te
 import "../App.css";
 import SearchIcon from '@mui/icons-material/Search';
 import { motion } from 'framer-motion';
+import { useToast } from "../pages/toast";
 
 const Fournisseurs = () => {
   const [data, setData] = useState([]);
@@ -13,7 +14,8 @@ const Fournisseurs = () => {
   const [editedItem, setEditedItem] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-    
+  const { showToast } = useToast();
+
   
   const [newFournisseur, setNewFournisseur] = useState({ nom: "", adresse: "" , telephone:"" });
 
@@ -23,6 +25,8 @@ const Fournisseurs = () => {
       setData(response.data);
     } catch (error) {
       console.error("Erreur lors de la récupération des fournisseurs:", error);
+      showToast("Erreur lors de la mise à jour:");
+
     }
   }, []);
 
@@ -36,6 +40,8 @@ const Fournisseurs = () => {
       fetchData();
     } catch (error) {
       console.error("Erreur lors de la suppression:", error);
+      showToast("Erreur lors de la mise à jour:");
+
     }
   };
 
@@ -61,6 +67,8 @@ const Fournisseurs = () => {
       setEditedItem(null);
     } catch (error) {
       console.error("Erreur lors de la mise à jour:", error);
+      showToast("Erreur lors de la mise à jour:");
+
     }
   };
 
@@ -70,7 +78,7 @@ const Fournisseurs = () => {
 
   const handleAddFournisseur = async () => {
     if (!newFournisseur.nom || !newFournisseur.adresse || !newFournisseur.telephone) {
-      alert("Veuillez remplir tous les champs !");
+      showToast("Veuillez remplir tous les champs !");
       return;
     }
     try {
@@ -80,6 +88,8 @@ const Fournisseurs = () => {
       setOpenDialog(false);
     } catch (error) {
       console.error("Erreur lors de l'ajout:", error);
+      showToast("Erreur lors de l'ajout:");
+
     }
   };
 
@@ -170,13 +180,13 @@ const Fournisseurs = () => {
               <td style={styles.cell}>
                 {editedItem?.id === item.id ? (
                   <>
-                    <Save onClick={handleSaveEdit} style={{ ...styles.icon, color: "green" }} />
-                    <X onClick={handleCancelEdit} style={{ ...styles.icon, color: "red" }} />
+                    <Save onClick={handleSaveEdit} style={{ ...styles.icon, color: "green"  , cursor:"pointer"}} />
+                    <X onClick={handleCancelEdit} style={{ ...styles.icon, color: "red" , cursor:"pointer"}} />
                   </>
                 ) : (
                   <>
-                    <Pencil onClick={() => handleEdit(item)} style={{ ...styles.icon, color: "#00a3f5" }} />
-                    <Trash onClick={() => handleDelete(item.id)} style={{ ...styles.icon, color: "#e74c3c" }} />
+                    <Pencil onClick={() => handleEdit(item)} style={{ ...styles.icon, color: "#00a3f5"  ,cursor:"pointer"}} />
+                    <Trash onClick={() => handleDelete(item.id)} style={{ ...styles.icon, color: "#e74c3c"  ,cursor:"pointer"}} />
                   </>
                 )}
               </td>
@@ -196,8 +206,8 @@ const Fournisseurs = () => {
 
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} color="primary">Annuler</Button>
-          <Button onClick={handleAddFournisseur} color="primary">Ajouter</Button>
+          <Button onClick={() => setOpenDialog(false)} style={{color:"red"}}>Annuler</Button>
+          <Button onClick={handleAddFournisseur} style={{color:"#00a3f5"}}>Ajouter</Button>
         </DialogActions>
       </Dialog>
     </div>

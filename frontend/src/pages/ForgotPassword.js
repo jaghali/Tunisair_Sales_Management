@@ -5,12 +5,14 @@ import axios from "axios";
 import { PanelContextProvider, Content } from "./ResizablePanel";
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
 import { Hash , Mail  } from 'lucide-react';
+import { useToast } from "./toast";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [matricule, setMatricule] = useState(""); // added matricule state
   const [state, setState] = useState("form"); // "form" or "success"
   const [errorMessage, setErrorMessage] = useState("");
+    const { showToast } = useToast();
 
   const handleReset = async (e) => {
     e.preventDefault();
@@ -25,10 +27,10 @@ const ForgotPassword = () => {
       if (response.data.success) {
         setState("success");
       } else {
-        setErrorMessage("Unable to reset password. Please try again.");
+        showToast("Unable to reset password. Please try again.");
       }
     } catch (error) {
-      setErrorMessage("Failed to send reset email. Please check your information.");
+      showToast("Failed to send reset email. Please check your information.");
     }
   };
 
@@ -131,9 +133,8 @@ const ForgotPassword = () => {
     label="Email address"
     type="email"
     value={email}
-
     variant="standard"
-    onChange={(e) => setMatricule(e.target.value)}
+      onChange={(e) => setEmail(e.target.value)}
         required
         style={styles.TextField}
         InputLabelProps={{

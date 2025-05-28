@@ -164,9 +164,9 @@ const EtatOffresDepartTable = () => {
     }
   };
   const handleDetailClick = () => {
-    navigate(`/ConfrotationOffrePage`);
+    navigate(`/ConfrotationOffrePage/${id}`);
   };
-
+   
   const paginatedData = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (

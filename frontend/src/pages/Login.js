@@ -5,6 +5,7 @@ import { Eye, EyeOff } from "lucide-react"; // Import Eye and EyeOff icons
 import { TextField, InputAdornment } from "@mui/material";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import airplane from '../components/Images/airplane.png'; // Import the airplane image
+import { useToast } from "./toast";
 
 const LoginPage = () => {
     const [matricule, setMatricule] = useState("");
@@ -12,6 +13,8 @@ const LoginPage = () => {
     const [errorMessage, setErrorMessage] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
+    const { showToast } = useToast();
+
 
     // Fonction pour décoder le JWT et extraire les informations
     function parseJwt(token) {
@@ -54,7 +57,7 @@ const LoginPage = () => {
                 navigate(response.data.redirect);
             }
         } catch (error) {
-            setErrorMessage("Invalid credentials.");
+            showToast("Invalid credentials.");
         }
     };
 

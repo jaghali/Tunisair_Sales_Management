@@ -275,7 +275,6 @@ const EnteteOffre = () => {
     </MenuItem>
   ))}
 </Select>
-            <TextField label="fL 03" value={newItem.fL03} onChange={(e) => setNewItem({ ...newItem, fL03: e.target.value })} fullWidth />
             
           </div>
           <div style={{ display: "flex", gap: "15px" , marginBottom: "10px"}}>
@@ -284,7 +283,6 @@ const EnteteOffre = () => {
       value={newItem.cC1}
       onChange={(e) => setNewItem({ ...newItem, cC1: e.target.value })}
       displayEmpty
-      style={{ marginTop: 16 }}
     >
       <MenuItem value="" disabled>CC1</MenuItem>
       {pnList
@@ -309,7 +307,6 @@ const EnteteOffre = () => {
       value={newItem.cC2}
       onChange={(e) => setNewItem({ ...newItem, cC2: e.target.value })}
       displayEmpty
-      style={{ marginTop: 16 }}
     >
       <MenuItem value="" disabled fullWidth >CC2</MenuItem>
       {pnList

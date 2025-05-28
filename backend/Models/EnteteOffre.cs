@@ -18,7 +18,7 @@ namespace TunisairSalesManagement.Models
         public string NUMERO_ETAT { get; set; }
         public string FL01 { get; set; }
         public string FL02 { get; set; }
-        public string FL03 { get; set; }
+        public string? FL03 { get; set; }
         public string CC1 { get; set; }
         public string PNC1 { get; set; }
         public string NOM1 { get; set; }

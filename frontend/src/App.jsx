@@ -113,6 +113,8 @@ function MainLayout() {
     matchPath({ path: "/OffrePage/:id", end: false }, location.pathname) ||
     matchPath({ path: "/OffrePagearr/:id", end: false }, location.pathname) ||
     matchPath({ path: "/ConfrontationPage/:id", end: false }, location.pathname) ||
+    matchPath({ path: "/ConfrotationOffrePage/:id", end: false }, location.pathname) ||
+
     matchPath({ path: "/Gemini", end: true }, location.pathname);
 
   const sidebarComponent = useMemo(() => {

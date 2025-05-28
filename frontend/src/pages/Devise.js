@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { ArrowLeftRight } from "lucide-react";
 import { useCurrency } from "../pages/CurrencyContext";
 import {
   IconButton,
-  Dialog,
-  DialogActions,
-  DialogContent,
   Box,
   Grid,
   TextField,
@@ -17,121 +13,30 @@ import {
   TableRow,
   TableCell,
   Paper,
-  Typography,
-  Card,
-  CardContent,
-  MenuItem,
-  Select,
   FormControl,
   InputLabel,
+  Dialog,
+  MenuItem,
+  Select,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-
-function AjoutDeviseForm({ onSubmit, onCancel }) {
-  const [formData, setFormData] = useState({ nom: "", code: "" });
-
-  const handleChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(formData);
-    setFormData({ nom: "", code: "" });
-  };
-
-  return (
-    <Card sx={{ maxWidth: 400, margin: "20px auto" }}>
-      <CardContent>
-        <Typography variant="h6" mb={2}>
-          Ajouter une Devise
-        </Typography>
-        <form onSubmit={handleSubmit}>
-          <Box display="flex" flexDirection="column" gap={2}>
-            <TextField
-              size="small"
-              label="Nom"
-              name="nom"
-              value={formData.nom}
-              onChange={handleChange}
-              required
-            />
-            <TextField
-              size="small"
-              label="Code"
-              name="code"
-              value={formData.code}
-              onChange={handleChange}
-              required
-            />
-            <Box display="flex" justifyContent="space-between">
-              <Button type="submit" variant="contained" size="small">
-                Ajouter
-              </Button>
-              <Button onClick={onCancel} variant="outlined" size="small">
-                Annuler
-              </Button>
-            </Box>
-          </Box>
-        </form>
-      </CardContent>
-    </Card>
-  );
-}
-
-function UpdateDeviseForm({ formData, onChange, onCancel, onSubmit }) {
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(formData);
-  };
-
-  return (
-    <Box p={4}>
-      <Typography variant="h5" mb={3}>
-        Modifier la Devise
-      </Typography>
-      <form onSubmit={handleSubmit}>
-        <Box display="flex" flexDirection="column" gap={2}>
-          <TextField
-            label="Nom"
-            name="nom"
-            value={formData.nom}
-            onChange={onChange}
-            variant="outlined"
-            required
-          />
-          <TextField
-            label="Code"
-            name="code"
-            value={formData.code}
-            onChange={onChange}
-            variant="outlined"
-            required
-          />
-          <Box display="flex" gap={2}>
-            <Button type="submit" variant="contained" color="primary">
-              Mettre à jour
-            </Button>
-            <Button onClick={onCancel} variant="outlined" color="secondary">
-              Annuler
-            </Button>
-          </Box>
-        </Box>
-      </form>
-    </Box>
-  );
-}
+import { motion, AnimatePresence } from "framer-motion";
+import { Pencil, Trash, Save, X, Plus, Euro } from "lucide-react";
+import ApiCurrency from "../components/ApiCurrency";
+import Form from "../components/Form";
 
 export default function Devise() {
-  const [converterCurrency, setConverterCurrency] = useState("TND"); // convertisseur
+  const [converterCurrency, setConverterCurrency] = useState("TND");
   const [rate, setRate] = useState(null);
   const [amount, setAmount] = useState(1);
   const [converted, setConverted] = useState("");
   const [devises, setDevises] = useState([]);
   const [editData, setEditData] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [openDialog, setOpenDialog] = useState(false);
-  const { currency, setCurrency } = useCurrency(); 
+  const [ajoutFormData, setAjoutFormData] = useState({ nom: "", code: "" });
+  const { currency, setCurrency } = useCurrency();
+  const [showApiToast, setShowApiToast] = useState(false);
 
   const API_URL = "http://localhost:5000/api/Devise";
 
@@ -147,16 +52,18 @@ export default function Devise() {
     const res = await axios.get(API_URL);
     setDevises(res.data);
   };
-  
+
   const handleCurrencyChange = (event) => {
     const selected = event.target.value;
-    setCurrency(selected); // met à jour dans context + localStorage
+    setCurrency(selected);
+    localStorage.setItem("trimesterCurrency", selected);
   };
 
   const handleAdd = async (data) => {
     await axios.post(API_URL, data);
     loadDevises();
-    setOpenDialog(false);
+    setShowAddForm(false);
+    setAjoutFormData({ nom: "", code: "" });
   };
 
   const handleUpdate = async (data) => {
@@ -174,7 +81,6 @@ export default function Devise() {
 
   const handleCancelUpdate = () => setEditData(null);
 
-
   useEffect(() => {
     axios
       .get(`http://localhost:5000/api/ExchangeRate/${converterCurrency}`)
@@ -191,9 +97,9 @@ export default function Devise() {
   }, [amount, rate]);
 
   return (
-    <div className="p-4">
+    <div>
       <Box mt={5} mb={3} ml={40}>
-        <h2> Select Devise To use </h2>
+        <h2>Select Devise To use</h2>
         <FormControl size="small">
           <InputLabel>Devise</InputLabel>
           <Select value={currency} label="Devise" onChange={handleCurrencyChange}>
@@ -205,136 +111,187 @@ export default function Devise() {
         </FormControl>
       </Box>
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => setOpenDialog(true)}
-        style={{ position: "absolute", right: "423px" }}
-      >
-        Ajouter Devise
-      </Button>
-
-      {showAddForm && (
-        <AjoutDeviseForm
-          onSubmit={handleAdd}
-          onCancel={() => setShowAddForm(false)}
-        />
-      )}
-
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogContent>
-          <AjoutDeviseForm
-            onSubmit={handleAdd}
-            onCancel={() => setOpenDialog(false)}
-          />
-        </DialogContent>
-        <DialogActions />
-      </Dialog>
-
-      <Typography variant="h5" mt={4} mb={2}>
-        Liste des Devises
-      </Typography>
-      <Grid item xs={12} md={5}>
-        <Paper sx={{ maxWidth: 500, margin: "auto" }}>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>Nom</TableCell>
-                <TableCell>Code</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {devises.map((d) => (
-                <TableRow key={d.id}>
-                  {editData && editData.id === d.id ? (
-                    <TableCell colSpan={4}>
-                      <UpdateDeviseForm
-                        formData={editData}
-                        onChange={(e) =>
-                          setEditData({
-                            ...editData,
-                            [e.target.name]: e.target.value,
-                          })
-                        }
-                        onSubmit={handleUpdate}
-                        onCancel={handleCancelUpdate}
-                      />
-                    </TableCell>
-                  ) : (
-                    <>
-                      <TableCell>{d.id}</TableCell>
-                      <TableCell>{d.nom}</TableCell>
-                      <TableCell>{d.code}</TableCell>
-                      <TableCell>
-                        <Box display="flex" gap={1}>
-                          <IconButton color="primary" onClick={() => handleEdit(d)}>
-                            <EditIcon />
-                          </IconButton>
-                          <IconButton color="error" onClick={() => handleDelete(d.id)}>
-                            <DeleteIcon />
-                          </IconButton>
-                        </Box>
-                      </TableCell>
-                    </>
-                  )}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Paper>
-      </Grid>
-
-      {/* Convertisseur */}
-      <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
-        <div
-          style={{
-            backgroundColor: "#E5E6EB",
-            padding: "30px",
-            borderRadius: "12px",
-            boxShadow: "0 0 20px rgba(0, 0, 0, 0.1)",
-            minWidth: "340px",
-            fontFamily: "Arial",
-            textAlign: "center",
-          }}
+      <div style={styles.Buttons}>
+        <motion.button
+          onClick={() => setShowApiToast(true)}
+          style={styles.ApiButton}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
         >
-          <h2>Convertisseur de devises</h2>
+          <Euro style={styles.icon} /> Api
+        </motion.button>
 
-          <Box display="flex" gap={2} mb={2}>
-            <TextField
-              label="Montant (EUR)"
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              fullWidth
-              size="small"
-            />
-            <ArrowLeftRight size={24} style={{ alignSelf: "center" }} />
-            <TextField
-              label={`Converti en ${converterCurrency}`}
-              value={converted}
-              InputProps={{ readOnly: true }}
-              fullWidth
-              size="small"
-            />
-          </Box>
+        <motion.button
+          onClick={() => setShowAddForm(true)}
+          style={styles.addButton}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          <Plus style={styles.icon} /> Ajouter Devise
+        </motion.button>
+      </div>
 
-          <FormControl fullWidth size="small">
-            <InputLabel>Devise convertisseur</InputLabel>
-            <Select
-              value={converterCurrency}
-              label="Devise convertisseur"
-              onChange={(e) => setConverterCurrency(e.target.value)}
+      <AnimatePresence>
+        {showApiToast && (
+          <motion.div
+            style={styles.boxapi}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.3 }}
+          >
+            <IconButton
+              aria-label="fermer"
+              onClick={() => setShowApiToast(false)}
+              sx={{
+                position: "absolute",
+                top: 25,
+                right: 8,
+                color: "#C80505",
+                zIndex: 1000,
+              }}
             >
-              <MenuItem value="TND">TND</MenuItem>
-              <MenuItem value="USD">USD</MenuItem>
-              <MenuItem value="GBP">GBP</MenuItem>
-              <MenuItem value="EUR">EUR</MenuItem>
-            </Select>
-          </FormControl>
-        </div>
+              <X />
+            </IconButton>
+            <ApiCurrency />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showAddForm && (
+          <Form
+            open={showAddForm}
+            onClose={() => setShowAddForm(false)}
+            onSubmit={handleAdd}
+            title="Ajouter une Devise"
+            fields={[
+              { name: "nom", label: "Nom" },
+              { name: "code", label: "Code" },
+            ]}
+            values={ajoutFormData}
+            onChange={(e) =>
+              setAjoutFormData({
+                ...ajoutFormData,
+                [e.target.name]: e.target.value,
+              })
+            }
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {editData && (
+          <Form
+            open={!!editData}
+            onClose={handleCancelUpdate}
+            onSubmit={handleUpdate}
+            title="Modifier la Devise"
+            fields={[
+              { name: "nom", label: "Nom" },
+              { name: "code", label: "Code" },
+            ]}
+            values={editData}
+            onChange={(e) =>
+              setEditData({ ...editData, [e.target.name]: e.target.value })
+            }
+            submitLabel="Mettre à jour"
+          />
+        )}
+      </AnimatePresence>
+
+      <div style={styles.boxcrud}>
+        <Grid item xs={12} md={5}>
+          <Paper sx={{ maxWidth: 500, margin: "auto" }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>ID</TableCell>
+                  <TableCell>Nom</TableCell>
+                  <TableCell>Code</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {devises.map((d) => (
+                  <TableRow key={d.id}>
+                    <TableCell>{d.id}</TableCell>
+                    <TableCell>{d.nom}</TableCell>
+                    <TableCell>{d.code}</TableCell>
+                    <TableCell>
+                      <Box display="flex" gap={1}>
+                        <IconButton color="primary" onClick={() => handleEdit(d)}>
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton color="error" onClick={() => handleDelete(d.id)}>
+                          <DeleteIcon />
+                        </IconButton>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Paper>
+        </Grid>
       </div>
     </div>
   );
 }
+
+const styles = {
+  Buttons: {
+    display: "flex",
+    justifyContent: "center",
+    marginBottom: "1rem",
+    gap: "18%",
+    marginLeft: "10%",
+  },
+  boxcrud: {
+    marginLeft: "10%",
+    marginTop: "2%",
+  },
+  addButton: {
+    padding: "10px 20px",
+    backgroundColor: "#C80505",
+    color: "#fff",
+    border: "none",
+    borderRadius: "5px",
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
+    fontSize: "16px",
+  },
+  ApiButton: {
+    padding: "10px 20px",
+    backgroundColor: "#C80505",
+    color: "#fff",
+    border: "none",
+    borderRadius: "5px",
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
+    fontSize: "16px",
+  },
+  icon: {
+    marginRight: "0.5rem",
+  },
+  boxapi: {
+    width: "40%",
+    height: "40%",
+    borderRadius: "2rem",
+    position: "fixed",
+    left: "35%",
+    top: "20%",
+    transform: "translate(-50%, -50%)",
+    display: "flex",
+    flexDirection: "column",
+    zIndex: 999,
+    background: "rgba(255, 255, 255, 0.16)",
+    boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+    backdropFilter: "blur(13.8px)",
+    WebkitBackdropFilter: "blur(13.8px)",
+    padding: "30px",
+    textAlign: "center",
+  },
+};
