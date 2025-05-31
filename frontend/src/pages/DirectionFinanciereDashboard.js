@@ -13,6 +13,7 @@ const DirectionFinanciereDashboard = () => {
   const [error, setError] = useState(null);
   const [view, setView] = useState("gallery");  // State for toggle
   const [selectedMonth, setSelectedMonth] = useState("");
+  const [exchangeRates, setExchangeRates] = useState([]);
   const chartRef = useRef(null);
   const pieChartRef = useRef(null);
   function getCurrencySymbol(code) {
@@ -50,6 +51,23 @@ const DirectionFinanciereDashboard = () => {
   const handleMonthChange = (e) => {
     setSelectedMonth(e.target.value);
   };
+  useEffect(() => {
+    const fetchExchangeRates = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/tauxchange");
+        setExchangeRates(res.data);
+      } catch (err) {
+        console.error("Erreur lors de la récupération des taux de change:", err);
+      }
+    };
+  
+    fetchExchangeRates();
+  }, []);
+  const getExchangeRate = () => {
+    const rate = exchangeRates.find(r => r.devise.code === currency);
+    return rate ? rate.valeur : 1; // Par défaut 1 si non trouvé
+  };
+    
 
   const selectedYear = selectedMonth ? parseInt(selectedMonth.split("-")[0]) : null;
   const selectedMonthNumber = selectedMonth ? parseInt(selectedMonth.split("-")[1]) : null;
@@ -61,6 +79,12 @@ const DirectionFinanciereDashboard = () => {
 
   const commission14 = totalValeurForSelectedMonth * 0.14;
   const commission1 = (totalValeurForSelectedMonth * 0.01) + (commission14 / (numberOfEquipage || 1));
+  const exchangeRate = getExchangeRate();
+
+const convertedTotalValeur = totalValeurForSelectedMonth * exchangeRate;
+const convertedCommission14 = commission14 * exchangeRate;
+const convertedCommission1 = commission1 * exchangeRate;
+
   
   useEffect(() => {
     if (!chartRef.current || !pieChartRef.current || groupedData.length === 0) return;
@@ -202,20 +226,20 @@ const DirectionFinanciereDashboard = () => {
              <StatCard
                 name="Totale Valeur"
                 icon={Wallet}
-                value={`${totalValeurForSelectedMonth.toFixed(2)} ${symbol}`}
+                value={`${convertedTotalValeur.toFixed(2)} ${symbol}`}
                 color="#27ae60"
                 />
               
               <StatCard
                 name="Commission Totale (14%)"
                 icon={Percent}
-                value={`${commission14.toFixed(2)} ${symbol}`}
+                value={`${convertedCommission14.toFixed(2)} ${symbol}`}
                 color="#3498db"
               />
               <StatCard
                 name="Commission PNC Vendeur (1%)"
                 icon={User}
-                value={`${commission1.toFixed(2)} ${symbol}`}
+                value={`${convertedCommission1.toFixed(2)} ${symbol}`}
                 color="#e67e22"
               />
               <StatCard

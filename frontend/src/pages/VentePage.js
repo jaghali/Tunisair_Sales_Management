@@ -52,7 +52,6 @@ const VentePage = () => {
       }));
   
       setVenteDetails([...venteDetails, ...addedEquipages]);
-      showToast("Équipage ajouté automatiquement avec succès.");
     } catch (err) {
       console.error(err);
       setError("Erreur lors de la récupération automatique de l'équipage.");
