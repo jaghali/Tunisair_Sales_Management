@@ -8,7 +8,6 @@ const SIDEBAR_ITEMS = [
     { name: "Utilisateurs", icon: Users, href: "/admin-users" },
     { name: "Articles", icon: PackageSearch, href: "/ArticlesPage" },
     { name: "Fournisseur", icon: PackageSearch, href: "/FournisseurPage" },
-    { name: "Avion", icon: Plane , href: "/Avion" },
     { name: "Devise", icon: DollarSign, href: "/Devise" },
     { name: "TauxDeChange", icon:ChartSpline, href: "/Tauxdechange" },
     { name: "Logout", icon: LogOut, href: "/" },

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useCurrency } from "../pages/CurrencyContext";
+
 const Commission = () => {
   const [groupedData, setGroupedData] = useState([]);
   const [equipageData, setEquipageData] = useState([]);
@@ -12,41 +13,41 @@ const Commission = () => {
   const [entetes, setEntetes] = useState([]);
   const chartRef = useRef(null);
   const pieChartRef = useRef(null);
+
   function getCurrencySymbol(code) {
-        switch (code) {
-          case "TND":
-            return "DT";
-          case "USD":
-            return "$";
-          case "EUR":
-            return "€";
-          case "GBP":
-            return "£";
-          default:
-            return code;
-        }
-      }
-      const { currency } = useCurrency();
-      const symbol = getCurrencySymbol(currency);
-  
+    switch (code) {
+      case "TND":
+        return "DT";
+      case "USD":
+        return "$";
+      case "EUR":
+        return "€";
+      case "GBP":
+        return "£";
+      default:
+        return code;
+    }
+  }
+
+  const { currency } = useCurrency();
+  const symbol = getCurrencySymbol(currency);
 
   const filteredGroupedData = selectedMonth
-  ? groupedData.filter(item => {
-      const monthString = `${item.mois}-${item.annee}`;
-      return monthString === selectedMonth;
-    })
-  : groupedData;
+    ? groupedData.filter(item => {
+        const monthString = `${item.mois}-${item.annee}`;
+        return monthString === selectedMonth;
+      })
+    : groupedData;
 
-const filteredEtatVentes = selectedMonth
-  ? etatVentes.filter(item => {
-      const date = new Date(item.dateVente);
-      const month = `${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getFullYear()}`;
-      return month === selectedMonth;
-    })
-  : etatVentes;
+  const filteredEtatVentes = selectedMonth
+    ? etatVentes.filter(item => {
+        const date = new Date(item.dateVente);
+        const month = `${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getFullYear()}`;
+        return month === selectedMonth;
+      })
+    : etatVentes;
 
-const sumFilteredEtatVentes = filteredEtatVentes.reduce((acc, curr) => acc + curr.valeur, 0);
-
+  const sumFilteredEtatVentes = filteredEtatVentes.reduce((acc, curr) => acc + curr.valeur, 0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,23 +74,23 @@ const sumFilteredEtatVentes = filteredEtatVentes.reduce((acc, curr) => acc + cur
 
   const getEtatVentesForMatricule = (matricule) => {
     return entetes.filter(entete => entete.pnC1 === matricule || entete.pnC2 === matricule);
-  };  
+  };
 
   const filteredEquipage = selectedMonth
-  ? equipageData.filter(equipage => {
-      const matchingEntetes = entetes.filter(entete =>
-        (entete.pnC1 === equipage.matricule || entete.pnC2 === equipage.matricule)
-        && entete.datE_EDITION
-      );
+    ? equipageData.filter(equipage => {
+        const matchingEntetes = entetes.filter(entete =>
+          (entete.pnC1 === equipage.matricule || entete.pnC2 === equipage.matricule)
+          && entete.datE_EDITION
+        );
 
-      // Vérifier si AU MOINS UN entete correspond au mois sélectionné
-      return matchingEntetes.some(entete => {
-        const date = new Date(entete.datE_EDITION);
-        const month = `${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getFullYear()}`;
-        return month === selectedMonth;
-      });
-    })
-  : equipageData;
+        // Check if at least one entete matches the selected month
+        return matchingEntetes.some(entete => {
+          const date = new Date(entete.datE_EDITION);
+          const month = `${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getFullYear()}`;
+          return month === selectedMonth;
+        });
+      })
+    : equipageData;
 
   const sumEtatVentesDepart = groupedData.reduce((acc, curr) => acc + curr.totalValeur, 0);
   const numberOfEquipage = equipageData.length;
@@ -106,15 +107,14 @@ const sumFilteredEtatVentes = filteredEtatVentes.reduce((acc, curr) => acc + cur
       >
         <option value="">-- Tous les mois --</option>
         {groupedData.map((item, index) => {
-  const moisPadded = item.mois.toString().padStart(2, "0");
-  const value = `${moisPadded}-${item.annee}`;
-  return (
-    <option key={index} value={value}>
-      {value}
-    </option>
-  );
-})}
-
+          const moisPadded = item.mois.toString().padStart(2, "0");
+          const value = `${moisPadded}-${item.annee}`;
+          return (
+            <option key={index} value={value}>
+              {value}
+            </option>
+          );
+        })}
       </select>
 
       <div style={styles.card}>
@@ -134,7 +134,7 @@ const sumFilteredEtatVentes = filteredEtatVentes.reduce((acc, curr) => acc + cur
               {filteredEquipage.map((e, i) => {
                 const isVendeu = entetes.some(entete => entete.pnC1 === e.matricule);
                 const status = isVendeu ? "PNC VENDEUR" : "PNC";
-                
+
                 const isVendeur = status === "PNC VENDEUR";
                 const commission = isVendeur
                   ? (sumEtatVentesDepart * 0.01 + commission14 / numberOfEquipage).toFixed(2)
@@ -149,46 +149,47 @@ const sumFilteredEtatVentes = filteredEtatVentes.reduce((acc, curr) => acc + cur
                       <td style={styles.td}>{status}</td>
                       <td style={styles.td}>{commission} {symbol}</td>
                       <td style={styles.td}>
-                     <button
-                     style={{ padding: "5px 10px", cursor: "pointer" }}
-                     onClick={() => setActiveDetails(activeDetails === i ? null : i)}
-                    >
-                    {isOpen ? "Masquer" : "Détails"}
-                    </button>
-                    </td>
-
+                        {status === "PNC VENDEUR" && (
+                          <button
+                            style={{ padding: "5px 10px", cursor: "pointer" }}
+                            onClick={() => setActiveDetails(activeDetails === i ? null : i)}
+                          >
+                            {isOpen ? "Masquer" : "Détails"}
+                          </button>
+                        )}
+                      </td>
                     </tr>
                     {isOpen && (
-  <tr>
-    <td colSpan="5" style={{ padding: "10px", backgroundColor: "#f9f9f9" }}>
-      <h4>États travaillés :</h4>
-      {getEtatVentesForMatricule(e.matricule).length > 0 ? (
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ backgroundColor: "#ddd" }}>
-              <th style={styles.th}>Numéro État</th>
-              <th style={styles.th}>Date</th>
-              <th style={styles.th}>Commission (14%)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {getEtatVentesForMatricule(e.matricule).map((entete, j) => (
-              <tr key={j}>
-                <td style={styles.td}>{entete.numerO_ETAT}</td>
-                <td style={styles.td}>{entete.datE_EDITION}</td>
-                <td style={styles.td}>{(entete.totaleEncaisse * 0.14 / (numberOfFilteredEquipage || 1)).toFixed(2)} {symbol}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <p>Aucun état trouvé pour cet équipage.</p>
-      )}
-    </td>
-  </tr>
-)}
-
-
+                      <tr>
+                        <td colSpan="5" style={{ padding: "10px", backgroundColor: "#f9f9f9" }}>
+                          <h4>États travaillés :</h4>
+                          {getEtatVentesForMatricule(e.matricule).length > 0 ? (
+                            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                              <thead>
+                                <tr style={{ backgroundColor: "#ddd" }}>
+                                  <th style={styles.th}>Numéro État</th>
+                                  <th style={styles.th}>Date</th>
+                                  <th style={styles.th}>Commission (14%)</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {getEtatVentesForMatricule(e.matricule).map((entete, j) => (
+                                  <tr key={j}>
+                                    <td style={styles.td}>{entete.numerO_ETAT}</td>
+                                    <td style={styles.td}>{entete.datE_EDITION}</td>
+                                    <td style={styles.td}>
+                                      {(entete.totaleEncaisse * 0.14 / (numberOfFilteredEquipage || 1)).toFixed(2)} {symbol}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          ) : (
+                            <p>Aucun état trouvé pour cet équipage.</p>
+                          )}
+                        </td>
+                      </tr>
+                    )}
                   </React.Fragment>
                 );
               })}

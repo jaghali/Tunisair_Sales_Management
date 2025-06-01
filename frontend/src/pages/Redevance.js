@@ -12,9 +12,21 @@ import {
   Legend,
   LineController,
 } from "chart.js";
+import { motion } from "framer-motion";
+import StatCard from "../components/common/StatCard";
+import { Wallet, Percent, User } from "lucide-react";
 
-// Enregistrer les composants de Chart.js
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, LineController, Title, Tooltip, Legend);
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  LineController,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const Redevance = () => {
   const [groupedData, setGroupedData] = useState([]);
@@ -23,27 +35,30 @@ const Redevance = () => {
   const [error, setError] = useState(null);
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);
-  function getCurrencySymbol(code) {
-        switch (code) {
-          case "TND":
-            return "DT";
-          case "USD":
-            return "$";
-          case "EUR":
-            return "€";
-          case "GBP":
-            return "£";
-          default:
-            return code;
-        }
-      }
-      const { currency } = useCurrency();
-      const symbol = getCurrencySymbol(currency);
+  const { currency } = useCurrency();
+
+  const getCurrencySymbol = (code) => {
+    switch (code) {
+      case "TND":
+        return "DT";
+      case "USD":
+        return "$";
+      case "EUR":
+        return "€";
+      case "GBP":
+        return "£";
+      default:
+        return code;
+    }
+  };
+  const symbol = getCurrencySymbol(currency);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/EtatVentesDepart/GroupByMonth");
+        const res = await axios.get(
+          "http://localhost:5000/api/EtatVentesDepart/GroupByMonth"
+        );
         setGroupedData(res.data);
       } catch (err) {
         setError("Erreur lors du chargement des données.");
@@ -61,157 +76,186 @@ const Redevance = () => {
   const selectedYear = selectedMonth ? parseInt(selectedMonth.split("-")[0]) : null;
   const selectedMonthNumber = selectedMonth ? parseInt(selectedMonth.split("-")[1]) : null;
 
-  const selectedData = groupedData.find(
-    (item) => item.annee === selectedYear && item.mois === selectedMonthNumber
-  );
-
-  // Calculate the totalValeur sum for the selected month
   const totalValeurForSelectedMonth = groupedData
     .filter((item) => item.annee === selectedYear && item.mois === selectedMonthNumber)
     .reduce((acc, item) => acc + item.totalValeur, 0);
 
   useEffect(() => {
-    if (!chartRef.current) return;
+  if (!chartRef.current) return;
 
-    const labels = groupedData.map((item) => `${item.mois}-${item.annee}`);
-    const data = groupedData.map((item) => item.totalValeur * 0.85); // Redevance nette (après retenue)
+  const labels = groupedData.map((item) => `${item.mois}-${item.annee}`);
+  const totalValeurData = groupedData.map((item) => item.totalValeur);
+  const redevanceData = groupedData.map((item) => item.totalValeur * 0.85);
+  const retenuData = groupedData.map((item) => item.totalValeur * 0.15);
 
-    const chartData = {
-      labels,
-      datasets: [
-        {
-          label: "Redevance (85%)",
-          data,
-          borderColor: "#2980b9",
-          backgroundColor: "rgba(41, 128, 185, 0.2)",
-          fill: true,
-          tension: 0.4,
-        },
-      ],
-    };
 
-    const chartOptions = {
-      responsive: true,
-      plugins: {
-        legend: {
-          position: "top",
-        },
-        title: {
-          display: true,
-          text: "Redevance Mensuelle (après retenue)",
-        },
+  const chartData = {
+    labels,
+    datasets: [
+      {
+        label: "Total Valeur",
+        data: totalValeurData,
+        borderColor: "#2ecc71",
+        backgroundColor: "rgba(46, 204, 113, 0.2)",
+        fill: false,
+        tension: 0.4,
       },
-    };
+      {
+        label: "Redevance (85%)",
+        data: redevanceData,
+        borderColor: "#2980b9",
+        backgroundColor: "rgba(41, 128, 185, 0.2)",
+        fill: true,
+        tension: 0.4,
+      },
+      {
+        label: "Retenu (15%)",
+        data: retenuData,
+        borderColor: "#e67e22",
+        backgroundColor: "rgba(41, 128, 185, 0.2)",
+        fill: true,
+        tension: 0.4,
+      },
+    ],
+  };
 
-    if (chartInstanceRef.current) {
-      chartInstanceRef.current.destroy();
-    }
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top",
+      },
+      title: {
+        display: true,
+        text: "Redevance & Total Valeur Mensuelle",
+      },
+    },
+  };
 
-    chartInstanceRef.current = new ChartJS(chartRef.current, {
-      type: "line",
-      data: chartData,
-      options: chartOptions,
-    });
-  }, [groupedData]);
+  if (chartInstanceRef.current) {
+    chartInstanceRef.current.destroy();
+  }
+
+  chartInstanceRef.current = new ChartJS(chartRef.current, {
+    type: "line",
+    data: chartData,
+    options: chartOptions,
+  });
+}, [groupedData, currency]);
+
 
   return (
     <div style={styles.pageContainer}>
-      <div style={styles.calendarContainer}>
-        <h2 style={styles.calendarTitle}>Choisir un mois :</h2>
-        <input
-          type="month"
-          style={styles.select}
-          onChange={handleMonthChange}
-          value={selectedMonth}
-        />
-      </div>
-  
-      <div style={styles.cardContainer}>
-        <div style={styles.card}>
-          <h1 style={styles.title}>Redevance</h1>
-          {loading ? (
-            <p style={styles.loading}>Chargement...</p>
-          ) : error ? (
-            <p style={styles.error}>{error}</p>
-          ) : (
-            <>
-              {selectedMonth && (
-                <div style={styles.dataSection}>
-                  <p style={styles.dataText}>
-                    <strong>Total Valeur pour le mois sélectionné :</strong>{" "}
-                    {totalValeurForSelectedMonth.toFixed(2)} {symbol}
-                  </p>
-                  <p style={styles.dataText}>
-                    <strong>Redevance (85%) :</strong>{" "}
-                    {(totalValeurForSelectedMonth * 0.85).toFixed(2)} {symbol}
-                  </p>
-                  <p style={styles.dataText}>
-                    <strong>Retenue (15%) :</strong>{" "}
-                    {(totalValeurForSelectedMonth * 0.15).toFixed(2)} {symbol}
-                  </p>
-                </div>
-              )}
-            </>
-          )}
+      <motion.div
+        style={{ ...styles.card, background: "transparent", boxShadow: "none" }}
+        initial={{ scale: 0.8 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h1 style={styles.title}>Redevance</h1>
+
+        <div style={styles.monthSelectorWrapper}>
+          <div style={styles.monthSelector}>
+            <label htmlFor="month" style={styles.monthLabel}>
+              📅 Choisir un mois :
+            </label>
+            <input
+              type="month"
+              id="month"
+              onChange={handleMonthChange}
+              value={selectedMonth}
+              style={styles.monthInput}
+            />
+          </div>
         </div>
-  
-        <div style={styles.card}>
-          <h1 style={styles.title}>Graphique des Redevances Mensuelles</h1>
+
+        {loading ? (
+          <p style={styles.loading}>Chargement...</p>
+        ) : error ? (
+          <p style={styles.error}>{error}</p>
+        ) : (
+          <div style={styles.statRow}>
+            <StatCard
+              name="Total Valeur:"
+              icon={Wallet}
+              value={`${totalValeurForSelectedMonth.toFixed(2)} ${symbol}`}
+              color="#27ae60"
+            />
+            <StatCard
+              name="Redevance (85%):"
+              icon={Percent}
+              value={`${(totalValeurForSelectedMonth * 0.85).toFixed(2)} ${symbol}`}
+              color="#3498db"
+            />
+            <StatCard
+              name="Retenue (15%):"
+              icon={User}
+              value={`${(totalValeurForSelectedMonth * 0.15).toFixed(2)} ${symbol}`}
+              color="#e67e22"
+            />
+          </div>
+        )}
+        <div style={styles.chartContainer}>
           <canvas ref={chartRef} />
         </div>
-      </div>
+      </motion.div>
     </div>
   );
-  
 };
 
 const styles = {
+  monthSelectorWrapper: {
+    position: "fixed",
+    top: "20px",
+    right: "20px",
+    zIndex: 1000,
+  },
+  monthSelector: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    backgroundColor: "#fff",
+    padding: "10px 15px",
+    borderRadius: "8px",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
+  },
+  monthLabel: {
+    fontWeight: "600",
+    color: "#2c3e50",
+    fontSize: "14px",
+  },
+  monthInput: {
+    padding: "6px 10px",
+    fontSize: "14px",
+    borderRadius: "5px",
+    border: "1px solid #ccc",
+    outline: "none",
+  },
   pageContainer: {
     minHeight: "100vh",
     backgroundColor: "#f4f6f8",
     display: "flex",
     flexDirection: "column",
-    justifyContent: "center",
     alignItems: "center",
+    marginLeft: "15%",
     fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    padding: "20px",
-  },
-  calendarContainer: {
-    width: "100%",
-    textAlign: "center",
-    marginBottom: "30px",
-  },
-  calendarTitle: {
-    fontSize: "18px",
-    color: "#34495e",
-    marginBottom: "15px",
-    fontWeight: "600",
-  },
-  select: {
-    width: "250px",
-    padding: "10px",
-    fontSize: "16px",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-  },
-  cardContainer: {
-    display: "flex",
-    justifyContent: "space-between",
-    width: "75%",
-    maxWidth: "1200px",
-    gap: "20px",
-    marginTop: "20px",
-    paddingLeft: "220px",
+    padding: "40px",
   },
   card: {
     backgroundColor: "#ffffff",
     padding: "30px",
     borderRadius: "12px",
     boxShadow: "0 6px 20px rgba(0, 0, 0, 0.1)",
-    width: "45%",
+    width: "100%",
     textAlign: "center",
     border: "1px solid #e0e0e0",
     boxSizing: "border-box",
+    marginLeft: "3%",
+  },
+  chartContainer: {
+    width: "90%",
+    maxWidth: "800px",
+    margin: "0 auto 30px",
   },
   title: {
     color: "#2c3e50",
@@ -226,13 +270,11 @@ const styles = {
     color: "#c0392b",
     fontWeight: "bold",
   },
-  dataSection: {
-    marginTop: "20px",
-  },
-  dataText: {
-    fontSize: "18px",
-    color: "#34495e",
-    marginBottom: "12px",
+  statRow: {
+    display: "flex",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: "20px",
   },
 };
 

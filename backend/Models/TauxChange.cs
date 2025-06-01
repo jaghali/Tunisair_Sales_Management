@@ -14,7 +14,7 @@ namespace TunisairSalesManagement.Models
         public decimal Valeur { get; set; }
 
         [Required]
-        public DateTime Date { get; set; } = DateTime.UtcNow;
+        public DateTime Date { get; set; }
 
         [Required]
         [ForeignKey("Devise")]

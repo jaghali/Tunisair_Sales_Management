@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
     Box,
+    IconButton,
     Button,
     Container,
     Grid,
@@ -21,7 +22,12 @@ import {
     CircularProgress,
     Alert
 } from '@mui/material';
-import { Edit, Delete } from '@mui/icons-material';
+import { motion, AnimatePresence } from "framer-motion";
+import ApiCurrency from "../components/ApiCurrency";
+import { Pencil, Trash, Save, X, Plus, Euro } from "lucide-react";
+import { useCurrency } from "../pages/CurrencyContext";
+import { useToast } from "./toast";
+
 
 const Tauxdechange = () => {
     const [tauxChanges, setTauxChanges] = useState([]);
@@ -30,10 +36,29 @@ const Tauxdechange = () => {
     const [editingId, setEditingId] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+  const [showApiToast, setShowApiToast] = useState(false);
+
 
     const apiUrl = 'http://localhost:5000/api/tauxchange';
     const deviseUrl = 'http://localhost:5000/api/Devise';
-
+ function getCurrencySymbol(code) {
+      switch (code) {
+        case "TND":
+          return "TND";
+        case "USD":
+          return "USD";
+        case "EUR":
+          return "EUR";
+        case "GBP":
+          return "GBP";
+        default:
+          return code;
+      }
+    }
+    const { currency } = useCurrency();
+        const { showToast } = useToast();
+    
+        const symbol = getCurrencySymbol(currency);
     useEffect(() => {
         setLoading(true);
         axios.get(apiUrl)
@@ -42,7 +67,7 @@ const Tauxdechange = () => {
                 setLoading(false);
             })
             .catch(error => {
-                setError('Erreur lors du chargement des taux de change.');
+                showToast('Erreur lors du chargement des taux de change.');
                 setLoading(false);
                 console.error('Erreur lors du chargement des taux de change:', error);
             });
@@ -50,51 +75,74 @@ const Tauxdechange = () => {
         axios.get(deviseUrl)
             .then(response => setDevises(response.data))
             .catch(error => {
-                setError('Erreur lors du chargement des devises.');
+                showToast('Erreur lors du chargement des devises.');
                 setLoading(false);
                 console.error('Erreur lors du chargement des devises:', error);
             });
     }, []);
 
     const handleSubmit = (e) => {
-        e.preventDefault();
-        setLoading(true);
-        const dataToSubmit = { 
-            valeur: parseFloat(formData.valeur),
-            date: formData.date ? new Date(formData.date).toISOString() : '',
-            deviseId: parseInt(formData.deviseId)
-        };
-        const dataToEdit = { 
-            id: editingId, 
-            valeur: parseFloat(formData.valeur),
-            date: formData.date ? new Date(formData.date).toISOString() : '',
-            deviseId: parseInt(formData.deviseId)
-        };
-
-        const request = editingId 
-            ? axios.put(`${apiUrl}/${editingId}`,dataToEdit ) 
-            : axios.post(apiUrl, dataToSubmit);
+    e.preventDefault();
+    setError('');
     
-        request
-            .then(response => {
-                console.log("Réponse du backend:", response.data);
-                const updatedTauxChanges = editingId
-                    ? tauxChanges.map(t =>
-                        t.id === editingId ? { ...dataToSubmit, id: editingId } : t
-                    )
-                    : [...tauxChanges, response.data];
-                    
-                setTauxChanges(updatedTauxChanges);
-                setFormData({ valeur: '', date: '', deviseId: '' });
-                setEditingId(null);
-            })
-            .catch(error => {
-                const errorMessage = error.response ? error.response.data : 'Erreur lors de la requête';
-                setError(`Erreur: ${errorMessage}`);
-                console.error('Erreur lors de l\'ajout/édition:', error);
-            })
-            .finally(() => setLoading(false));
+    const selectedDate = new Date(formData.date);
+    const selectedMonth = selectedDate.getMonth();
+    const selectedYear = selectedDate.getFullYear();
+    const selectedDeviseId = parseInt(formData.deviseId);
+
+    const exists = tauxChanges.some((t) => {
+        const tDate = new Date(t.date);
+        return (
+            t.deviseId === selectedDeviseId &&
+            tDate.getMonth() === selectedMonth &&
+            tDate.getFullYear() === selectedYear &&
+            t.id !== editingId 
+        );
+    });
+
+    if (exists) {
+        showToast("Un taux de change pour cette devise existe déjà ce mois-là.");
+        return;
+    }
+
+    setLoading(true);
+
+    const dataToSubmit = { 
+        valeur: parseFloat(formData.valeur),
+        date: selectedDate.toISOString(),
+        deviseId: selectedDeviseId
     };
+    const dataToEdit = { 
+        id: editingId, 
+        valeur: parseFloat(formData.valeur),
+        date: selectedDate.toISOString(),
+        deviseId: selectedDeviseId
+    };
+
+    const request = editingId 
+        ? axios.put(`${apiUrl}/${editingId}`, dataToEdit) 
+        : axios.post(apiUrl, dataToSubmit);
+
+    request
+        .then(response => {
+            const updatedTauxChanges = editingId
+                ? tauxChanges.map(t =>
+                    t.id === editingId ? { ...dataToSubmit, id: editingId } : t
+                )
+                : [...tauxChanges, response.data];
+                
+            setTauxChanges(updatedTauxChanges);
+            setFormData({ valeur: '', date: '', deviseId: '' });
+            setEditingId(null);
+        })
+        .catch(error => {
+            const errorMessage = error.response ? error.response.data : 'Erreur lors de la requête';
+            showToast(`Erreur lors de l'ajout dans ce mois`);
+            console.error("Erreur lors de l'ajout/édition:", error);
+        })
+        .finally(() => setLoading(false));
+};
+
 
     const handleDelete = (id) => {
         setLoading(true);
@@ -104,7 +152,7 @@ const Tauxdechange = () => {
                 setLoading(false);
             })
             .catch(error => {
-                setError('Erreur lors de la suppression.');
+                showToast('Erreur lors de la suppression.');
                 setLoading(false);
                 console.error('Erreur lors de la suppression:', error);
             });
@@ -127,7 +175,7 @@ const Tauxdechange = () => {
     return (
         <Box display="flex">
             <Box width="250px">{/* Sidebar placeholder */}</Box>
-
+            
             <Container maxWidth="lg" sx={{ mt: 4 }}>
                 <Typography variant="h4" gutterBottom>
                     Gestion des Taux de Change
@@ -150,8 +198,8 @@ const Tauxdechange = () => {
                         </Grid>
                         <Grid item xs={12} md={3}>
                             <TextField
-                                type="date"
-                                label="Date"
+                                type="month"
+                                label="Month"
                                 InputLabelProps={{ shrink: true }}
                                 fullWidth
                                 value={formData.date}
@@ -177,20 +225,58 @@ const Tauxdechange = () => {
                             </FormControl>
                         </Grid>
                         <Grid item xs={12} md={3}>
-                            <Button 
-                                type="submit" 
-                                variant="contained" 
-                                color="primary" 
-                                fullWidth 
-                                sx={{ height: '100%' }}
-                                disabled={loading} // Disable button when loading
-                            >
-                                {loading ? <CircularProgress size={24} /> : (editingId ? 'Mettre à jour' : 'Ajouter')}
-                            </Button>
+                            
+                            <div style={styles.Buttons}>
+                                    <motion.button
+                                      onClick={() => setShowApiToast(true)}
+                                      style={styles.ApiButton}
+                                      whileHover={{ scale: 1.1 }}
+                                      whileTap={{ scale: 0.9 }}
+                                    >
+                                      <Euro style={styles.icon} /> Api
+                                    </motion.button>
+                            
+                                    <motion.button
+                                        type="submit"
+                                        style={styles.addButton}
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        disabled={loading}
+                                        >
+                                        {loading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : (editingId ? 'Mettre à jour' : 'Ajouter')}
+                                    </motion.button>
+
+                                  </div>
+                            
                         </Grid>
                     </Grid>
                 </Box>
-
+                <AnimatePresence>
+                        {showApiToast && (
+                        <motion.div
+                            style={styles.boxapi}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <IconButton
+                            aria-label="fermer"
+                            onClick={() => setShowApiToast(false)}
+                            sx={{
+                                position: "absolute",
+                                top: 25,
+                                right: 8,
+                                color: "#C80505",
+                                zIndex: 1000,
+                            }}
+                            >
+                            <X />
+                            </IconButton>
+                            <ApiCurrency />
+                        </motion.div>
+                        )}
+                    </AnimatePresence>
                 {/* Tableau */}
                 <TableContainer component={Paper}>
                     <Table>
@@ -198,7 +284,8 @@ const Tauxdechange = () => {
                             <TableRow>
                                 <TableCell><strong>Valeur</strong></TableCell>
                                 <TableCell><strong>Date</strong></TableCell>
-                                <TableCell><strong>Devise</strong></TableCell>
+                                <TableCell><strong>Devise 1 </strong></TableCell>
+                                <TableCell><strong>Devise 2 </strong></TableCell>
                                 <TableCell align="right"><strong>Actions</strong></TableCell>
                             </TableRow>
                         </TableHead>
@@ -208,23 +295,12 @@ const Tauxdechange = () => {
                                     <TableCell>{taux.valeur}</TableCell>
                                     <TableCell>{new Date(taux.date).toLocaleDateString()}</TableCell>
                                     <TableCell>{getDeviseNom(taux.deviseId)}</TableCell>
+                                    <TableCell>TND</TableCell>
+
                                     <TableCell align="right">
-                                        <Button
-                                            variant="outlined"
-                                            startIcon={<Edit />}
-                                            onClick={() => handleEdit(taux)}
-                                            sx={{ mr: 1 }}
-                                        >
-                                            Modifier
-                                        </Button>
-                                        <Button
-                                            variant="outlined"
-                                            color="error"
-                                            startIcon={<Delete />}
-                                            onClick={() => handleDelete(taux.id)}
-                                        >
-                                            Supprimer
-                                        </Button>
+                                         <Pencil onClick={() => handleEdit(taux)} style={{ ...styles.icon, color: "#00a3f5"  ,cursor:"pointer"}} />
+                                          <Trash onClick={() => handleDelete(taux.id)} style={{ ...styles.icon, color: "#e74c3c"  ,cursor:"pointer"}} />
+                                     
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -237,3 +313,60 @@ const Tauxdechange = () => {
 };
 
 export default Tauxdechange;
+
+const styles = {
+  Buttons: {
+    display: "flex",
+    justifyContent: "center",
+    marginBottom: "1rem",
+    gap: "18%",
+    marginLeft: "10%",
+  },
+  boxcrud: {
+    marginLeft: "10%",
+    marginTop: "2%",
+  },
+  addButton: {
+    padding: "10px 20px",
+    backgroundColor: "#C80505",
+    color: "#fff",
+    border: "none",
+    borderRadius: "5px",
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
+    fontSize: "16px",
+  },
+  ApiButton: {
+    padding: "10px 20px",
+    backgroundColor: "#C80505",
+    color: "#fff",
+    border: "none",
+    borderRadius: "5px",
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
+    fontSize: "16px",
+  },
+  icon: {
+    marginRight: "0.5rem",
+  },
+  boxapi: {
+    width: "40%",
+    height: "40%",
+    borderRadius: "2rem",
+    position: "fixed",
+    left: "35%",
+    top: "20%",
+    transform: "translate(-50%, -50%)",
+    display: "flex",
+    flexDirection: "column",
+    zIndex: 999,
+    background: "rgba(255, 255, 255, 0.16)",
+    boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+    backdropFilter: "blur(13.8px)",
+    WebkitBackdropFilter: "blur(13.8px)",
+    padding: "30px",
+    textAlign: "center",
+  },
+};

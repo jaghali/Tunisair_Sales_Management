@@ -23,7 +23,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { motion, AnimatePresence } from "framer-motion";
 import { Pencil, Trash, Save, X, Plus, Euro } from "lucide-react";
-import ApiCurrency from "../components/ApiCurrency";
 import Form from "../components/Form";
 
 export default function Devise() {
@@ -36,7 +35,6 @@ export default function Devise() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [ajoutFormData, setAjoutFormData] = useState({ nom: "", code: "" });
   const { currency, setCurrency } = useCurrency();
-  const [showApiToast, setShowApiToast] = useState(false);
 
   const API_URL = "http://localhost:5000/api/Devise";
 
@@ -111,15 +109,7 @@ export default function Devise() {
         </FormControl>
       </Box>
 
-      <div style={styles.Buttons}>
-        <motion.button
-          onClick={() => setShowApiToast(true)}
-          style={styles.ApiButton}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-        >
-          <Euro style={styles.icon} /> Api
-        </motion.button>
+        
 
         <motion.button
           onClick={() => setShowAddForm(true)}
@@ -129,34 +119,8 @@ export default function Devise() {
         >
           <Plus style={styles.icon} /> Ajouter Devise
         </motion.button>
-      </div>
 
-      <AnimatePresence>
-        {showApiToast && (
-          <motion.div
-            style={styles.boxapi}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.3 }}
-          >
-            <IconButton
-              aria-label="fermer"
-              onClick={() => setShowApiToast(false)}
-              sx={{
-                position: "absolute",
-                top: 25,
-                right: 8,
-                color: "#C80505",
-                zIndex: 1000,
-              }}
-            >
-              <X />
-            </IconButton>
-            <ApiCurrency />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      
 
       <AnimatePresence>
         {showAddForm && (
@@ -261,18 +225,9 @@ const styles = {
     alignItems: "center",
     cursor: "pointer",
     fontSize: "16px",
+    marginLeft:"39%"
   },
-  ApiButton: {
-    padding: "10px 20px",
-    backgroundColor: "#C80505",
-    color: "#fff",
-    border: "none",
-    borderRadius: "5px",
-    display: "flex",
-    alignItems: "center",
-    cursor: "pointer",
-    fontSize: "16px",
-  },
+ 
   icon: {
     marginRight: "0.5rem",
   },

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useCurrency } from "../pages/CurrencyContext";
+import { File } from 'lucide-react';
+import { motion, AnimatePresence } from "framer-motion";
+
 function getCurrencySymbol(code) {
   switch (code) {
     case "TND":
@@ -15,6 +18,7 @@ function getCurrencySymbol(code) {
       return code;
   }
 }
+
 function getCurrencyTaux(code) {
   switch (code) {
     case "TND":
@@ -107,23 +111,38 @@ const Avances = () => {
 
   return (
     <div style={styles.pageContainer}>
-      <div style={styles.contentWrapper}>
-      <div style={{ marginBottom: "20px" }}>
-  <label style={{ marginRight: "10px", fontWeight: "500", fontSize: "16px",color:"black"  }}>Filtrer par mois:</label>
-  <input
-    type="month"
-    value={selectedMonth}
-    style={styles.calendarInput}
-    onChange={(e) => setSelectedMonth(e.target.value)}
-    onFocus={(e) => (e.target.style.borderColor = "#3498db")}
-    onBlur={(e) => (e.target.style.borderColor = "#ccc")}
-  />
-</div>
 
+      <div style={styles.contentWrapper}>
         <h2 style={styles.title}>Avance en devise</h2>
-        <button onClick={exportToTxt} style={styles.exportButton}>
-        Exporter en TXT
-        </button>
+ <div style={styles.monthSelectorWrapper}>
+          <div style={styles.monthSelector}>
+            <label htmlFor="month" style={styles.monthLabel}>
+              📅 Choisir un mois :
+            </label>
+            <input
+              type="month"
+              id="month"
+              onChange={(e) => setSelectedMonth(e.target.value)}
+
+              value={selectedMonth}
+              style={styles.monthInput}
+            />
+          </div>
+        </div>
+      
+
+    
+        <motion.button
+            onClick={exportToTxt}
+
+              style={styles.exportButton}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+                                            >
+                  <File  style={{marginRight:"5%"}} /> Exporter en TXT
+
+          </motion.button>                                
+        
         {loading ? (
           <p>Chargement...</p>
         ) : error ? (
@@ -187,7 +206,7 @@ const Avances = () => {
             </table>
           </div>
         ) : (
-          <p>Aucun trou de caisse détecté.</p>
+          <p>Aucun trous de caisse détecté.</p>
         )}
       </div>
     </div>
@@ -195,6 +214,46 @@ const Avances = () => {
 };
 
 const styles = {
+  monthSelectorWrapper: {
+    position: "fixed",
+    top: "20px",
+    right: "20px",
+    zIndex: 1000,
+  },
+  monthSelector: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    backgroundColor: "#fff",
+    padding: "10px 15px",
+    borderRadius: "8px",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
+  },
+  monthLabel: {
+    fontWeight: "600",
+    color: "#2c3e50",
+    fontSize: "14px",
+  },
+  monthInput: {
+    padding: "6px 10px",
+    fontSize: "14px",
+    borderRadius: "5px",
+    border: "1px solid #ccc",
+    outline: "none",
+  },
+  exportButton: {
+    padding: "10px 20px",
+    backgroundColor: "#C80505",
+    color: "#fff",
+    border: "none",
+    width:"19%",
+    borderRadius: "5px",
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
+    fontSize: "16px",
+    marginBottom:"3%",
+  },
   pageContainer: {
     display: "flex",
     justifyContent: "flex-start",
@@ -216,22 +275,13 @@ const styles = {
     borderColor: "#3498db",
     boxShadow: "0 0 5px rgba(52, 152, 219, 0.5)",
   },
+ 
   
-  exportButton: {
-    marginBottom: "15px",
-    padding: "8px 16px",
-    backgroundColor: "#3498db",
-    color: "white",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-    fontSize: "14px",
-  },
-  
-  contentWrapper: {
-    marginLeft: "260px",
+ contentWrapper: {
+    marginLeft: "25%",
     width: "100%",
     maxWidth: "1000px",
+
   },
   title: {
     fontSize: "22px",
